@@ -1,10 +1,17 @@
 {
  "version": 1,
  "settings": {
-  "schedule": [3, 10, 30, 60],
+  "schedule": [
+   3,
+   10,
+   30,
+   60
+  ],
   "hardDays": 1
  },
- "folders": [],
+ "folders": [
+  "Ghatna chakra"
+ ],
  "items": {},
  "stats": {}
 }
