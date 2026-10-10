@@ -7,7 +7,8 @@
    30,
    60
   ],
-  "hardDays": 1
+  "hardDays": 1,
+  "dailyLimit": 0
  },
  "folders": [
   "Ghatna chakra",
@@ -29,7 +30,9 @@
    "due": "2026-10-10",
    "schedule": null,
    "done": false,
-   "hist": []
+   "hist": [],
+   "hl": 1,
+   "note": false
   },
   "mv2ilcg7yg86": {
    "id": "mv2ilcg7yg86",
