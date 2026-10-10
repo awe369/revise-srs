@@ -51,6 +51,22 @@
      "r"
     ]
    ]
+  },
+  "mv2io7d51afp": {
+   "id": "mv2io7d51afp",
+   "name": "Miscellaneous_Smart_Short_Notes",
+   "type": "pdf",
+   "file": "files/mv2io7d51afp-miscellaneous-smart-short-notes.pdf",
+   "sha": "8d5e3747286f6b388e89ab11a4d6c589e6d3765a",
+   "folder": "Ghatna chakra/Science/Biology",
+   "size": 256396,
+   "added": "2026-10-10",
+   "reads": 0,
+   "last": null,
+   "due": "2026-10-10",
+   "schedule": null,
+   "done": false,
+   "hist": []
   }
  },
  "stats": {
