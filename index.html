@@ -133,7 +133,24 @@
   #reader .rbody{flex:1;min-height:0;position:relative;background:#fff}
   #reader iframe{width:100%;height:100%;border:0;display:block;background:#fff}
   #reader .pdfwrap{position:absolute;inset:0;overflow:auto;background:#525659;padding:10px 0}
-  #reader .pdfwrap canvas{display:block;margin:0 auto 10px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4);max-width:100%}
+  #reader .pdfwrap .pg{position:relative;margin:0 auto 10px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+  #reader .pdfwrap .pg canvas{display:block;width:100%;height:100%}
+  /* pdf.js text layer: invisible text over the page so it can be selected & highlighted */
+  .textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;text-align:initial;-webkit-text-size-adjust:none;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:2}
+  .textLayer span,.textLayer br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+  .textLayer span.markedContent{top:0;height:0}
+  .textLayer ::selection{background:rgba(47,111,222,.32)}
+  .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
+  .textLayer.selecting .endOfContent{top:0}
+  .textLayer mark.pdfhl{color:transparent;padding:0;border-radius:2px;cursor:pointer}
+  .textLayer mark.pdfhl.n{box-shadow:inset 0 -2px 0 rgba(0,0,0,.45)}
+  .textLayer mark.pdfhl.f{outline:3px solid #2f6fde;outline-offset:1px}
+  .hlbar{position:fixed;z-index:30;display:flex;gap:7px;align-items:center;padding:7px 9px;background:#1d1f24;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  .hlbar button{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:17px}
+  .hlbar button.c{border:2px solid rgba(255,255,255,.9)}
+  .hlbar button.c.on{box-shadow:0 0 0 3px #6b9cff}
+  .hlbar .s{width:1px;height:22px;background:#555}
+  .hl .pg-l{font-size:.72rem;color:var(--dim);font-weight:600;margin-bottom:3px}
   #reader .loading{position:absolute;inset:0;display:grid;place-items:center;color:#555;background:var(--bg)}
   #reader .loading div{color:var(--muted)}
   #reader .rbar{border-top:1px solid var(--line);background:var(--surface);padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
@@ -279,6 +296,10 @@
     <button class="iconbtn" id="rMore" aria-label="File options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
   </div>
   <div class="rbody" id="rBody"></div>
+  <div class="hlbar hidden" id="pdfBar" role="toolbar" aria-label="Highlight">
+    <button class="c" data-c="y" style="background:#ffe066" aria-label="Yellow"></button><button class="c" data-c="g" style="background:#9be89b" aria-label="Green"></button><button class="c" data-c="b" style="background:#9fd3ff" aria-label="Blue"></button><button class="c" data-c="p" style="background:#ffb0c8" aria-label="Pink"></button>
+    <span class="s"></span><button data-a="note" aria-label="Add note">✎</button><button data-a="del" aria-label="Remove highlight">✕</button>
+  </div>
   <div class="rbar" id="rBar">
     <div class="rq"><span id="rQ">How well do you remember this?</span><button id="rSnooze">Snooze 1 day</button></div>
     <div class="grades">
@@ -858,7 +879,7 @@ function itemMenu(id){
     <div class="menu">
       <button data-m="open">📖 Read now</button>
       <button data-m="notes">📝 Notes${it.note ? ' (has notes)' : ''}</button>
-      ${it.type === 'html' && !it.gen ? `<button data-m="hl" ${it.hl ? '' : 'disabled style="opacity:.5"'}>✨ Make highlights file${it.hl ? '' : ' — no highlights yet'}</button>` : ''}
+      ${!it.gen ? `<button data-m="hl" ${it.hl ? '' : 'disabled style="opacity:.5"'}>✨ Make highlights file${it.hl ? '' : ' — no highlights yet'}</button>` : ''}
       <button data-m="edit">⚙️ Edit name, folder &amp; schedule</button>
       <button data-m="done">${it.done ? '↩️ Bring back into revision' : '✅ Mark as mastered (stop reminders)'}</button>
       <button data-m="reset">🔄 Restart schedule from today</button>
@@ -975,24 +996,24 @@ function hlNoteDlg(hid){
       const note = $('hText').value.trim();
       closeDlg();
       changeNote(id, d => { const x = d.highlights.find(y => y.id === hid); if(x) x.note = note; });
-      postToFrame({t: 'set', h: n.data.highlights.find(x => x.id === hid)});
+      refreshHlView(n.data.highlights.find(x => x.id === hid));
     };
   });
 }
 function highlightsDlg(){
   const id = readerId, it = db.items[id], n = notes[id]; if(!it) return;
-  if(it.type !== 'html'){ openDlg(`<h3>Highlights</h3><p class="hint">Highlighting works on HTML files for now. You can still keep notes on this PDF with the 📝 button.</p><div class="foot"><button class="btn" data-close>Close</button></div>`); return; }
   const list = n ? n.data.highlights.slice().sort((a, b) => (a.pos || 0) - (b.pos || 0)) : [];
-  openDlg(`<h3>Highlights (${list.length})</h3><p class="hint">Select text in the file to highlight it. Tap a highlight in the file to change its colour, add a note or remove it.</p>
-    ${list.length ? `<div class="hls">${list.map(h => `<div class="hl hl-${esc(h.color)}"><q>${esc(h.exact.slice(0, 600))}${h.exact.length > 600 ? '…' : ''}</q>${h.note ? `<div class="hn">${esc(h.note)}</div>` : ''}${readerMissing.includes(h.id) ? '<div class="miss">Couldn’t find this text in the file any more.</div>' : ''}
+  const pdfHint = it.type === 'pdf' ? ' If you can’t select any text in this PDF, it’s a scanned image — use 📝 notes for it instead.' : '';
+  openDlg(`<h3>Highlights (${list.length})</h3><p class="hint">Select text in the file to highlight it (long-press on a phone). Tap a highlight to change its colour, add a note or remove it.${pdfHint}</p>
+    ${list.length ? `<div class="hls">${list.map(h => `<div class="hl hl-${esc(h.color)}">${h.page ? `<div class="pg-l">Page ${+h.page}</div>` : ''}<q>${esc(hlText(h).slice(0, 600))}${hlText(h).length > 600 ? '…' : ''}</q>${h.note ? `<div class="hn">${esc(h.note)}</div>` : ''}${readerMissing.includes(h.id) ? '<div class="miss">Couldn’t find this text in the file any more.</div>' : ''}
       <div class="ha"><button data-goto="${esc(h.id)}">Go to</button><button data-hnote="${esc(h.id)}">${h.note ? 'Edit note' : 'Add note'}</button><button class="del" data-hdel="${esc(h.id)}">Remove</button></div></div>`).join('')}</div>` : '<div class="empty" style="margin-top:8px">No highlights yet.</div>'}
     <div class="foot">${list.length && !it.gen ? '<button class="btn" id="hMake">✨ Make highlights file</button>' : ''}<span style="flex:1"></span><button class="btn" data-close>Close</button></div>`, b => {
-    b.querySelectorAll('[data-goto]').forEach(x => x.onclick = () => { closeDlg(); postToFrame({t: 'goto', id: x.dataset.goto}); });
+    b.querySelectorAll('[data-goto]').forEach(x => x.onclick = () => { closeDlg(); gotoHl(x.dataset.goto); });
     b.querySelectorAll('[data-hnote]').forEach(x => x.onclick = () => hlNoteDlg(x.dataset.hnote));
     b.querySelectorAll('[data-hdel]').forEach(x => x.onclick = () => {
       const hid = x.dataset.hdel;
       changeNote(id, d => { d.highlights = d.highlights.filter(y => y.id !== hid); }, hid);
-      postToFrame({t: 'remove', id: hid}); highlightsDlg();
+      removeHlView(hid); highlightsDlg();
     });
     const mk = $('hMake'); if(mk) mk.onclick = () => { closeDlg(); makeHighlightsFile({type: 'file', id}); };
   });
@@ -1003,6 +1024,7 @@ function buildHighlightsDoc(title, sections){
   const total = sections.reduce((a, s) => a + s.n.highlights.length, 0);
   const bg = {y: '#fff6c7', g: '#e2f7e2', b: '#e1f1ff', p: '#ffe6ee'}, bd = {y: '#e8c32e', g: '#4fbf6a', b: '#4aa3f0', p: '#f06c9b'};
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
+<style>.pg{display:block;font-size:.72rem;color:#888;font-weight:600;margin-bottom:2px;font-style:normal}</style>
 <style>body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;padding:24px 18px 60px;line-height:1.6;color:#1d1f24;background:#fff}
 h1{font-size:1.6rem;margin:0 0 4px}.sub{color:#666;font-size:.9rem;margin:0 0 24px}h2{font-size:1.15rem;margin:28px 0 4px;padding-top:14px;border-top:1px solid #e5e5e5}
 .where{color:#888;font-size:.8rem;margin-bottom:10px}.q{border-left:4px solid;border-radius:4px 10px 10px 4px;padding:10px 14px;margin:10px 0;white-space:pre-wrap;word-break:break-word}
@@ -1011,7 +1033,7 @@ h1{font-size:1.6rem;margin:0 0 4px}.sub{color:#666;font-size:.9rem;margin:0 0 24
 <h1>${esc(title)}</h1><p class="sub">${plural(total, 'highlight')} from ${plural(sections.length, 'file')} · updated ${niceDate(today())}</p>
 ${sections.map(({it, n}) => `<h2>${esc(it.name)}</h2><div class="where">${esc(folderLabel(it.folder))}</div>
 ${n.text.trim() ? `<div class="fn"><b>My notes:</b>\n${esc(n.text.trim())}</div>` : ''}
-${n.highlights.slice().sort((a, b) => (a.pos || 0) - (b.pos || 0)).map(h => `<div class="q" style="background:${bg[h.color] || bg.y};border-color:${bd[h.color] || bd.y}">${esc(h.exact)}${h.note ? `<div class="n">✎ ${esc(h.note)}</div>` : ''}</div>`).join('\n')}`).join('\n')}
+${n.highlights.slice().sort((a, b) => (a.pos || 0) - (b.pos || 0)).map(h => `<div class="q" style="background:${bg[h.color] || bg.y};border-color:${bd[h.color] || bd.y}">${h.page ? `<span class="pg">Page ${+h.page}</span>` : ''}${esc(hlText(h))}${h.note ? `<div class="n">✎ ${esc(h.note)}</div>` : ''}</div>`).join('\n')}`).join('\n')}
 </body></html>`;
 }
 async function makeHighlightsFile(scope){
@@ -1327,8 +1349,14 @@ function postToFrame(m){ const f = frameEl(); if(f && f.contentWindow){ m.__rv =
 function cleanHl(h){
   if(!h || typeof h.exact !== 'string' || !h.exact.trim()) return null;
   return {id: String(h.id).slice(0, 40), exact: h.exact.slice(0, 8000), prefix: String(h.prefix || '').slice(-64), suffix: String(h.suffix || '').slice(0, 64),
-    color: HL_COLORS[h.color] ? h.color : 'y', note: '', pos: +h.pos || 0, at: today()};
+    color: HL_COLORS[h.color] ? h.color : 'y', note: '', pos: +h.pos || 0, at: today(),
+    ...(h.page ? {page: +h.page} : {}), ...(typeof h.text === 'string' && h.text.trim() ? {text: h.text.trim().slice(0, 8000)} : {})};
 }
+/** Text to show for a highlight (PDF selections keep their line breaks in `text`). */
+const hlText = h => h.text || h.exact;
+function refreshHlView(h){ if(!h) return; if(pdfState) stylePdfHl(h); else postToFrame({t: 'set', h}); }
+function removeHlView(id){ if(pdfState) unwrapPdfHl(id); else postToFrame({t: 'remove', id}); }
+function gotoHl(id){ if(pdfState) gotoPdfHl(id); else postToFrame({t: 'goto', id}); }
 window.addEventListener('message', e => {
   const f = frameEl(); if(!f || e.source !== f.contentWindow) return;
   const m = e.data; if(!m || m.__rv !== 1 || !readerId) return;
@@ -1356,7 +1384,7 @@ async function openReader(id){
   $('reader').classList.remove('hidden'); document.body.style.overflow = 'hidden';
   $('rName').textContent = it.name; $('rSub').textContent = folderLabel(it.folder);
   $('rZoomIn').classList.toggle('hidden', it.type !== 'pdf'); $('rZoomOut').classList.toggle('hidden', it.type !== 'pdf');
-  $('rHls').classList.toggle('hidden', it.type !== 'html');
+  $('rHls').classList.remove('hidden'); hidePdfBar();
   updateReaderBar();
   const body = $('rBody');
   body.innerHTML = '<div class="loading"><div>Loading…</div></div>';
@@ -1395,7 +1423,7 @@ function saveReaderState(){
 function closeReader(fromPop){
   saveReaderState();
   $('reader').classList.add('hidden'); document.body.style.overflow = '';
-  $('rBody').innerHTML = ''; readerId = null; queueIds = []; pdfState = null;
+  $('rBody').innerHTML = ''; readerId = null; queueIds = []; pdfState = null; hidePdfBar();
   if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl = null; }
   if(!fromPop && location.hash.startsWith('#open=')) history.back();
   render();
@@ -1442,33 +1470,177 @@ async function renderPdf(buf, body){
   const doc = await lib.getDocument({data: new Uint8Array(buf)}).promise;
   const wrap = document.createElement('div'); wrap.className = 'pdfwrap';
   body.innerHTML = ''; body.appendChild(wrap);
-  pdfState = {doc, wrap, zoom: 1, rendered: new Map()};
+  pdfState = {doc, wrap, zoom: 1, rendered: new Set(), lib};
+  wrap.addEventListener('scroll', () => { if(!pdfEditing) hidePdfBar(); }, {passive: true});
   await layoutPdf(readerPos);
 }
 async function layoutPdf(ratio){
   const st = pdfState; if(!st) return;
   const {doc, wrap} = st;
+  hidePdfBar();
   const keep = typeof ratio === 'number' ? ratio : (wrap.scrollHeight > wrap.clientHeight ? wrap.scrollTop / (wrap.scrollHeight - wrap.clientHeight) : 0);
   wrap.innerHTML = ''; st.rendered.clear();
   const avail = Math.max(200, wrap.clientWidth - 16) * st.zoom;
   const first = await doc.getPage(1); const v1 = first.getViewport({scale: 1});
   const scale = avail / v1.width, dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  st.scale = scale;
   const io = new IntersectionObserver(entries => entries.forEach(en => { if(en.isIntersecting) drawPage(+en.target.dataset.p, en.target, scale, dpr); }), {root: wrap, rootMargin: '600px 0px'});
   for(let p = 1; p <= doc.numPages; p++){
-    const c = document.createElement('canvas'); c.dataset.p = p;
-    c.style.width = Math.round(v1.width * scale) + 'px'; c.style.height = Math.round(v1.height * scale) + 'px';
-    if(st.zoom > 1) c.style.maxWidth = 'none';
-    wrap.appendChild(c); io.observe(c);
+    const pg = document.createElement('div'); pg.className = 'pg'; pg.dataset.p = p;
+    pg.style.width = Math.floor(v1.width * scale) + 'px'; pg.style.height = Math.floor(v1.height * scale) + 'px';
+    wrap.appendChild(pg); io.observe(pg);
   }
   st.io && st.io.disconnect(); st.io = io;
   wrap.scrollTop = keep * (wrap.scrollHeight - wrap.clientHeight);
 }
-async function drawPage(n, canvas, scale, dpr){
-  const st = pdfState; if(!st || st.rendered.has(canvas)) return; st.rendered.set(canvas, true);
-  const page = await st.doc.getPage(n); const vp = page.getViewport({scale: scale * dpr});
-  canvas.width = vp.width; canvas.height = vp.height;
-  canvas.style.height = Math.round(vp.height / dpr) + 'px'; canvas.style.width = Math.round(vp.width / dpr) + 'px';
-  await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise;
+async function drawPage(n, pg, scale, dpr){
+  const st = pdfState; if(!st || st.rendered.has(pg)) return; st.rendered.add(pg);
+  const page = await st.doc.getPage(n);
+  const vp = page.getViewport({scale}), vpHi = page.getViewport({scale: scale * dpr});
+  pg.style.width = Math.floor(vp.width) + 'px'; pg.style.height = Math.floor(vp.height) + 'px';
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.floor(vpHi.width); canvas.height = Math.floor(vpHi.height);
+  pg.appendChild(canvas);
+  await page.render({canvasContext: canvas.getContext('2d'), viewport: vpHi}).promise;
+  if(pdfState !== st) return;
+  // selectable text on top of the picture
+  try{
+    const tl = document.createElement('div'); tl.className = 'textLayer'; tl.dataset.p = n;
+    tl.style.setProperty('--scale-factor', scale);
+    pg.appendChild(tl);
+    const textContent = await page.getTextContent();
+    await st.lib.renderTextLayer({textContentSource: textContent, container: tl, viewport: vp, textDivs: []}).promise;
+    const eoc = document.createElement('div'); eoc.className = 'endOfContent'; tl.appendChild(eoc);
+    tl.addEventListener('mousedown', () => tl.classList.add('selecting'));
+    applyPdfHighlights(n, tl);
+  }catch(e){ console.warn('text layer failed', e); }
+}
+
+/* --- PDF highlights (same data as HTML ones, plus the page number) --- */
+const PDF_HL_BG = {y: 'rgba(255,214,0,.42)', g: 'rgba(60,200,80,.35)', b: 'rgba(40,150,255,.33)', p: 'rgba(255,80,140,.33)'};
+let pdfSel = null, pdfEditing = null, pdfBarTouch = 0, pdfSelT = null;
+function pdfTextNodes(tl){
+  const w = document.createTreeWalker(tl, NodeFilter.SHOW_TEXT, {acceptNode: n => n.parentNode && n.parentNode.closest('.endOfContent') ? 2 : 1});
+  const out = []; let n; while((n = w.nextNode())) out.push(n); return out;
+}
+function pdfIndex(tl){ const ns = pdfTextNodes(tl); let s = ''; const map = []; ns.forEach(n => { map.push([n, s.length]); s += n.data; }); return {s, map}; }
+function pdfOffset(ix, node, o){
+  if(node.nodeType === 3){ const e = ix.map.find(m => m[0] === node); if(e) return e[1] + o; }
+  const r = document.createRange(); try{ r.setStart(node, o); }catch(e){ return 0; } r.collapse(true);
+  for(const [n, base] of ix.map){ if(r.comparePoint(n, 0) >= 0) return base; }
+  return ix.s.length;
+}
+function pdfLocate(s, h){
+  let i = s.indexOf(h.exact), best = -1, bs = -Infinity, cnt = 0;
+  while(i !== -1 && cnt < 2000){
+    const p = h.prefix || '', q = h.suffix || '', j = i + h.exact.length; let k = 0, m = 0;
+    while(k < p.length && s[i - 1 - k] === p[p.length - 1 - k]) k++;
+    while(m < q.length && s[j + m] === q[m]) m++;
+    if(k + m > bs){ bs = k + m; best = i; }
+    i = s.indexOf(h.exact, i + 1); cnt++;
+  }
+  return best;
+}
+function pdfWrap(tl, a, b, h){
+  const ix = pdfIndex(tl); let made = 0;
+  for(const [n, s0] of ix.map){
+    const s1 = s0 + n.data.length;
+    if(s1 <= a || s0 >= b) continue;
+    const st = Math.max(a, s0) - s0, en = Math.min(b, s1) - s0;
+    if(!n.data.slice(st, en).trim()) continue;
+    let mid = n; if(st > 0) mid = n.splitText(st); if(en - st < mid.data.length) mid.splitText(en - st);
+    const m = document.createElement('mark'); m.className = 'pdfhl'; m.dataset.hid = h.id;
+    mid.parentNode.insertBefore(m, mid); m.appendChild(mid); made++;
+  }
+  stylePdfHl(h); return made;
+}
+const pdfMarks = id => pdfState ? [...pdfState.wrap.querySelectorAll('mark.pdfhl')].filter(m => m.dataset.hid === id) : [];
+function stylePdfHl(h){ pdfMarks(h.id).forEach(m => { m.style.background = PDF_HL_BG[h.color] || PDF_HL_BG.y; m.classList.toggle('n', !!h.note); m.title = h.note || ''; }); }
+function unwrapPdfHl(id){ pdfMarks(id).forEach(m => { const p = m.parentNode; while(m.firstChild) p.insertBefore(m.firstChild, m); p.removeChild(m); p.normalize(); }); }
+function applyPdfHighlights(page, tl){
+  const n = notes[readerId]; if(!n) return;
+  n.data.highlights.filter(h => +h.page === page).forEach(h => {
+    const at = pdfLocate(pdfIndex(tl).s, h);
+    if(at < 0 || !pdfWrap(tl, at, at + h.exact.length, h)){ if(!readerMissing.includes(h.id)) readerMissing.push(h.id); }
+  });
+}
+function hidePdfBar(){ const b = $('pdfBar'); if(b) b.classList.add('hidden'); pdfEditing = null; }
+function showPdfBar(rect, mode, color){
+  const bar = $('pdfBar');
+  bar.querySelector('[data-a=del]').style.display = mode === 'edit' ? '' : 'none';
+  bar.querySelectorAll('.c').forEach(c => c.classList.toggle('on', c.dataset.c === color));
+  bar.classList.remove('hidden');
+  const bw = bar.offsetWidth, bh = bar.offsetHeight, top = $('rBody').getBoundingClientRect();
+  let x = rect.left + rect.width / 2 - bw / 2; x = Math.max(8, Math.min(x, window.innerWidth - bw - 8));
+  let y = rect.bottom + 12; if(y + bh > top.bottom - 8) y = rect.top - bh - 12;
+  bar.style.left = x + 'px'; bar.style.top = Math.max(top.top + 6, y) + 'px';
+}
+function checkPdfSel(){
+  if(!pdfState) return;
+  const sel = document.getSelection();
+  if(!sel || sel.isCollapsed || !sel.rangeCount){ if(!pdfEditing && Date.now() - pdfBarTouch > 700) hidePdfBar(); return; }
+  const r = sel.getRangeAt(0);
+  const startEl = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement;
+  const tl = startEl && startEl.closest('.textLayer');
+  if(!tl || !pdfState.wrap.contains(tl)) return;
+  const ix = pdfIndex(tl);
+  let a = pdfOffset(ix, r.startContainer, r.startOffset);
+  let b = tl.contains(r.endContainer) ? pdfOffset(ix, r.endContainer, r.endOffset) : ix.s.length;   // a selection can't span pages
+  const t = ix.s.slice(a, b); a += t.length - t.replace(/^\s+/, '').length; b -= t.length - t.replace(/\s+$/, '').length;
+  if(b - a < 1) return;
+  pdfSel = {page: +tl.dataset.p, a, b, s: ix.s, text: sel.toString()};
+  pdfEditing = null;
+  showPdfBar(r.getBoundingClientRect(), 'new', null);
+}
+document.addEventListener('selectionchange', () => { if(!pdfState) return; clearTimeout(pdfSelT); pdfSelT = setTimeout(checkPdfSel, 280); });
+document.addEventListener('mouseup', () => document.querySelectorAll('.textLayer.selecting').forEach(t => t.classList.remove('selecting')));
+function createPdfHl(color){
+  if(!pdfSel || !readerId || !notes[readerId]) return null;
+  const o = pdfSel, tl = pdfState && pdfState.wrap.querySelector(`.textLayer[data-p="${o.page}"]`); if(!tl) return null;
+  const raw = {id: 'h' + uid(), exact: o.s.slice(o.a, o.b), prefix: o.s.slice(Math.max(0, o.a - 48), o.a), suffix: o.s.slice(o.b, o.b + 48),
+    color, pos: o.page * 1e6 + o.a, page: o.page, text: o.text};
+  const h = cleanHl(raw); if(!h) return null;
+  pdfWrap(tl, o.a, o.b, h);
+  try{ document.getSelection().removeAllRanges(); }catch(e){}
+  pdfSel = null;
+  changeNote(readerId, d => { d.highlights = d.highlights.filter(x => x.id !== h.id).concat([h]); });
+  toast(`Highlighted (${HL_NAMES[color]})`, 1200);
+  return h;
+}
+$('pdfBar').addEventListener('mousedown', e => { e.preventDefault(); pdfBarTouch = Date.now(); });
+$('pdfBar').addEventListener('touchstart', () => { pdfBarTouch = Date.now(); }, {passive: true});
+$('pdfBar').addEventListener('click', e => {
+  const btn = e.target.closest('button'); if(!btn || !readerId) return;
+  pdfBarTouch = Date.now();
+  const id = readerId, c = btn.dataset.c, a = btn.dataset.a, editing = pdfEditing;
+  if(c){
+    if(editing){ changeNote(id, d => { const x = d.highlights.find(y => y.id === editing); if(x) x.color = c; }); refreshHlView(notes[id].data.highlights.find(x => x.id === editing)); }
+    else createPdfHl(c);
+    hidePdfBar();
+  } else if(a === 'note'){
+    const h = editing ? notes[id].data.highlights.find(x => x.id === editing) : createPdfHl('y');
+    hidePdfBar(); if(h) hlNoteDlg(h.id);
+  } else if(a === 'del' && editing){
+    unwrapPdfHl(editing); changeNote(id, d => { d.highlights = d.highlights.filter(x => x.id !== editing); }, editing); hidePdfBar();
+  }
+});
+$('rBody').addEventListener('click', e => {
+  if(!pdfState) return;
+  const m = e.target.closest('mark.pdfhl'), sel = document.getSelection();
+  if(m && (!sel || sel.isCollapsed)){
+    const h = notes[readerId] && notes[readerId].data.highlights.find(x => x.id === m.dataset.hid);
+    if(h){ pdfEditing = h.id; showPdfBar(m.getBoundingClientRect(), 'edit', h.color); return; }
+  }
+  if(!sel || sel.isCollapsed) hidePdfBar();
+});
+async function gotoPdfHl(id){
+  const h = notes[readerId] && notes[readerId].data.highlights.find(x => x.id === id); if(!h || !pdfState) return;
+  const pg = pdfState.wrap.querySelector(`.pg[data-p="${+h.page}"]`); if(!pg) return;
+  pdfState.wrap.scrollTop = pg.offsetTop - 10;
+  for(let i = 0; i < 40 && !pdfMarks(id).length; i++) await sleep(100);   // wait for the page to render
+  const ms = pdfMarks(id); if(!ms.length) return toast('Couldn’t find this text on the page');
+  ms[0].scrollIntoView({block: 'center', behavior: 'smooth'});
+  ms.forEach(m => m.classList.add('f')); setTimeout(() => ms.forEach(m => m.classList.remove('f')), 1600);
 }
 $('rZoomIn').onclick = () => { if(pdfState){ pdfState.zoom = Math.min(3, pdfState.zoom + .25); layoutPdf(); } };
 $('rZoomOut').onclick = () => { if(pdfState){ pdfState.zoom = Math.max(.5, pdfState.zoom - .25); layoutPdf(); } };

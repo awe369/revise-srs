@@ -26,9 +26,10 @@ When you open a file, rate it at the bottom:
 
 ## Highlights, notes and more
 
-- **Highlight (HTML files):** select text while reading. A small bar appears: pick a colour
+- **Highlight (HTML and PDF):** select text while reading (long-press on a phone). A small bar appears: pick a colour
   (yellow / green / blue / pink) or ✎ to add a note. Tap a highlight to recolour it, add a note or remove it.
-  The 🖍 button in the reader lists all highlights, with *Go to*.
+  The 🖍 button in the reader lists all highlights, with *Go to*. PDF highlights remember their page number.
+  Scanned PDFs (pages that are just images) have no text, so they can't be highlighted — use 📝 notes for those.
 - **Highlights file:** use 🖍 → **Make highlights file** (or a folder's options) to collect every
   highlight and note into a new file, e.g. *biofertilizers — Highlights*. It goes into your library and
   comes up for revision like any other file. Run it again later to update it; its schedule stays the same.
