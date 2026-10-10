@@ -1,10 +1,11 @@
 name: Daily revision reminder
 
-# Every morning, opens an issue listing the notes due for revision.
-# GitHub then notifies you (email / GitHub mobile app). Yesterday's issue is closed automatically.
+# Every morning: sends a Telegram message listing the notes due today, with links that open each one.
+# Needs two repository secrets: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (see README).
+# Without them it falls back to opening a GitHub issue, so GitHub notifies you instead.
 on:
   schedule:
-    - cron: '15 2 * * *'   # 02:15 UTC = 07:45 IST
+    - cron: '30 1 * * *'   # 01:30 UTC = 07:00 IST (GitHub may start scheduled runs a few minutes late)
   workflow_dispatch:
 
 permissions:
@@ -19,6 +20,9 @@ jobs:
       - uses: actions/github-script@v7
         env:
           TIMEZONE: Asia/Kolkata
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          APP_URL: ${{ vars.APP_URL }}
         with:
           script: |
             const fs = require('fs');
@@ -26,29 +30,54 @@ jobs:
             try { db = JSON.parse(fs.readFileSync('data/srs.json', 'utf8')); }
             catch (e) { core.info('No database yet — nothing to do.'); return; }
 
-            const today = new Intl.DateTimeFormat('en-CA', { timeZone: process.env.TIMEZONE }).format(new Date());
-            const due = Object.values(db.items || {})
-              .filter(it => !it.done && it.due && it.due <= today)
-              .sort((a, b) => a.due.localeCompare(b.due) || a.name.localeCompare(b.name));
+            const tz = process.env.TIMEZONE;
+            const today = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+            const addDays = (s, n) => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+            const pretty = s => new Date(s + 'T00:00:00Z').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+            const items = Object.values(db.items || {}).filter(it => !it.done && it.due);
+            const due = items.filter(it => it.due <= today).sort((a, b) => a.due.localeCompare(b.due) || a.name.localeCompare(b.name));
+            const limit = +(db.settings && db.settings.dailyLimit) || 0;
+            const shown = limit ? due.slice(0, limit) : due;
+            const tomorrow = items.filter(it => it.due === addDays(today, 1)).length;
 
             const { owner, repo } = context.repo;
+            const app = (process.env.APP_URL || `https://${owner}.github.io/${repo}/`).replace(/\/?$/, '/');
+            const where = it => it.folder ? it.folder.split('/').join(' › ') : 'Home';
+            const late = it => Math.round((Date.parse(today) - Date.parse(it.due)) / 864e5);
+
+            if (process.env.TG_TOKEN) {
+              if (!process.env.TG_CHAT) { core.setFailed('TELEGRAM_CHAT_ID secret is missing — see README.'); return; }
+              const h = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+              let text;
+              if (shown.length) {
+                const lines = shown.slice(0, 40).map((it, i) => `${i + 1}. <a href="${h(app + '#open=' + it.id)}">${h(it.name)}</a> — <i>${h(where(it))}</i>${late(it) > 0 ? ` · ${late(it)}d late` : ''}`);
+                text = `📚 <b>Aaj ${shown.length} revision due</b> · ${pretty(today)}\n\n${lines.join('\n')}`
+                  + (shown.length > 40 ? `\n…and ${shown.length - 40} more` : '')
+                  + (due.length > shown.length ? `\n\n(${due.length - shown.length} more beyond your daily limit)` : '')
+                  + `\n\n👉 <a href="${h(app)}">Open Revise</a>`;
+              } else {
+                text = `✅ <b>Aaj kuch due nahi</b> · ${pretty(today)}\nKal: ${tomorrow} file${tomorrow === 1 ? '' : 's'}.`;
+              }
+              const r = await fetch(`https://api.telegram.org/bot${process.env.TG_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: process.env.TG_CHAT, text, parse_mode: 'HTML', disable_web_page_preview: true })
+              });
+              const j = await r.json();
+              if (!j.ok) core.setFailed(`Telegram error: ${j.description} — check the bot token, the chat ID, and that you pressed Start in the bot chat.`);
+              else core.info(`Telegram reminder sent (${shown.length} due).`);
+              return;
+            }
+
+            // Fallback: a GitHub issue (GitHub notifies you by email / mobile app)
             const label = 'revision-reminder';
             const open = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: 'open', labels: label });
-            for (const i of open) {
-              await github.rest.issues.update({ owner, repo, issue_number: i.number, state: 'closed', state_reason: 'completed' });
-            }
-            if (!due.length) { core.info('Nothing due today.'); return; }
-
+            for (const i of open) await github.rest.issues.update({ owner, repo, issue_number: i.number, state: 'closed', state_reason: 'completed' });
+            if (!shown.length) { core.info('Nothing due today.'); return; }
             try { await github.rest.issues.createLabel({ owner, repo, name: label, color: '2f6fde' }); } catch (e) {}
-            const app = `https://${owner}.github.io/${repo}/`;
             const clean = s => String(s).replace(/[\[\]]/g, '');
-            const lines = due.map(it => {
-              const late = Math.round((Date.parse(today) - Date.parse(it.due)) / 864e5);
-              const where = it.folder ? it.folder.split('/').join(' › ') : 'Home';
-              return `- [ ] [${clean(it.name)}](${app}#open=${it.id}) — ${clean(where)}${late > 0 ? ` · ${late}d late` : ''}`;
-            });
+            const lines = shown.map(it => `- [ ] [${clean(it.name)}](${app}#open=${it.id}) — ${clean(where(it))}${late(it) > 0 ? ` · ${late(it)}d late` : ''}`);
             await github.rest.issues.create({
               owner, repo, labels: [label],
-              title: `📚 ${due.length} revision${due.length > 1 ? 's' : ''} due — ${today}`,
+              title: `📚 ${shown.length} revision${shown.length > 1 ? 's' : ''} due — ${today}`,
               body: `@${owner} aaj ye revise karna hai:\n\n${lines.join('\n')}\n\n👉 [Open Revise](${app})`
             });

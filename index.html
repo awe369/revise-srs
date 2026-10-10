@@ -59,7 +59,7 @@
 
   /* tabs */
   nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-  nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+  nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
   nav.tabs button{padding:10px 0 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.74rem;color:var(--dim);font-weight:500;position:relative}
   nav.tabs button svg{width:22px;height:22px}
   nav.tabs button.on{color:var(--accent)}
@@ -181,6 +181,46 @@
   .progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
 
   .drop{border:2px dashed var(--accent);background:var(--accent-soft)}
+
+  /* v2 additions */
+  .row .flags{display:inline-flex;gap:8px;margin-left:2px}
+  .banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);font-size:.88rem}
+  .banner span{flex:1;min-width:180px}
+  .field textarea{width:100%;min-height:150px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);resize:vertical;font:inherit;line-height:1.5}
+  .hls{display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow:auto;margin:10px -4px 0;padding:0 4px}
+  .hl{border-left:4px solid;border-radius:6px 10px 10px 6px;background:var(--bg);padding:9px 11px;font-size:.88rem}
+  .hl q{quotes:none;display:block;white-space:pre-wrap;word-break:break-word}
+  .hl .hn{color:var(--muted);font-size:.8rem;margin-top:5px;font-style:italic;white-space:pre-wrap}
+  .hl .ha{display:flex;gap:12px;margin-top:6px;font-size:.78rem}
+  .hl .ha button{color:var(--accent);font-weight:600}
+  .hl .ha button.del{color:var(--hard)}
+  .hl .miss{font-size:.74rem;color:var(--warn);margin-top:4px}
+  .hl-y{border-color:#e8c32e} .hl-g{border-color:#4fbf6a} .hl-b{border-color:#4aa3f0} .hl-p{border-color:#f06c9b}
+
+  /* stats */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+  .stats.four{grid-template-columns:repeat(4,1fr)}
+  @media (max-width:560px){ .stats.four{grid-template-columns:repeat(2,1fr)} }
+  .heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;overflow-x:auto;padding-bottom:2px}
+  .heat i{width:14px;height:14px;border-radius:3px;background:var(--surface-2);display:block;cursor:default}
+  .heat i.l1{background:color-mix(in srgb,var(--accent) 30%,var(--surface-2))}
+  .heat i.l2{background:color-mix(in srgb,var(--accent) 55%,var(--surface-2))}
+  .heat i.l3{background:color-mix(in srgb,var(--accent) 80%,var(--surface-2))}
+  .heat i.l4{background:var(--accent)}
+  .heat i.fut{visibility:hidden}
+  .heat i.on{outline:2px solid var(--text);outline-offset:1px}
+  .scale{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--dim);margin-top:8px}
+  .scale i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .detail{font-size:.8rem;color:var(--muted);margin-top:6px;min-height:1.2em}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin-bottom:10px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .mix{margin:10px 0 12px}
+  .mix .mt{display:flex;justify-content:space-between;font-size:.84rem;font-weight:600;margin-bottom:5px;gap:8px}
+  .mix .mt span{color:var(--dim);font-weight:500;white-space:nowrap}
+  .mix .bar{display:flex;gap:2px;height:12px}
+  .mix .bar b{display:block;height:100%;min-width:3px}
+  .mix .bar b:first-child{border-radius:4px 0 0 4px} .mix .bar b:last-child{border-radius:0 4px 4px 0} .mix .bar b:only-child{border-radius:4px}
+  .mix .pc{font-size:.74rem;color:var(--muted);margin-top:4px}
   @media (max-width:420px){ h1{font-size:1.4rem} .stat b{font-size:1.3rem} }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -223,6 +263,7 @@
     <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Today<span class="badge hidden" id="dueBadge"></span></button>
     <button data-tab="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Library</button>
     <button data-tab="upcoming"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Upcoming</button>
+    <button data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
   </div></nav>
 </div>
 
@@ -233,6 +274,8 @@
     <div class="rtitle"><b id="rName"></b><span id="rSub"></span></div>
     <button class="iconbtn hidden" id="rZoomOut" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
     <button class="iconbtn hidden" id="rZoomIn" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button class="iconbtn" id="rHls" aria-label="Highlights" title="Highlights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l-6 6v3h9l3-3"/><path d="M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg></button>
+    <button class="iconbtn" id="rNotes" aria-label="Notes" title="Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></button>
     <button class="iconbtn" id="rMore" aria-label="File options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
   </div>
   <div class="rbody" id="rBody"></div>
@@ -248,6 +291,7 @@
 
 <dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
 <input type="file" id="fileInput" accept=".html,.htm,.pdf,text/html,application/pdf" multiple hidden>
+<input type="file" id="dirInput" webkitdirectory multiple hidden>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -267,11 +311,15 @@ const relDay = s => { const n = diffDays(today(), s); return n === 0 ? 'Today' :
 const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const slug = s => s.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').slice(0, 40) || 'file';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function bytesToB64(bytes){ let s = ''; for(let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
 function b64ToBytes(b64){ const bin = atob(b64.replace(/\s/g, '')); const u = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
 const strToB64 = s => bytesToB64(new TextEncoder().encode(s));
 const b64ToStr = b => new TextDecoder().decode(b64ToBytes(b));
+const lsGet = k => { try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return null; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const lsDel = k => { try{ localStorage.removeItem(k); }catch(e){} };
 
 let toastT;
 function toast(msg, ms = 2400){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
@@ -279,10 +327,9 @@ function toast(msg, ms = 2400){ const t = $('toast'); t.textContent = msg; t.cla
 /* ================= config ================= */
 const CFG_KEY = 'revise-cfg';
 let cfg = null;
-function loadCfg(){ try{ cfg = JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ cfg = null; } if(cfg && !(cfg.owner && cfg.repo && cfg.token)) cfg = null; }
-function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} }
+function loadCfg(){ cfg = lsGet(CFG_KEY); if(cfg && !(cfg.owner && cfg.repo && cfg.token)) cfg = null; }
+function saveCfg(){ lsSet(CFG_KEY, cfg); }
 function guessRepo(){
-  // https://<owner>.github.io/<repo>/  →  prefill
   const h = location.hostname.match(/^([^.]+)\.github\.io$/i);
   const seg = location.pathname.split('/').filter(Boolean)[0];
   return { owner: h ? h[1] : '', repo: h ? (seg && !seg.includes('.') ? seg : h[1] + '.github.io') : '' };
@@ -290,6 +337,7 @@ function guessRepo(){
 
 /* ================= GitHub API ================= */
 const DB_PATH = 'data/srs.json';
+const notesPath = id => `data/notes/${id}.json`;
 async function gh(path, {method = 'GET', body, accept} = {}){
   const r = await fetch('https://api.github.com' + path, {
     method, cache: 'no-store',
@@ -299,6 +347,7 @@ async function gh(path, {method = 'GET', body, accept} = {}){
   if(!r.ok){ let m = ''; try{ m = (await r.json()).message; }catch(e){} const err = new Error(m || ('GitHub error ' + r.status)); err.status = r.status; throw err; }
   return r;
 }
+const isNetErr = e => !e.status;   // fetch() itself failed → offline / network
 const cpath = p => `/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${p.split('/').map(encodeURIComponent).join('/')}`;
 const refQ = () => '?ref=' + encodeURIComponent(cfg.branch || 'main');
 async function ghGetJSON(p){
@@ -306,28 +355,41 @@ async function ghGetJSON(p){
     const j = await (await gh(cpath(p) + refQ())).json();
     let text;
     if(j.encoding === 'base64' && j.content) text = b64ToStr(j.content);
-    else text = await (await gh(cpath(p) + refQ(), {accept: 'application/vnd.github.raw+json'})).text(); // >1 MB
+    else text = await (await gh(cpath(p) + refQ(), {accept: 'application/vnd.github.raw+json'})).text(); // > 1 MB
     return {sha: j.sha, data: JSON.parse(text)};
   }catch(e){ if(e.status === 404) return {sha: null, data: null}; throw e; }
 }
 async function ghPut(p, b64, message, sha){
-  const j = await (await gh(cpath(p), {method: 'PUT', body: Object.assign({message, content: b64, branch: cfg.branch || 'main'}, sha ? {sha} : {})})).json();
-  return j.content.sha;
+  for(let attempt = 0; ; attempt++){
+    try{
+      const j = await (await gh(cpath(p), {method: 'PUT', body: Object.assign({message, content: b64, branch: cfg.branch || 'main'}, sha ? {sha} : {})})).json();
+      return j.content.sha;
+    }catch(e){
+      // GitHub throttles many file writes in a row (403/429 "secondary rate limit") — back off and retry
+      if((e.status === 403 || e.status === 429) && /rate|abuse/i.test(e.message) && attempt < 4){ await sleep(4000 * (attempt + 1)); continue; }
+      throw e;
+    }
+  }
 }
+async function ghShaOf(p){ try{ return (await (await gh(cpath(p) + refQ())).json()).sha; }catch(e){ if(e.status === 404) return null; throw e; } }
 async function ghDelete(p, sha, message){
-  if(!sha){ try{ sha = (await (await gh(cpath(p) + refQ())).json()).sha; }catch(e){ if(e.status === 404) return; throw e; } }
+  if(!sha) sha = await ghShaOf(p);
+  if(!sha) return;
   try{ await gh(cpath(p), {method: 'DELETE', body: {message, sha, branch: cfg.branch || 'main'}}); }
   catch(e){
     if(e.status === 404) return;
-    if(e.status === 409 || e.status === 422){ const s = (await (await gh(cpath(p) + refQ())).json()).sha; await gh(cpath(p), {method: 'DELETE', body: {message, sha: s, branch: cfg.branch || 'main'}}); }
+    if(e.status === 409 || e.status === 422){ const s = await ghShaOf(p); if(s) await gh(cpath(p), {method: 'DELETE', body: {message, sha: s, branch: cfg.branch || 'main'}}); }
     else throw e;
   }
 }
 async function ghRaw(p){ return (await gh(cpath(p) + refQ(), {accept: 'application/vnd.github.raw+json'})).arrayBuffer(); }
 
-/* ================= database ================= */
+/* ================= database + offline-safe sync =================
+   Every change is a named operation (OPS). It's applied locally at once, queued in
+   localStorage, then replayed on the latest copy from GitHub and saved. If you're
+   offline the queue simply waits and is sent when the connection comes back. */
 const DEFAULT_SCHED = [3, 10, 30, 60];
-function blankDb(){ return {version: 1, settings: {schedule: DEFAULT_SCHED.slice(), hardDays: 1}, folders: [], items: {}, stats: {}}; }
+function blankDb(){ return {version: 1, settings: {schedule: DEFAULT_SCHED.slice(), hardDays: 1, dailyLimit: 0}, folders: [], items: {}, stats: {}}; }
 function normDb(d){
   const b = blankDb();
   if(!d || typeof d !== 'object') return b;
@@ -338,69 +400,177 @@ function normDb(d){
   d.stats = d.stats && typeof d.stats === 'object' ? d.stats : {};
   return d;
 }
-let db = blankDb(), dbSha = null, lastPull = 0;
-let chain = Promise.resolve(), pending = 0;
+let db = blankDb(), lastPull = 0;
+let queue = lsGet('revise-queue') || [];
+const saveQueue = () => lsSet('revise-queue', queue);
+const saveDbCache = () => lsSet('revise-db', db);
 
-function setSync(mode, txt){ const s = $('sync'); s.className = 'sync' + (mode ? ' ' + mode : ''); $('syncTxt').textContent = txt; }
-function bumpSync(){ if(pending > 0) setSync('busy', 'Saving…'); else setSync('', 'Synced'); }
-
-async function pull(){
-  setSync('busy', 'Loading…');
-  const {sha, data} = await ghGetJSON(DB_PATH);
-  if(!data){ db = blankDb(); dbSha = await ghPut(DB_PATH, strToB64(JSON.stringify(db, null, 1)), 'Create revision database', null); }
-  else { db = normDb(data); dbSha = sha; }
-  lastPull = Date.now();
-  bumpSync();
-}
-/** Apply a change locally right away, then replay it on the latest remote copy and save (retries on conflicts). */
-function commit(fn, message){
-  fn(db); render();
-  pending++; bumpSync();
-  chain = chain.then(async () => {
-    for(let attempt = 0; attempt < 4; attempt++){
-      const {sha, data} = await ghGetJSON(DB_PATH);
-      const fresh = normDb(data);
-      fn(fresh);
-      try{
-        dbSha = await ghPut(DB_PATH, strToB64(JSON.stringify(fresh, null, 1)), message, sha);
-        if(pending === 1){ db = fresh; render(); }
-        lastPull = Date.now();
-        return;
-      }catch(e){ if(e.status !== 409 && e.status !== 422) throw e; }
-    }
-    throw new Error('Save conflict — please refresh');
-  }).catch(e => {
-    setSync('err', 'Not saved'); toast('Could not save: ' + e.message, 4000);
-    return pull().then(render).catch(() => {});
-  }).finally(() => { pending--; if(pending === 0 && !$('sync').classList.contains('err')) bumpSync(); });
-  return chain;
-}
-
-/* ================= spaced repetition ================= */
-const schedOf = (it, st = db.settings) => (Array.isArray(it.schedule) && it.schedule.length) ? it.schedule : st.schedule;
+/* --- scheduling --- */
+const schedOf = (it, st) => (Array.isArray(it.schedule) && it.schedule.length) ? it.schedule : st.schedule;
 const intervalAt = (it, reads, st) => { const s = schedOf(it, st); return s[Math.min(Math.max(reads, 1) - 1, s.length - 1)]; };
-/** reads = how many times the file has been read so far. Good → next gap, Easy → skips a gap, Hard → back soon. */
+/** reads = times read so far. Good → next gap, Easy → skips a gap, Hard → back soon (place unchanged). */
 function preview(it, grade, st = db.settings){
   if(grade === 'hard') return {days: Math.max(1, +st.hardDays || 1), reads: it.reads || 0};
   const reads = (it.reads || 0) + (grade === 'easy' ? 2 : 1);
   return {days: intervalAt(it, reads, st), reads};
 }
-function applyGrade(d, id, grade){
-  const it = d.items[id]; if(!it) return;
-  const p = preview(it, grade, d.settings);
-  it.reads = p.reads; it.due = addDays(today(), p.days); it.last = today(); it.done = false;
-  it.hist = (it.hist || []).concat([[today(), grade[0]]]).slice(-60);
-  d.stats[today()] = (d.stats[today()] || 0) + 1;
+/** With a daily limit, nudge a due date forward (within ~15% of the gap) to a day that still has room. */
+function balanceDay(d, id, base, days){
+  const lim = +d.settings.dailyLimit || 0;
+  if(!lim) return base;
+  const load = day => Object.values(d.items).filter(x => x.id !== id && !x.done && x.due === day).length;
+  const win = Math.max(1, Math.round(days * 0.15));
+  let best = base, bestLoad = Infinity;
+  for(let k = 0; k <= win; k++){ const dd = addDays(base, k), l = load(dd); if(l < lim) return dd; if(l < bestLoad){ bestLoad = l; best = dd; } }
+  return best;
 }
-const isDue = it => !it.done && it.due && it.due <= today();
+const EDITABLE = ['name', 'folder', 'schedule', 'due', 'done', 'sha', 'size', 'gen'];
+const OPS = {
+  addFolders(d, {paths}){ paths.forEach(p => { if(!d.folders.includes(p)) d.folders.push(p); }); },
+  delFolder(d, {path}){ d.folders = d.folders.filter(f => f !== path); },
+  renameFolder(d, {from, to}){
+    const re = f => f === from ? to : f.startsWith(from + '/') ? to + f.slice(from.length) : f;
+    d.folders = [...new Set(d.folders.map(re))];
+    Object.values(d.items).forEach(it => { it.folder = re(it.folder); });
+  },
+  addItems(d, {items, folders}){ OPS.addFolders(d, {paths: folders || []}); items.forEach(it => { d.items[it.id] = Object.assign({}, it); }); },
+  grade(d, {id, g, day}){
+    const it = d.items[id]; if(!it) return;
+    const p = preview(it, g, d.settings);
+    it.reads = p.reads; it.due = balanceDay(d, id, addDays(day, p.days), p.days); it.last = day; it.done = false;
+    it.hist = (it.hist || []).concat([[day, g[0]]]).slice(-60);
+    d.stats[day] = (d.stats[day] || 0) + 1;
+  },
+  snooze(d, {id, day}){ const it = d.items[id]; if(it) it.due = addDays(day, 1); },
+  setDone(d, {id, done, day}){ const it = d.items[id]; if(!it) return; it.done = done; if(!done && (!it.due || it.due < day)) it.due = day; },
+  restart(d, {id, day}){ const it = d.items[id]; if(!it) return; it.reads = 1; it.done = false; it.last = day; it.due = addDays(day, schedOf(it, d.settings)[0]); },
+  edit(d, {id, patch}){ const it = d.items[id]; if(!it) return; EDITABLE.forEach(k => { if(k in patch) it[k] = patch[k]; }); },
+  delItem(d, {id}){ delete d.items[id]; },
+  settings(d, {patch}){ Object.assign(d.settings, patch); },
+  annot(d, {id, hl, note}){ const it = d.items[id]; if(!it) return; it.hl = hl; it.note = note; },
+  moveDue(d, {moves}){ Object.entries(moves).forEach(([id, due]) => { if(d.items[id]) d.items[id].due = due; }); }
+};
+function applyOp(d, q){ try{ OPS[q.op] && OPS[q.op](d, q.args); }catch(e){ console.warn('op failed', q, e); } }
+
+function setSync(mode, txt){ const s = $('sync'); s.className = 'sync' + (mode ? ' ' + mode : ''); $('syncTxt').textContent = txt; }
+function syncIdle(){ if(queue.length) setSync('err', navigator.onLine ? `${queue.length} unsaved` : `Offline · ${queue.length} pending`); else setSync(navigator.onLine ? '' : 'err', navigator.onLine ? 'Synced' : 'Offline'); }
+
+async function pull(){
+  setSync('busy', 'Loading…');
+  const {data} = await ghGetJSON(DB_PATH);
+  if(!data){ const b = blankDb(); await ghPut(DB_PATH, strToB64(JSON.stringify(b, null, 1)), 'Create revision database', null); db = b; }
+  else db = normDb(data);
+  queue.forEach(q => applyOp(db, q));        // keep changes that haven't reached GitHub yet
+  lastPull = Date.now(); saveDbCache();
+  syncIdle();
+}
+function commit(op, args, msg){
+  const q = {op, args, msg};
+  applyOp(db, q); queue.push(q); saveQueue(); saveDbCache();
+  render(); flush();
+}
+let flushing = false, retryT = null;
+async function flush(){
+  if(flushing || !queue.length || !cfg) return;
+  flushing = true; clearTimeout(retryT); setSync('busy', 'Saving…');
+  try{
+    let conflicts = 0;
+    while(queue.length){
+      const batch = queue.slice();
+      const {sha, data} = await ghGetJSON(DB_PATH);
+      const fresh = normDb(data);
+      batch.forEach(q => applyOp(fresh, q));
+      const msg = batch.length === 1 ? batch[0].msg : `${batch.length} changes: ` + batch.map(b => b.msg).join('; ').slice(0, 180);
+      try{ await ghPut(DB_PATH, strToB64(JSON.stringify(fresh, null, 1)), msg, sha); }
+      catch(e){ if((e.status === 409 || e.status === 422) && ++conflicts < 6) continue; throw e; }
+      queue.splice(0, batch.length); saveQueue();
+      queue.forEach(q => applyOp(fresh, q));   // anything added while we were saving
+      db = fresh; lastPull = Date.now(); saveDbCache(); render();
+    }
+    syncIdle();
+  }catch(e){
+    syncIdle();
+    if(!isNetErr(e)) toast('Could not save: ' + e.message, 4000);
+    retryT = setTimeout(flush, isNetErr(e) ? 20000 : 60000);
+  }finally{ flushing = false; }
+}
+window.addEventListener('online', () => { syncIdle(); flush(); flushAllNotes(); });
+window.addEventListener('offline', syncIdle);
+
+const isDue = it => !!it && !it.done && it.due && it.due <= today();
 const dueItems = () => Object.values(db.items).filter(isDue).sort((a, b) => a.due < b.due ? -1 : a.due > b.due ? 1 : a.name.localeCompare(b.name));
-function streak(){
-  let n = 0, d = today();
+function streaks(){
+  let cur = 0, d = today();
   if(!db.stats[d]) d = addDays(d, -1);
-  while(db.stats[d]){ n++; d = addDays(d, -1); }
-  return n;
+  while(db.stats[d]){ cur++; d = addDays(d, -1); }
+  let best = 0, run = 0, prev = null;
+  Object.keys(db.stats).filter(k => db.stats[k] > 0).sort().forEach(k => { run = prev && diffDays(prev, k) === 1 ? run + 1 : 1; best = Math.max(best, run); prev = k; });
+  return {cur, best};
 }
 const folderLabel = f => f ? f.split('/').join(' › ') : 'Home';
+const inTree = (it, f) => !f || it.folder === f || it.folder.startsWith(f + '/');
+
+/* ================= per-file notes & highlights =================
+   Stored in data/notes/<id>.json → {highlights:[…], text:'…', pos:0..1}.
+   Kept in localStorage too, so edits made offline are saved later. */
+const HL_COLORS = {y: '#ffe066', g: '#9be89b', b: '#9fd3ff', p: '#ffb0c8'};
+const HL_NAMES = {y: 'Yellow', g: 'Green', b: 'Blue', p: 'Pink'};
+const notes = {};                       // id → {data, dirty, deleted:[]}
+const noteKey = id => 'revise-note-' + id;
+const blankNote = () => ({v: 1, highlights: [], text: '', pos: 0});
+function normNote(n){ const b = blankNote(); if(!n || typeof n !== 'object') return b; return {v: 1, highlights: Array.isArray(n.highlights) ? n.highlights : [], text: typeof n.text === 'string' ? n.text : '', pos: +n.pos || 0}; }
+async function loadNote(id){
+  const local = lsGet(noteKey(id));
+  if(local && local.dirty){ notes[id] = local; flushNote(id); return local; }
+  let n;
+  try{ const {data} = await ghGetJSON(notesPath(id)); n = {data: normNote(data), dirty: false, deleted: []}; }
+  catch(e){ n = local || {data: blankNote(), dirty: false, deleted: []}; }
+  notes[id] = n; lsSet(noteKey(id), n);
+  return n;
+}
+const noteTimers = {};
+function changeNote(id, fn, deletedId){
+  const n = notes[id]; if(!n) return;
+  fn(n.data); n.dirty = true;
+  if(deletedId) n.deleted.push(deletedId);
+  lsSet(noteKey(id), n);
+  clearTimeout(noteTimers[id]); noteTimers[id] = setTimeout(() => flushNote(id), 1500);
+}
+function mergeNote(remote, local, deleted){
+  const byId = new Map();
+  remote.highlights.forEach(h => byId.set(h.id, h));
+  local.highlights.forEach(h => byId.set(h.id, h));
+  deleted.forEach(id => byId.delete(id));
+  return {v: 1, highlights: [...byId.values()].sort((a, b) => (a.pos || 0) - (b.pos || 0)), text: local.text, pos: local.pos};
+}
+const flushingNotes = {};
+async function flushNote(id){
+  clearTimeout(noteTimers[id]);
+  const n = notes[id] || lsGet(noteKey(id));
+  if(!n || !n.dirty || !cfg) return;
+  if(flushingNotes[id]){ flushingNotes[id] = 'again'; return; }
+  flushingNotes[id] = true;
+  try{
+    for(let attempt = 0; attempt < 5; attempt++){
+      const {sha, data} = await ghGetJSON(notesPath(id));
+      const merged = mergeNote(normNote(data), n.data, n.deleted);
+      const it = db.items[id];
+      try{ await ghPut(notesPath(id), strToB64(JSON.stringify(merged, null, 1)), 'Notes: ' + (it ? it.name : id), sha); }
+      catch(e){ if(e.status === 409 || e.status === 422) continue; throw e; }
+      n.data = merged; n.dirty = false; n.deleted = []; lsSet(noteKey(id), n); notes[id] = n;
+      const hl = merged.highlights.length, note = !!merged.text.trim();
+      if(it && ((it.hl || 0) !== hl || !!it.note !== note)) commit('annot', {id, hl, note}, 'Update note counts for ' + it.name);
+      break;
+    }
+  }catch(e){ /* offline — stays dirty in localStorage and is retried later */ }
+  finally{
+    const again = flushingNotes[id] === 'again'; flushingNotes[id] = false;
+    if(again && notes[id] && notes[id].dirty) flushNote(id);
+  }
+}
+function flushAllNotes(){
+  try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith('revise-note-')){ const n = lsGet(k); if(n && n.dirty){ const id = k.slice(12); notes[id] = notes[id] || n; flushNote(id); } } } }catch(e){}
+}
 
 /* ================= views ================= */
 let tab = 'today', curFolder = '', query = '';
@@ -408,6 +578,7 @@ function setTab(t){ tab = t; query = ''; render(); window.scrollTo(0, 0); }
 
 const SVG_FOLDER = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
 const SVG_MORE = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>';
+const SVG_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>';
 
 function dueChip(it){
   if(it.done) return '<span class="chip done">Mastered</span>';
@@ -417,28 +588,35 @@ function dueChip(it){
   if(n === 0) return '<span class="chip due">Due today</span>';
   return `<span class="chip">${n === 1 ? 'Tomorrow' : niceDate(it.due)}</span>`;
 }
-function itemRow(it, {showFolder = true, menu = true} = {}){
-  const sub = [showFolder ? folderLabel(it.folder) : null, it.reads ? 'read ' + plural(it.reads, 'time') : 'not read yet'].filter(Boolean).join(' · ');
+function itemRow(it, {showFolder = true} = {}){
+  const flags = [it.gen ? '✨' : '', it.hl ? '🖍 ' + it.hl : '', it.note ? '📝' : ''].filter(Boolean).join(' ');
+  const sub = [showFolder ? folderLabel(it.folder) : null, it.gen ? 'highlights file' : it.reads ? 'read ' + plural(it.reads, 'time') : 'not read yet'].filter(Boolean).join(' · ');
   return `<div class="row" data-open="${esc(it.id)}" role="button" tabindex="0">
     <div class="ic ${it.type}">${it.type.toUpperCase()}</div>
-    <div class="mid"><div class="nm">${esc(it.name)}</div><div class="sub">${esc(sub)}</div></div>
+    <div class="mid"><div class="nm">${esc(it.name)}</div><div class="sub">${esc(sub)}${flags ? ` <span class="flags">${esc(flags)}</span>` : ''}</div></div>
     ${dueChip(it)}
-    ${menu ? `<button class="more" data-itemmenu="${esc(it.id)}" aria-label="Options for ${esc(it.name)}">${SVG_MORE}</button>` : ''}
+    <button class="more" data-itemmenu="${esc(it.id)}" aria-label="Options for ${esc(it.name)}">${SVG_MORE}</button>
   </div>`;
+}
+/** Today's list, respecting the optional daily limit. */
+function todayQueue(){
+  const due = dueItems(), lim = +db.settings.dailyLimit || 0;
+  return {shown: lim ? due.slice(0, lim) : due, extra: lim ? Math.max(0, due.length - lim) : 0, all: due};
 }
 
 function renderToday(){
-  const due = dueItems(), all = Object.values(db.items);
-  const doneToday = db.stats[today()] || 0;
-  let h = `<h1>${due.length ? plural(due.length, 'file') + ' to revise' : 'All caught up'}</h1>
+  const {shown, extra} = todayQueue(), all = Object.values(db.items);
+  const doneToday = db.stats[today()] || 0, st = streaks();
+  let h = `<h1>${shown.length ? plural(shown.length, 'file') + ' to revise' : 'All caught up'}</h1>
     <p class="lead">${WD[new Date().getDay()]}, ${niceDate(today())}</p>
     <div class="stats">
       <div class="stat"><b>${doneToday}</b><span>revised today</span></div>
-      <div class="stat"><b>${streak()}${streak() >= 3 ? ' 🔥' : ''}</b><span>day streak</span></div>
+      <div class="stat"><b>${st.cur}${st.cur >= 3 ? ' 🔥' : ''}</b><span>day streak</span></div>
       <div class="stat"><b>${all.length}</b><span>files total</span></div>
     </div>`;
-  if(due.length){
-    h += `<h2>Due now</h2><div class="list">${due.map(it => itemRow(it)).join('')}</div>`;
+  if(shown.length){
+    h += `<h2>Due now</h2><div class="list">${shown.map(it => itemRow(it)).join('')}</div>`;
+    if(extra) h += `<div class="banner"><span><b>${plural(extra, 'more file')}</b> due beyond your daily limit of ${db.settings.dailyLimit}.</span><button class="btn" data-act="spread">Spread over next days</button></div>`;
   } else if(!all.length){
     h += `<h2>Get started</h2><div class="empty"><div class="big">📚</div><b>Your library is empty</b>Create a folder (like “Ghatna Chakra”) and upload the HTML or PDF notes you read today.<div class="actions" style="justify-content:center"><button class="btn primary" data-go="library">Open library</button></div></div>`;
   } else {
@@ -461,16 +639,13 @@ function forecastHTML(){
   }
   const max = Math.max(1, ...counts.map(c => c[1]));
   return `<div class="forecast" role="img" aria-label="Reviews due over the next 14 days">${counts.map(([d, n], i) =>
-    `<div class="col" title="${niceDate(d)}: ${n}"><span class="n">${n || ''}</span><div class="bar${n ? '' : ' zero'}" style="height:${n ? Math.max(8, n / max * 100) : 3}%"></div><span class="lab">${i === 0 ? 'Now' : i % 2 ? '' : parseD(d).getDate()}</span></div>`).join('')}</div>`;
+    `<div class="col" title="${niceDate(d)}: ${plural(n, 'file')}"><span class="n">${n || ''}</span><div class="bar${n ? '' : ' zero'}" style="height:${n ? Math.max(8, n / max * 100) : 3}%"></div><span class="lab">${i === 0 ? 'Now' : i % 2 ? '' : parseD(d).getDate()}</span></div>`).join('')}</div>`;
 }
 
 function childFolders(parent){
-  return db.folders.filter(f => {
-    if(parent === '') return !f.includes('/');
-    return f.startsWith(parent + '/') && !f.slice(parent.length + 1).includes('/');
-  }).sort((a, b) => a.localeCompare(b));
+  return db.folders.filter(f => parent === '' ? !f.includes('/') : f.startsWith(parent + '/') && !f.slice(parent.length + 1).includes('/')).sort((a, b) => a.localeCompare(b));
 }
-const inTree = (it, f) => it.folder === f || (f && it.folder.startsWith(f + '/'));
+const canPickDir = 'webkitdirectory' in document.createElement('input');
 function renderLibrary(){
   if(curFolder && !db.folders.includes(curFolder)) curFolder = '';
   const parts = curFolder ? curFolder.split('/') : [];
@@ -480,7 +655,8 @@ function renderLibrary(){
   }).join('')}</div>
   <input class="search" id="search" type="search" placeholder="Search all files…" value="${esc(query)}" autocomplete="off">
   <div class="actions">
-    <button class="btn primary" data-act="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>Upload notes</button>
+    <button class="btn primary" data-act="upload">${SVG_UP}Upload notes</button>
+    ${canPickDir ? `<button class="btn" data-act="uploaddir">${SVG_UP}Upload folder</button>` : ''}
     <button class="btn" data-act="newfolder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New folder</button>
     ${curFolder ? `<button class="btn" data-act="foldermenu" data-path="${esc(curFolder)}">${SVG_MORE.replace('<svg', '<svg style="width:17px;height:17px"')}Folder options</button>` : ''}
   </div>`;
@@ -491,7 +667,7 @@ function renderLibrary(){
     return h;
   }
   const subs = childFolders(curFolder);
-  const files = Object.values(db.items).filter(it => it.folder === curFolder).sort((a, b) => a.name.localeCompare(b.name));
+  const files = Object.values(db.items).filter(it => it.folder === curFolder).sort((a, b) => (!!a.gen - !!b.gen) || a.name.localeCompare(b.name));
   if(subs.length){
     h += `<h2>Folders</h2><div class="list">${subs.map(f => {
       const items = Object.values(db.items).filter(it => inTree(it, f)), dueN = items.filter(isDue).length;
@@ -504,7 +680,7 @@ function renderLibrary(){
   }
   if(files.length) h += `<h2>Files</h2><div class="list">${files.map(it => itemRow(it, {showFolder: false})).join('')}</div>`;
   if(!subs.length && !files.length){
-    h += `<div class="empty" style="margin-top:16px"><div class="big">${curFolder ? '📂' : '🗂️'}</div><b>${curFolder ? 'This folder is empty' : 'Build your library'}</b>${curFolder ? 'Upload notes here, or add a sub-folder (e.g. Science → Biology).' : 'Start with a folder like “Ghatna Chakra”, then add sub-folders such as Science → Biology.'}</div>`;
+    h += `<div class="empty" style="margin-top:16px"><div class="big">${curFolder ? '📂' : '🗂️'}</div><b>${curFolder ? 'This folder is empty' : 'Build your library'}</b>${curFolder ? 'Upload notes here, or add a sub-folder (e.g. Science → Biology).' : 'Start with a folder like “Ghatna Chakra”, or upload a whole folder from your computer — sub-folders are created automatically.'}</div>`;
   }
   return h;
 }
@@ -514,7 +690,7 @@ function renderUpcoming(){
   const groups = {};
   items.forEach(it => { const k = it.due < today() ? today() : it.due; (groups[k] = groups[k] || []).push(it); });
   const keys = Object.keys(groups).sort();
-  let h = `<h1>Upcoming</h1><p class="lead">Your revision calendar. Tap a file to read it early — that counts as a review.</p>`;
+  let h = `<h1>Upcoming</h1><p class="lead">Your revision calendar. Tap a file to read it early — rating it counts as a revision.</p>`;
   if(!keys.length) return h + `<div class="empty"><div class="big">🗓️</div><b>Nothing scheduled</b>Upload notes in the Library to start.</div>`;
   keys.slice(0, 60).forEach(k => {
     const list = groups[k].sort((a, b) => a.name.localeCompare(b.name));
@@ -526,14 +702,65 @@ function renderUpcoming(){
   return h;
 }
 
+/* --- stats --- */
+const GRADE_COLOR = {h: 'var(--hard)', g: 'var(--good)', e: 'var(--easy)'};
+function gradeCounts(items){
+  const c = {h: 0, g: 0, e: 0};
+  items.forEach(it => (it.hist || []).forEach(([, g]) => { if(g in c) c[g]++; }));
+  return c;
+}
+function renderStats(){
+  const all = Object.values(db.items), st = streaks();
+  const total = Object.values(db.stats).reduce((a, b) => a + b, 0);
+  let week = 0; for(let i = 0; i < 7; i++) week += db.stats[addDays(today(), -i)] || 0;
+  let h = `<h1>Stats</h1><p class="lead">How your revision is going.</p>
+    <div class="stats four">
+      <div class="stat"><b>${total}</b><span>revisions total</span></div>
+      <div class="stat"><b>${week}</b><span>last 7 days</span></div>
+      <div class="stat"><b>${st.best}</b><span>best streak (days)</span></div>
+      <div class="stat"><b>${all.filter(it => it.done).length}<small style="font-size:.9rem;color:var(--dim)">/${all.length}</small></b><span>files mastered</span></div>
+    </div>`;
+  // heatmap: last 18 weeks, Monday-first columns
+  const weeks = 18, t = parseD(today());
+  const start = new Date(t); start.setDate(t.getDate() - ((t.getDay() + 6) % 7) - (weeks - 1) * 7);
+  const max = Math.max(1, ...Object.values(db.stats));
+  let cells = '';
+  for(let i = 0; i < weeks * 7; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const k = ymd(d), n = db.stats[k] || 0, fut = k > today();
+    const lvl = fut ? '' : n === 0 ? '' : ' l' + Math.min(4, Math.ceil(n / max * 4));
+    cells += `<i class="${fut ? 'fut' : ''}${lvl}" data-day="${k}" data-n="${n}" tabindex="${fut ? -1 : 0}" title="${niceDate(k)}: ${plural(n, 'revision')}"></i>`;
+  }
+  h += `<h2>Revision activity</h2><div class="card"><div class="heat" id="heat" role="img" aria-label="Revisions per day, last ${weeks} weeks">${cells}</div>
+    <div class="scale">Less <i style="background:var(--surface-2)"></i><i class="l1" style="background:color-mix(in srgb,var(--accent) 30%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--accent) 55%,var(--surface-2))"></i><i style="background:color-mix(in srgb,var(--accent) 80%,var(--surface-2))"></i><i style="background:var(--accent)"></i> More</div>
+    <div class="detail" id="heatDetail">Tap a day to see its count.</div></div>`;
+  // grade mix per top-level folder
+  const tops = [...new Set(all.map(it => it.folder.split('/')[0]))].sort((a, b) => a.localeCompare(b));
+  const rows = tops.map(f => ({f, c: gradeCounts(all.filter(it => it.folder.split('/')[0] === f && !it.gen))})).filter(r => r.c.h + r.c.g + r.c.e > 0);
+  h += `<h2>How well you remember</h2><div class="card">`;
+  if(rows.length){
+    h += `<div class="legend"><span><i style="background:var(--hard)"></i>Hard</span><span><i style="background:var(--good)"></i>Good</span><span><i style="background:var(--easy)"></i>Easy</span></div>`;
+    rows.forEach(({f, c}) => {
+      const n = c.h + c.g + c.e, pct = k => Math.round(c[k] / n * 100);
+      h += `<div class="mix"><div class="mt">${esc(f || 'Home')}<span>${plural(n, 'rating')}</span></div>
+        <div class="bar">${['h', 'g', 'e'].filter(k => c[k]).map(k => `<b style="width:${c[k] / n * 100}%;background:${GRADE_COLOR[k]}" title="${{h: 'Hard', g: 'Good', e: 'Easy'}[k]}: ${c[k]} (${pct(k)}%)"></b>`).join('')}</div>
+        <div class="pc">Hard ${pct('h')}% · Good ${pct('g')}% · Easy ${pct('e')}%</div></div>`;
+    });
+  } else h += `<p class="lead" style="margin:0">Rate a few files with Hard / Good / Easy and this fills in.</p>`;
+  h += `</div>`;
+  const tough = all.map(it => ({it, n: (it.hist || []).filter(x => x[1] === 'h').length})).filter(x => x.n).sort((a, b) => b.n - a.n).slice(0, 5);
+  if(tough.length) h += `<h2>Toughest files</h2><div class="list">${tough.map(x => itemRow(x.it)).join('')}</div>`;
+  return h;
+}
+
 function render(){
   if(!cfg) return;
   const m = $('main');
   const focusSearch = document.activeElement && document.activeElement.id === 'search';
   const caret = focusSearch ? document.activeElement.selectionStart : 0;
-  m.innerHTML = tab === 'today' ? renderToday() : tab === 'library' ? renderLibrary() : renderUpcoming();
+  m.innerHTML = tab === 'today' ? renderToday() : tab === 'library' ? renderLibrary() : tab === 'upcoming' ? renderUpcoming() : renderStats();
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
-  const n = dueItems().length, b = $('dueBadge');
+  const n = todayQueue().shown.length, b = $('dueBadge');
   b.textContent = n; b.classList.toggle('hidden', !n);
   document.title = (n ? `(${n}) ` : '') + 'Revise — Spaced Repetition';
   if(focusSearch){ const s = $('search'); if(s){ s.focus(); s.setSelectionRange(caret, caret); } }
@@ -542,25 +769,24 @@ function render(){
 
 /* ================= dialogs ================= */
 const dlg = $('dlg');
-function openDlg(html, onReady){ $('dlgBody').innerHTML = html; if(!dlg.open) dlg.showModal(); onReady && onReady($('dlgBody')); const f = $('dlgBody').querySelector('input[autofocus],select[autofocus]'); if(f) setTimeout(() => f.focus(), 30); }
+function openDlg(html, onReady){ $('dlgBody').innerHTML = html; if(!dlg.open) dlg.showModal(); onReady && onReady($('dlgBody')); const f = $('dlgBody').querySelector('[autofocus]'); if(f) setTimeout(() => f.focus(), 30); }
 function closeDlg(){ if(dlg.open) dlg.close(); }
 dlg.addEventListener('click', e => { if(e.target === dlg) closeDlg(); });
-
 function validName(n){ n = n.trim(); if(!n) return 'Name can’t be empty'; if(n.includes('/')) return 'Name can’t contain “/”'; return null; }
 
 function newFolderDlg(){
   openDlg(`<h3>New folder</h3><p class="hint">Inside <b>${esc(folderLabel(curFolder))}</b></p>
     <div class="field"><label for="fName">Folder name</label><input type="text" id="fName" placeholder="e.g. Ghatna Chakra" autofocus></div>
     <div class="err" id="fErr"></div>
-    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="fOk">Create</button></div>`, b => {
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="fOk">Create</button></div>`, () => {
     const go = () => {
       const name = $('fName').value.trim(), bad = validName(name);
       const path = curFolder ? curFolder + '/' + name : name;
       if(bad) return $('fErr').textContent = bad;
       if(db.folders.includes(path)) return $('fErr').textContent = 'That folder already exists';
       closeDlg();
-      commit(d => { if(!d.folders.includes(path)) d.folders.push(path); }, 'Add folder ' + path);
-      curFolder = path; render();
+      curFolder = path;
+      commit('addFolders', {paths: [path]}, 'Add folder ' + path);
     };
     $('fOk').onclick = go; $('fName').onkeydown = e => { if(e.key === 'Enter') go(); };
   });
@@ -568,21 +794,26 @@ function newFolderDlg(){
 function folderMenu(path){
   const items = Object.values(db.items).filter(it => inTree(it, path));
   const subs = db.folders.filter(f => f.startsWith(path + '/'));
+  const dueQ = items.filter(isDue), hlN = items.filter(it => !it.gen && (it.hl || it.note)).length;
   openDlg(`<h3>${esc(path.split('/').pop())}</h3><p class="hint">${esc(folderLabel(path))} · ${plural(items.length, 'file')}</p>
     <div class="menu">
+      <button data-m="review" ${dueQ.length ? '' : 'disabled style="opacity:.5"'}>▶️ Revise due files here (${dueQ.length})</button>
+      <button data-m="hl" ${hlN ? '' : 'disabled style="opacity:.5"'}>✨ Make highlights file for this folder${hlN ? ` (${plural(hlN, 'file')})` : ' — no highlights yet'}</button>
+      <button data-m="offline">⬇️ Save for offline reading</button>
       <button data-m="rename">✏️ Rename</button>
-      <button data-m="review" ${items.filter(isDue).length ? '' : 'disabled style="opacity:.5"'}>▶️ Revise due files in this folder (${items.filter(isDue).length})</button>
       <button data-m="delete" class="danger">🗑️ Delete folder${items.length || subs.length ? ' (must be empty)' : ''}</button>
     </div>
     <div class="foot"><button class="btn" data-close>Close</button></div>`, b => {
     b.querySelector('[data-m=rename]').onclick = () => renameFolderDlg(path);
-    b.querySelector('[data-m=review]').onclick = () => { const q = items.filter(isDue).sort((a, b) => a.due < b.due ? -1 : 1); if(!q.length) return; closeDlg(); startQueue(q.map(it => it.id)); };
+    b.querySelector('[data-m=review]').onclick = () => { if(!dueQ.length) return; closeDlg(); startQueue(dueQ.map(it => it.id)); };
+    b.querySelector('[data-m=hl]').onclick = () => { if(!hlN) return; closeDlg(); makeHighlightsFile({type: 'folder', path}); };
+    b.querySelector('[data-m=offline]').onclick = () => { closeDlg(); saveOffline(items); };
     b.querySelector('[data-m=delete]').onclick = () => {
       if(items.length || subs.length){ toast('Move or delete the files and sub-folders inside first.', 3200); return; }
       if(!confirm(`Delete folder “${path.split('/').pop()}”?`)) return;
       closeDlg();
       if(curFolder === path) curFolder = path.split('/').slice(0, -1).join('/');
-      commit(d => { d.folders = d.folders.filter(f => f !== path); }, 'Delete folder ' + path);
+      commit('delFolder', {path}, 'Delete folder ' + path);
     };
   });
 }
@@ -599,19 +830,17 @@ function renameFolderDlg(path){
       if(np === path) return closeDlg();
       if(db.folders.includes(np)) return $('fErr').textContent = 'A folder with that name already exists';
       closeDlg();
-      const re = f => f === path ? np : f.startsWith(path + '/') ? np + f.slice(path.length) : f;
-      if(curFolder === path || curFolder.startsWith(path + '/')) curFolder = re(curFolder);
-      commit(d => { d.folders = d.folders.map(re); Object.values(d.items).forEach(it => it.folder = re(it.folder)); }, `Rename folder ${path} → ${np}`);
+      if(curFolder === path || curFolder.startsWith(path + '/')) curFolder = np + curFolder.slice(path.length);
+      commit('renameFolder', {from: path, to: np}, `Rename folder ${path} → ${np}`);
     };
     $('fOk').onclick = go; $('fName').onkeydown = e => { if(e.key === 'Enter') go(); };
   });
 }
-
 function folderOptions(sel){
   return ['', ...db.folders.slice().sort((a, b) => a.localeCompare(b))].map(f => `<option value="${esc(f)}" ${f === sel ? 'selected' : ''}>${esc(folderLabel(f))}</option>`).join('');
 }
 function parseSched(s){
-  s = s.trim(); if(!s) return null;
+  s = String(s).trim(); if(!s) return null;
   const arr = s.split(/[\s,]+/).filter(Boolean).map(Number);
   if(!arr.length || arr.some(n => !Number.isInteger(n) || n < 1 || n > 3650)) return false;
   return arr;
@@ -619,31 +848,37 @@ function parseSched(s){
 
 function itemMenu(id){
   const it = db.items[id]; if(!it) return;
-  const s = schedOf(it);
-  openDlg(`<h3 style="word-break:break-word">${esc(it.name)}</h3><p class="hint">${esc(folderLabel(it.folder))} · ${it.type.toUpperCase()}</p>
+  const s = schedOf(it, db.settings);
+  openDlg(`<h3 style="word-break:break-word">${esc(it.name)}</h3><p class="hint">${esc(folderLabel(it.folder))} · ${it.type.toUpperCase()}${it.gen ? ' · highlights file' : ''}</p>
     <div class="meta">
       Next revision: <b>${it.done ? 'mastered — not scheduled' : it.due ? niceDate(it.due) + ' (' + relDay(it.due).toLowerCase() + ')' : '—'}</b><br>
       Read <b>${plural(it.reads || 0, 'time')}</b>${it.last ? ' · last on ' + niceDate(it.last) : ''} · added ${niceDate(it.added)}<br>
-      Schedule: <b>${s.join(', ')} days</b>${it.schedule ? ' (custom)' : ' (default)'}
+      Schedule: <b>${s.join(', ')} days</b>${it.schedule ? ' (custom)' : ' (default)'}${it.hl ? `<br>Highlights: <b>${it.hl}</b>` : ''}
     </div>
     <div class="menu">
       <button data-m="open">📖 Read now</button>
+      <button data-m="notes">📝 Notes${it.note ? ' (has notes)' : ''}</button>
+      ${it.type === 'html' && !it.gen ? `<button data-m="hl" ${it.hl ? '' : 'disabled style="opacity:.5"'}>✨ Make highlights file${it.hl ? '' : ' — no highlights yet'}</button>` : ''}
       <button data-m="edit">⚙️ Edit name, folder &amp; schedule</button>
       <button data-m="done">${it.done ? '↩️ Bring back into revision' : '✅ Mark as mastered (stop reminders)'}</button>
       <button data-m="reset">🔄 Restart schedule from today</button>
       <button data-m="delete" class="danger">🗑️ Delete file</button>
     </div>
     <div class="foot"><button class="btn" data-close>Close</button></div>`, b => {
-    b.querySelector('[data-m=open]').onclick = () => { closeDlg(); openReader(id); };
+    b.querySelector('[data-m=open]').onclick = () => { closeDlg(); if(readerId !== id) openReader(id); };
+    b.querySelector('[data-m=notes]').onclick = () => notesDlg(id);
+    const hb = b.querySelector('[data-m=hl]'); if(hb) hb.onclick = () => { if(!it.hl) return; closeDlg(); makeHighlightsFile({type: 'file', id}); };
     b.querySelector('[data-m=edit]').onclick = () => editItemDlg(id);
-    b.querySelector('[data-m=done]').onclick = () => { closeDlg(); const back = it.done; commit(d => { const x = d.items[id]; if(!x) return; x.done = !back; if(back && (!x.due || x.due < today())) x.due = today(); }, (back ? 'Unmaster ' : 'Master ') + it.name); toast(back ? 'Back in your revision cycle' : 'Marked as mastered'); };
-    b.querySelector('[data-m=reset]').onclick = () => { closeDlg(); commit(d => { const x = d.items[id]; if(!x) return; x.reads = 1; x.done = false; x.last = today(); x.due = addDays(today(), schedOf(x, d.settings)[0]); }, 'Restart ' + it.name); toast('Next revision in ' + plural(schedOf(it)[0], 'day')); };
+    b.querySelector('[data-m=done]').onclick = () => { closeDlg(); const back = it.done; commit('setDone', {id, done: !back, day: today()}, (back ? 'Unmaster ' : 'Master ') + it.name); toast(back ? 'Back in your revision cycle' : 'Marked as mastered'); };
+    b.querySelector('[data-m=reset]').onclick = () => { closeDlg(); commit('restart', {id, day: today()}, 'Restart ' + it.name); toast('Next revision in ' + plural(schedOf(it, db.settings)[0], 'day')); };
     b.querySelector('[data-m=delete]').onclick = async () => {
-      if(!confirm(`Delete “${it.name}” permanently? This removes the file from your repo.`)) return;
+      if(!confirm(`Delete “${it.name}” permanently? This removes the file and its highlights from your repo.`)) return;
       closeDlg(); if(readerId === id) closeReader();
       const path = it.file, sha = it.sha;
-      commit(d => { delete d.items[id]; }, 'Delete ' + it.name);
-      try{ await ghDelete(path, sha, 'Delete file ' + it.name); }catch(e){ toast('File record removed, but deleting the file failed: ' + e.message, 4000); }
+      commit('delItem', {id}, 'Delete ' + it.name);
+      lsDel(noteKey(id)); delete notes[id];
+      try{ await ghDelete(path, sha, 'Delete file ' + it.name); await ghDelete(notesPath(id), null, 'Delete notes for ' + it.name); }
+      catch(e){ toast('Removed from your library, but deleting the stored file failed: ' + e.message, 4000); }
     };
   });
 }
@@ -662,7 +897,9 @@ function editItemDlg(id){
       if(sched === false) return $('eErr').textContent = 'Gaps must be whole numbers of days, like 3, 10, 30';
       if(!/^\d{4}-\d{2}-\d{2}$/.test(due)) return $('eErr').textContent = 'Pick a valid date';
       closeDlg();
-      commit(d => { const x = d.items[id]; if(!x) return; x.name = name; x.folder = folder; x.schedule = sched; x.due = due; if(x.done && due) x.done = false; }, 'Edit ' + name);
+      const patch = {name, folder, schedule: sched, due};
+      if(it.done && due !== it.due) patch.done = false;
+      commit('edit', {id, patch}, 'Edit ' + name);
       toast('Saved');
     };
   });
@@ -672,113 +909,473 @@ function settingsDlg(){
   openDlg(`<h3>Settings</h3>
     <div class="field"><label for="sSched">Default revision gaps (days)</label><input type="text" id="sSched" inputmode="numeric" value="${esc(db.settings.schedule.join(', '))}"><div class="help">Read today → shown again after each gap. Files with a custom schedule keep theirs.</div></div>
     <div class="field"><label for="sHard">“Hard” brings it back after (days)</label><input type="text" id="sHard" inputmode="numeric" value="${esc(db.settings.hardDays)}"></div>
+    <div class="field"><label for="sLimit">Max files per day</label><input type="text" id="sLimit" inputmode="numeric" value="${esc(db.settings.dailyLimit || 0)}"><div class="help">0 = no limit. With a limit, new revision dates are nudged to quieter days, and you can spread a backlog over the next days.</div></div>
     <div class="field"><label for="sTheme">Theme</label><select id="sTheme"><option value="">Match device</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
-    <div class="meta">Connected to <b>${esc(cfg.owner)}/${esc(cfg.repo)}</b> (${esc(cfg.branch || 'main')})<br>Daily reminders: a GitHub Action opens an issue each morning listing what’s due, so GitHub notifies you.</div>
+    <div class="meta">Connected to <b>${esc(cfg.owner)}/${esc(cfg.repo)}</b> (${esc(cfg.branch || 'main')})<br>Daily reminder: Telegram message at 7:00 AM (set up once — see the repo README).</div>
     <div class="err" id="sErr"></div>
     <div class="foot"><button class="btn danger" id="sOut">Disconnect</button><span style="flex:1"></span><button class="btn" data-close>Cancel</button><button class="btn primary" id="sOk">Save</button></div>`, () => {
-    let th = ''; try{ th = localStorage.getItem('revise-theme') || ''; }catch(e){}
-    $('sTheme').value = th;
+    $('sTheme').value = lsGet('revise-theme') || '';
     $('sOk').onclick = () => {
-      const sched = parseSched($('sSched').value), hard = Number($('sHard').value);
+      const sched = parseSched($('sSched').value), hard = Number($('sHard').value), lim = Number($('sLimit').value || 0);
       if(!sched) return $('sErr').textContent = 'Gaps must be whole numbers of days, like 3, 10, 30, 60';
       if(!Number.isInteger(hard) || hard < 1 || hard > 60) return $('sErr').textContent = '“Hard” must be between 1 and 60 days';
+      if(!Number.isInteger(lim) || lim < 0 || lim > 500) return $('sErr').textContent = 'Max files per day must be 0–500';
       setTheme($('sTheme').value);
       closeDlg();
-      if(sched.join() !== db.settings.schedule.join() || hard !== +db.settings.hardDays)
-        commit(d => { d.settings.schedule = sched; d.settings.hardDays = hard; }, 'Update settings');
+      const s = db.settings;
+      if(sched.join() !== s.schedule.join() || hard !== +s.hardDays || lim !== (+s.dailyLimit || 0))
+        commit('settings', {patch: {schedule: sched, hardDays: hard, dailyLimit: lim}}, 'Update settings');
       toast('Settings saved');
     };
-    $('sOut').onclick = () => { if(!confirm('Disconnect this browser? Your files stay safe in GitHub.')) return; try{ localStorage.removeItem(CFG_KEY); }catch(e){} location.reload(); };
+    $('sOut').onclick = () => { if(!confirm('Disconnect this browser? Your files stay safe in GitHub.')) return; lsDel(CFG_KEY); lsDel('revise-db'); location.reload(); };
   });
 }
-function setTheme(v){ try{ v ? localStorage.setItem('revise-theme', v) : localStorage.removeItem('revise-theme'); }catch(e){} if(v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; }
+function setTheme(v){ v ? lsSet('revise-theme', v) : lsDel('revise-theme'); if(v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; }
 
-/* ================= upload ================= */
-let pendingFiles = [];
-function pickFiles(){ $('fileInput').click(); }
-$('fileInput').onchange = e => { const f = [...e.target.files]; e.target.value = ''; if(f.length) uploadDlg(f); };
+/** Move everything beyond the daily limit onto the next days that still have room. */
+function spreadBacklog(){
+  const lim = +db.settings.dailyLimit || 0; if(!lim) return;
+  const due = dueItems(), extra = due.slice(lim), moves = {};
+  const load = {};
+  Object.values(db.items).forEach(it => { if(!it.done && it.due > today()) load[it.due] = (load[it.due] || 0) + 1; });
+  let day = addDays(today(), 1);
+  extra.forEach(it => {
+    while((load[day] || 0) >= lim) day = addDays(day, 1);
+    moves[it.id] = day; load[day] = (load[day] || 0) + 1;
+  });
+  const last = Object.values(moves).sort().pop();
+  commit('moveDue', {moves}, `Spread ${extra.length} overdue files`);
+  toast(`${plural(extra.length, 'file')} spread until ${niceDate(last)}`);
+}
+
+/* ================= notes dialogs ================= */
+async function notesDlg(id){
+  const it = db.items[id]; if(!it) return;
+  openDlg(`<h3>Notes</h3><p class="hint">${esc(it.name)}</p><p class="lead">Loading…</p>`);
+  let n; try{ n = await loadNote(id); }catch(e){ return openDlg(`<h3>Notes</h3><p class="err">Couldn’t load notes: ${esc(e.message)}</p><div class="foot"><button class="btn" data-close>Close</button></div>`); }
+  openDlg(`<h3>Notes</h3><p class="hint">${esc(it.name)} — your own notes for this file, e.g. what confuses you or what to focus on next time.</p>
+    <div class="field"><textarea id="nText" autofocus placeholder="Write anything…">${esc(n.data.text)}</textarea></div>
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="nOk">Save</button></div>`, () => {
+    $('nOk').onclick = () => {
+      const text = $('nText').value;
+      closeDlg();
+      if(text === n.data.text) return;
+      changeNote(id, d => { d.text = text; }); flushNote(id);
+      toast('Notes saved');
+    };
+  });
+}
+function hlNoteDlg(hid){
+  const id = readerId, n = notes[id]; if(!n) return;
+  const h = n.data.highlights.find(x => x.id === hid); if(!h) return;
+  openDlg(`<h3>Note on highlight</h3><div class="hl hl-${esc(h.color)}"><q>${esc(h.exact.slice(0, 400))}${h.exact.length > 400 ? '…' : ''}</q></div>
+    <div class="field"><textarea id="hText" autofocus placeholder="Why is this important?" style="min-height:100px">${esc(h.note || '')}</textarea></div>
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="hOk">Save</button></div>`, () => {
+    $('hOk').onclick = () => {
+      const note = $('hText').value.trim();
+      closeDlg();
+      changeNote(id, d => { const x = d.highlights.find(y => y.id === hid); if(x) x.note = note; });
+      postToFrame({t: 'set', h: n.data.highlights.find(x => x.id === hid)});
+    };
+  });
+}
+function highlightsDlg(){
+  const id = readerId, it = db.items[id], n = notes[id]; if(!it) return;
+  if(it.type !== 'html'){ openDlg(`<h3>Highlights</h3><p class="hint">Highlighting works on HTML files for now. You can still keep notes on this PDF with the 📝 button.</p><div class="foot"><button class="btn" data-close>Close</button></div>`); return; }
+  const list = n ? n.data.highlights.slice().sort((a, b) => (a.pos || 0) - (b.pos || 0)) : [];
+  openDlg(`<h3>Highlights (${list.length})</h3><p class="hint">Select text in the file to highlight it. Tap a highlight in the file to change its colour, add a note or remove it.</p>
+    ${list.length ? `<div class="hls">${list.map(h => `<div class="hl hl-${esc(h.color)}"><q>${esc(h.exact.slice(0, 600))}${h.exact.length > 600 ? '…' : ''}</q>${h.note ? `<div class="hn">${esc(h.note)}</div>` : ''}${readerMissing.includes(h.id) ? '<div class="miss">Couldn’t find this text in the file any more.</div>' : ''}
+      <div class="ha"><button data-goto="${esc(h.id)}">Go to</button><button data-hnote="${esc(h.id)}">${h.note ? 'Edit note' : 'Add note'}</button><button class="del" data-hdel="${esc(h.id)}">Remove</button></div></div>`).join('')}</div>` : '<div class="empty" style="margin-top:8px">No highlights yet.</div>'}
+    <div class="foot">${list.length && !it.gen ? '<button class="btn" id="hMake">✨ Make highlights file</button>' : ''}<span style="flex:1"></span><button class="btn" data-close>Close</button></div>`, b => {
+    b.querySelectorAll('[data-goto]').forEach(x => x.onclick = () => { closeDlg(); postToFrame({t: 'goto', id: x.dataset.goto}); });
+    b.querySelectorAll('[data-hnote]').forEach(x => x.onclick = () => hlNoteDlg(x.dataset.hnote));
+    b.querySelectorAll('[data-hdel]').forEach(x => x.onclick = () => {
+      const hid = x.dataset.hdel;
+      changeNote(id, d => { d.highlights = d.highlights.filter(y => y.id !== hid); }, hid);
+      postToFrame({t: 'remove', id: hid}); highlightsDlg();
+    });
+    const mk = $('hMake'); if(mk) mk.onclick = () => { closeDlg(); makeHighlightsFile({type: 'file', id}); };
+  });
+}
+
+/* ================= highlights → new revision file ================= */
+function buildHighlightsDoc(title, sections){
+  const total = sections.reduce((a, s) => a + s.n.highlights.length, 0);
+  const bg = {y: '#fff6c7', g: '#e2f7e2', b: '#e1f1ff', p: '#ffe6ee'}, bd = {y: '#e8c32e', g: '#4fbf6a', b: '#4aa3f0', p: '#f06c9b'};
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
+<style>body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;padding:24px 18px 60px;line-height:1.6;color:#1d1f24;background:#fff}
+h1{font-size:1.6rem;margin:0 0 4px}.sub{color:#666;font-size:.9rem;margin:0 0 24px}h2{font-size:1.15rem;margin:28px 0 4px;padding-top:14px;border-top:1px solid #e5e5e5}
+.where{color:#888;font-size:.8rem;margin-bottom:10px}.q{border-left:4px solid;border-radius:4px 10px 10px 4px;padding:10px 14px;margin:10px 0;white-space:pre-wrap;word-break:break-word}
+.n{font-size:.88rem;color:#555;font-style:italic;margin-top:6px}.fn{background:#f6f5f2;border-radius:10px;padding:10px 14px;white-space:pre-wrap;font-size:.92rem;margin:8px 0}
+@media print{body{padding:0}.q{break-inside:avoid}}</style></head><body>
+<h1>${esc(title)}</h1><p class="sub">${plural(total, 'highlight')} from ${plural(sections.length, 'file')} · updated ${niceDate(today())}</p>
+${sections.map(({it, n}) => `<h2>${esc(it.name)}</h2><div class="where">${esc(folderLabel(it.folder))}</div>
+${n.text.trim() ? `<div class="fn"><b>My notes:</b>\n${esc(n.text.trim())}</div>` : ''}
+${n.highlights.slice().sort((a, b) => (a.pos || 0) - (b.pos || 0)).map(h => `<div class="q" style="background:${bg[h.color] || bg.y};border-color:${bd[h.color] || bd.y}">${esc(h.exact)}${h.note ? `<div class="n">✎ ${esc(h.note)}</div>` : ''}</div>`).join('\n')}`).join('\n')}
+</body></html>`;
+}
+async function makeHighlightsFile(scope){
+  if(!navigator.onLine) return toast('Needs internet');
+  const key = scope.type === 'file' ? 'file:' + scope.id : 'folder:' + scope.path;
+  const src = scope.type === 'file' ? [db.items[scope.id]].filter(Boolean)
+    : Object.values(db.items).filter(it => inTree(it, scope.path) && !it.gen && (it.hl || it.note)).sort((a, b) => a.folder.localeCompare(b.folder) || a.name.localeCompare(b.name));
+  if(!src.length) return toast('No highlights yet');
+  toast('Collecting highlights…', 8000);
+  try{
+    for(const it of src) if(notes[it.id] && notes[it.id].dirty) await flushNote(it.id);
+    const sections = [];
+    for(const it of src){ const n = await loadNote(it.id); if(n.data.highlights.length || n.data.text.trim()) sections.push({it, n: n.data}); }
+    if(!sections.length) return toast('No highlights yet — select text while reading to highlight it.', 3500);
+    const base = scope.type === 'file' ? src[0].name : scope.path.split('/').pop();
+    const title = base + ' — Highlights', html = buildHighlightsDoc(title, sections), b64 = strToB64(html);
+    const count = sections.reduce((a, s) => a + s.n.highlights.length, 0);
+    const existing = Object.values(db.items).find(x => x.gen && x.gen.key === key);
+    if(existing){
+      let sha;
+      try{ sha = await ghPut(existing.file, b64, 'Update ' + title, existing.sha); }
+      catch(e){ if(e.status !== 409 && e.status !== 422) throw e; sha = await ghPut(existing.file, b64, 'Update ' + title, await ghShaOf(existing.file)); }
+      commit('edit', {id: existing.id, patch: {sha, size: html.length, gen: {key, count, updated: today()}}}, 'Update ' + title);
+      toast(`“${title}” updated (${plural(count, 'highlight')}). Its revision schedule is unchanged.`, 4000);
+    } else {
+      const id = uid(), path = `files/${id}-${slug(title)}.html`;
+      const sha = await ghPut(path, b64, 'Create ' + title, null);
+      const folder = scope.type === 'file' ? src[0].folder : scope.path;
+      commit('addItems', {items: [{id, name: title, type: 'html', file: path, sha, folder, size: html.length, added: today(), reads: 1, last: today(),
+        due: balanceDay(db, id, addDays(today(), db.settings.schedule[0]), db.settings.schedule[0]), schedule: null, done: false, hist: [[today(), 'r']], gen: {key, count, updated: today()}}]}, 'Create ' + title);
+      toast(`Created “${title}” in ${folderLabel(folder)} — it will come up for revision too.`, 4500);
+    }
+  }catch(e){ toast('Couldn’t make the highlights file: ' + e.message, 4000); }
+}
+
+/* ================= upload (files and whole folders) ================= */
+$('fileInput').onchange = e => { const f = [...e.target.files]; e.target.value = ''; if(f.length) uploadDlg(f.map(file => ({file, dir: ''}))); };
+$('dirInput').onchange = e => {
+  const f = [...e.target.files]; e.target.value = '';
+  if(f.length) uploadDlg(f.map(file => ({file, dir: (file.webkitRelativePath || '').split('/').slice(0, -1).join('/')})));
+};
 function fileType(f){ const n = f.name.toLowerCase(); if(n.endsWith('.pdf') || f.type === 'application/pdf') return 'pdf'; if(/\.html?$/.test(n) || f.type === 'text/html') return 'html'; return null; }
-function uploadDlg(files){
-  const ok = files.filter(fileType), skipped = files.length - ok.length;
+const cleanSeg = s => s.replace(/\//g, '-').trim();
+function targetFolder(base, dir){ const segs = dir.split('/').map(cleanSeg).filter(Boolean); return [base, ...segs].filter(Boolean).join('/'); }
+function foldersFor(path){ const p = path.split('/'), out = []; for(let i = 1; i <= p.length; i++) out.push(p.slice(0, i).join('/')); return path ? out : []; }
+function uploadDlg(entries){
+  const ok = entries.filter(e => fileType(e.file)), skipped = entries.length - ok.length;
   if(!ok.length){ toast('Only .html and .pdf files are supported'); return; }
-  pendingFiles = ok;
-  const tooBig = ok.filter(f => f.size > 45 * 1024 * 1024);
+  if(!navigator.onLine){ toast('Uploading needs internet'); return; }
+  const tooBig = ok.filter(e => e.file.size > 45 * 1024 * 1024);
+  const dirs = [...new Set(ok.map(e => e.dir).filter(Boolean))];
   openDlg(`<h3>Upload ${plural(ok.length, 'file')}</h3>
-    <div class="filelist">${ok.map(f => esc(f.name) + ` <span style="color:var(--dim)">(${(f.size / 1024 / 1024).toFixed(f.size > 1e6 ? 1 : 2)} MB)</span>`).join('<br>')}</div>
+    <div class="filelist">${ok.slice(0, 200).map(e => esc((e.dir ? e.dir + '/' : '') + e.file.name) + ` <span style="color:var(--dim)">(${(e.file.size / 1024 / 1024).toFixed(e.file.size > 1e6 ? 1 : 2)} MB)</span>`).join('<br>')}${ok.length > 200 ? '<br>…' : ''}</div>
+    ${dirs.length ? `<p class="hint" style="margin-top:8px">Sub-folders are recreated inside the folder you pick (${plural(dirs.length, 'folder')}).</p>` : ''}
     ${skipped ? `<p class="hint" style="margin-top:8px">${plural(skipped, 'file')} skipped (only HTML/PDF).</p>` : ''}
-    ${tooBig.length ? `<p class="err">Files over 45 MB can’t be stored on GitHub this way: ${tooBig.map(f => esc(f.name)).join(', ')}</p>` : ''}
-    <div class="field"><label for="uFolder">Folder</label><select id="uFolder">${folderOptions(curFolder)}</select></div>
+    ${tooBig.length ? `<p class="err">Files over 45 MB can’t be stored on GitHub this way: ${tooBig.map(e => esc(e.file.name)).join(', ')}</p>` : ''}
+    <div class="field"><label for="uFolder">Put into</label><select id="uFolder">${folderOptions(curFolder)}</select></div>
     <label class="check"><input type="checkbox" id="uRead" checked><span><b>I already read ${ok.length > 1 ? 'these' : 'this'} today</b><br><span style="color:var(--muted);font-size:.8rem">First revision in <span id="uFirst">${db.settings.schedule[0]}</span> days. Untick to put ${ok.length > 1 ? 'them' : 'it'} in today’s list instead.</span></span></label>
     <div class="field"><label for="uSched">Custom revision gaps (optional)</label><input type="text" id="uSched" inputmode="numeric" placeholder="Default: ${db.settings.schedule.join(', ')}"></div>
     <div class="progress hidden" id="uProg"><i></i></div>
     <div class="err" id="uErr"></div>
     <div class="foot"><button class="btn" data-close id="uCancel">Cancel</button><button class="btn primary" id="uOk" ${tooBig.length === ok.length ? 'disabled' : ''}>Upload</button></div>`, () => {
     $('uSched').oninput = () => { const s = parseSched($('uSched').value); $('uFirst').textContent = (s || db.settings.schedule)[0]; };
-    $('uOk').onclick = () => doUpload(ok.filter(f => !tooBig.includes(f)));
+    $('uOk').onclick = () => doUpload(ok.filter(e => !tooBig.includes(e)));
   });
 }
 function readB64(file){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = () => rej(r.error); r.readAsDataURL(file); }); }
-async function doUpload(files){
-  const folder = $('uFolder').value, read = $('uRead').checked, sched = parseSched($('uSched').value);
+async function doUpload(entries){
+  const base = $('uFolder').value, read = $('uRead').checked, sched = parseSched($('uSched').value);
   if(sched === false){ $('uErr').textContent = 'Gaps must be whole numbers of days, like 3, 10, 30'; return; }
   $('uOk').disabled = true; $('uCancel').disabled = true; $('uProg').classList.remove('hidden');
-  const added = [];
-  for(let i = 0; i < files.length; i++){
-    const f = files[i], type = fileType(f), id = uid();
-    const name = f.name.replace(/\.(html?|pdf)$/i, '');
-    $('uErr').textContent = ''; $('uOk').textContent = `Uploading ${i + 1}/${files.length}…`;
+  const added = [], folders = new Set(), first = (sched || db.settings.schedule)[0];
+  const scratch = normDb(JSON.parse(JSON.stringify(db)));     // to balance due dates across this batch
+  let failed = 0;
+  for(let i = 0; i < entries.length; i++){
+    const {file, dir} = entries[i], type = fileType(file), id = uid();
+    const name = file.name.replace(/\.(html?|pdf)$/i, ''), folder = targetFolder(base, dir);
+    foldersFor(folder).forEach(f => folders.add(f));
+    $('uOk').textContent = `Uploading ${i + 1}/${entries.length}…`;
     try{
       const path = `files/${id}-${slug(name)}.${type}`;
-      const sha = await ghPut(path, await readB64(f), 'Upload ' + name, null);
-      added.push({id, name, type, file: path, sha, folder, size: f.size, added: today(), reads: read ? 1 : 0, last: read ? today() : null,
-        due: read ? addDays(today(), (sched || db.settings.schedule)[0]) : today(), schedule: sched, done: false, hist: read ? [[today(), 'r']] : []});
-    }catch(e){ toast(`“${f.name}” failed: ${e.message}`, 4000); }
-    $('uProg').firstElementChild.style.width = ((i + 1) / files.length * 100) + '%';
+      const sha = await ghPut(path, await readB64(file), 'Upload ' + name, null);
+      const due = read ? balanceDay(scratch, id, addDays(today(), first), first) : today();
+      const it = {id, name, type, file: path, sha, folder, size: file.size, added: today(), reads: read ? 1 : 0, last: read ? today() : null, due, schedule: sched, done: false, hist: read ? [[today(), 'r']] : []};
+      added.push(it); scratch.items[id] = it;
+      if(entries.length > 20) await sleep(400);              // stay under GitHub's write rate limit
+    }catch(e){ failed++; $('uErr').textContent = `“${file.name}” failed: ${e.message}`; }
+    $('uProg').firstElementChild.style.width = ((i + 1) / entries.length * 100) + '%';
   }
   closeDlg();
-  if(!added.length) return;
-  commit(d => { added.forEach(it => { d.items[it.id] = it; }); if(read) d.stats[today()] = (d.stats[today()] || 0); }, `Add ${added.length} file(s) to ${folder || 'Home'}`);
-  toast(read ? `Saved. First revision on ${niceDate(added[0].due)} 👍` : 'Saved to today’s list');
+  if(!added.length) return toast('Upload failed — check your connection and try again.', 4000);
+  commit('addItems', {items: added, folders: [...folders]}, `Add ${added.length} file(s) to ${base || 'Home'}`);
+  toast((failed ? `${failed} failed. ` : '') + (read ? `Saved ${plural(added.length, 'file')}. First revision on ${niceDate(added[0].due)} 👍` : `Saved ${plural(added.length, 'file')} to today’s list`), 4000);
+}
+// drag & drop (files or whole folders) on desktop
+async function walkEntry(entry, dir, out){
+  if(entry.isFile){ const file = await new Promise((res, rej) => entry.file(res, rej)); out.push({file, dir}); return; }
+  if(entry.isDirectory){
+    const reader = entry.createReader(), sub = dir ? dir + '/' + entry.name : entry.name;
+    let batch;
+    do{ batch = await new Promise((res, rej) => reader.readEntries(res, rej)); for(const e of batch) await walkEntry(e, sub, out); }while(batch.length);
+  }
+}
+['dragover', 'drop'].forEach(ev => document.addEventListener(ev, async e => {
+  if(!cfg || readerId || !e.dataTransfer || ![...e.dataTransfer.types].includes('Files')) return;
+  e.preventDefault();
+  if(ev !== 'drop') return;
+  const items = [...(e.dataTransfer.items || [])].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  let entries = [];
+  if(items.length){ try{ for(const en of items) await walkEntry(en, '', entries); }catch(err){ entries = []; } }
+  if(!entries.length) entries = [...e.dataTransfer.files].map(file => ({file, dir: ''}));
+  if(tab !== 'library') setTab('library');
+  uploadDlg(entries);
+}));
+
+/* ================= offline file cache ================= */
+const CACHE = 'revise-files';
+const cacheKey = it => new Request(new URL('__cache/' + encodeURIComponent(it.file) + '?v=' + encodeURIComponent(it.sha || ''), location.href).href);
+async function fetchFile(it){
+  let cache = null;
+  try{ cache = await caches.open(CACHE); const hit = await cache.match(cacheKey(it)); if(hit) return await hit.arrayBuffer(); }catch(e){ cache = null; }
+  const buf = await ghRaw(it.file);
+  try{ if(cache) await cache.put(cacheKey(it), new Response(buf.slice(0))); }catch(e){}
+  return buf;
+}
+async function saveOffline(items){
+  if(!items.length) return toast('No files here');
+  let done = 0, fail = 0;
+  for(const it of items){ try{ await fetchFile(it); done++; }catch(e){ fail++; } toast(`Saving for offline… ${done + fail}/${items.length}`, 6000); }
+  toast(fail ? `${done} saved, ${fail} failed` : `${plural(done, 'file')} available offline ✓`, 3000);
 }
 
 /* ================= reader ================= */
-let readerId = null, queue = [], blobUrl = null, pdfState = null;
-function startQueue(ids){ queue = ids.slice(1); openReader(ids[0]); }
-async function fetchFile(it){
-  const key = new Request(location.href.split('#')[0].replace(/[^/]*$/, '') + '__cache/' + encodeURIComponent(it.file) + '?v=' + encodeURIComponent(it.sha || ''));
-  let cache = null;
-  try{ cache = await caches.open('revise-files'); const hit = await cache.match(key); if(hit) return await hit.arrayBuffer(); }catch(e){ cache = null; }
-  const buf = await ghRaw(it.file);
-  try{ if(cache) await cache.put(key, new Response(buf.slice(0))); }catch(e){}
-  return buf;
-}
+let readerId = null, queueIds = [], blobUrl = null, pdfState = null, readerPos = 0, readerMissing = [];
+function startQueue(ids){ queueIds = ids.slice(1); openReader(ids[0]); }
 function htmlType(buf){
   const head = new TextDecoder('latin1').decode(new Uint8Array(buf, 0, Math.min(2048, buf.byteLength)));
   return /<meta[^>]+charset\s*=\s*["']?\s*(?!utf-?8)[\w-]+/i.test(head) ? 'text/html' : 'text/html;charset=utf-8';
 }
+/* This runs INSIDE the sandboxed note (separate origin, so it can't touch your token).
+   It draws highlights and the colour toolbar, and talks to the app with postMessage. ASCII only. */
+function rvHighlighter(){
+  if(window.__rvOn) return; window.__rvOn = true;
+  var C = {y:'#ffe066', g:'#9be89b', b:'#9fd3ff', p:'#ffb0c8'};
+  var HL = {}, lastSel = null, editing = null, barTouch = 0, selT = null, userScrolled = false;
+  function post(m){ m.__rv = 1; parent.postMessage(m, '*'); }
+  var css = document.createElement('style');
+  css.textContent = 'mark.__rv{color:#111 !important;padding:0;border-radius:2px;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone}mark.__rv.__n{text-decoration:underline dotted;text-underline-offset:3px}mark.__rv.__f{outline:3px solid #2f6fde;outline-offset:1px}';
+  (document.head || document.documentElement).appendChild(css);
+  var host = document.createElement('div');
+  host.setAttribute('data-rv', '');
+  host.style.cssText = 'all:initial;position:absolute;z-index:2147483647;display:none;left:0;top:0';
+  var sh = host.attachShadow ? host.attachShadow({mode: 'open'}) : host;
+  var dots = Object.keys(C).map(function(k){ return '<button class="c" data-c="' + k + '" style="background:' + C[k] + '" aria-label="Highlight"></button>'; }).join('');
+  sh.innerHTML = '<style>.b{display:flex;gap:7px;align-items:center;padding:7px 9px;background:#1d1f24;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.35);font:600 14px system-ui,sans-serif}button{border:0;margin:0;padding:0;width:32px;height:32px;border-radius:50%;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:transparent;font:inherit;font-size:17px;-webkit-tap-highlight-color:transparent}button.c{border:2px solid rgba(255,255,255,.9)}button.c.on{box-shadow:0 0 0 3px #6b9cff}.s{width:1px;height:22px;background:#555}</style><div class="b">' + dots + '<span class="s"></span><button data-a="note" aria-label="Add note">\u270E</button><button data-a="del" aria-label="Remove highlight">\u2715</button></div>';
+  document.documentElement.appendChild(host);
+
+  function textNodes(){
+    var w = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT, {acceptNode: function(n){
+      var p = n.parentNode; if(!p) return 2;
+      var t = p.nodeName; if(t === 'SCRIPT' || t === 'STYLE' || t === 'NOSCRIPT' || t === 'TEXTAREA' || t === 'TITLE') return 2;
+      return 1;
+    }});
+    var a = [], n; while((n = w.nextNode())) a.push(n); return a;
+  }
+  function index(){ var ns = textNodes(), s = '', map = []; for(var i = 0; i < ns.length; i++){ map.push([ns[i], s.length]); s += ns[i].data; } return {s: s, map: map}; }
+  function off(ix, node, o){
+    if(node.nodeType === 3){ for(var i = 0; i < ix.map.length; i++) if(ix.map[i][0] === node) return ix.map[i][1] + o; }
+    var r = document.createRange(); try{ r.setStart(node, o); }catch(e){ return 0; } r.collapse(true);
+    for(var j = 0; j < ix.map.length; j++){ if(r.comparePoint(ix.map[j][0], 0) >= 0) return ix.map[j][1]; }
+    return ix.s.length;
+  }
+  function selOffsets(){
+    var s = document.getSelection(); if(!s || s.isCollapsed || !s.rangeCount) return null;
+    var r = s.getRangeAt(0); var ix = index();
+    var a = off(ix, r.startContainer, r.startOffset), b = off(ix, r.endContainer, r.endOffset);
+    if(b <= a) return null;
+    var t = ix.s.slice(a, b); a += t.length - t.replace(/^\s+/, '').length; b -= t.length - t.replace(/\s+$/, '').length;
+    if(b - a < 1) return null;
+    return {a: a, b: b, s: ix.s, rect: r.getBoundingClientRect()};
+  }
+  function score(s, i, h){
+    var p = h.prefix || '', q = h.suffix || '', k = 0, m = 0, j = i + h.exact.length;
+    while(k < p.length && s.charAt(i - 1 - k) === p.charAt(p.length - 1 - k)) k++;
+    while(m < q.length && s.charAt(j + m) === q.charAt(m)) m++;
+    return k + m - Math.abs(i - (h.pos || 0)) / 1e7;
+  }
+  function locate(s, h){
+    var i = s.indexOf(h.exact), best = -1, bs = -Infinity, n = 0;
+    while(i !== -1 && n < 2000){ var sc = score(s, i, h); if(sc > bs){ bs = sc; best = i; } i = s.indexOf(h.exact, i + 1); n++; }
+    return best;
+  }
+  function wrap(a, b, h){
+    var ix = index(), made = 0;
+    for(var i = 0; i < ix.map.length; i++){
+      var n = ix.map[i][0], s0 = ix.map[i][1], s1 = s0 + n.data.length;
+      if(s1 <= a || s0 >= b) continue;
+      var st = Math.max(a, s0) - s0, en = Math.min(b, s1) - s0;
+      if(!n.data.slice(st, en).trim()) continue;
+      var mid = n; if(st > 0) mid = n.splitText(st); if(en - st < mid.data.length) mid.splitText(en - st);
+      var m = document.createElement('mark'); m.className = '__rv'; m.setAttribute('data-rvid', h.id);
+      mid.parentNode.insertBefore(m, mid); m.appendChild(mid); made++;
+    }
+    style(h); return made;
+  }
+  function marks(id){ return document.querySelectorAll('mark.__rv[data-rvid="' + String(id).replace(/["\\]/g, '') + '"]'); }
+  function style(h){ var ms = marks(h.id); for(var i = 0; i < ms.length; i++){ ms[i].style.backgroundColor = C[h.color] || C.y; ms[i].classList.toggle('__n', !!h.note); ms[i].title = h.note || ''; } }
+  function unwrap(id){ var ms = marks(id); for(var i = 0; i < ms.length; i++){ var m = ms[i], p = m.parentNode; while(m.firstChild) p.insertBefore(m.firstChild, m); p.removeChild(m); p.normalize(); } delete HL[id]; }
+  function apply(h){ HL[h.id] = h; var ix = index(); var at = locate(ix.s, h); if(at < 0) return false; return wrap(at, at + h.exact.length, h) > 0; }
+  function hide(){ host.style.display = 'none'; editing = null; }
+  function showBar(rect, mode, color){
+    sh.querySelector('[data-a=del]').style.display = mode === 'edit' ? '' : 'none';
+    var cs = sh.querySelectorAll('.c'); for(var i = 0; i < cs.length; i++) cs[i].classList.toggle('on', cs[i].getAttribute('data-c') === color);
+    host.style.display = 'block';
+    var bw = host.offsetWidth || 230, bh = host.offsetHeight || 46;
+    var x = rect.left + rect.width / 2 - bw / 2 + window.scrollX;
+    x = Math.max(window.scrollX + 6, Math.min(x, window.scrollX + document.documentElement.clientWidth - bw - 6));
+    var y = rect.bottom + window.scrollY + 12;
+    if(rect.bottom + bh + 20 > window.innerHeight) y = rect.top + window.scrollY - bh - 12;
+    host.style.left = x + 'px'; host.style.top = Math.max(window.scrollY + 4, y) + 'px';
+  }
+  function create(color){
+    if(!lastSel) return null;
+    var o = lastSel, h = {id: 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), exact: o.s.slice(o.a, o.b), prefix: o.s.slice(Math.max(0, o.a - 48), o.a), suffix: o.s.slice(o.b, o.b + 48), color: color, note: '', pos: o.a};
+    HL[h.id] = h; wrap(o.a, o.b, h);
+    try{ document.getSelection().removeAllRanges(); }catch(e){}
+    lastSel = null; post({t: 'add', h: h}); return h;
+  }
+  function onBar(e){
+    var btn = e.composedPath ? e.composedPath()[0] : e.target; if(btn && btn.closest) btn = btn.closest('button'); if(!btn || !btn.getAttribute) return;
+    e.preventDefault(); e.stopPropagation(); barTouch = Date.now();
+    var c = btn.getAttribute('data-c'), a = btn.getAttribute('data-a');
+    if(c){ if(editing){ HL[editing].color = c; style(HL[editing]); post({t: 'upd', id: editing, color: c}); hide(); } else { create(c); hide(); } }
+    else if(a === 'note'){ var h = editing ? HL[editing] : create('y'); hide(); if(h) post({t: 'note', id: h.id}); }
+    else if(a === 'del' && editing){ var id = editing; unwrap(id); hide(); post({t: 'del', id: id}); }
+  }
+  host.addEventListener('mousedown', function(e){ e.preventDefault(); barTouch = Date.now(); });
+  host.addEventListener('touchstart', function(){ barTouch = Date.now(); }, {passive: true});
+  host.addEventListener('click', onBar);
+  document.addEventListener('selectionchange', function(){
+    clearTimeout(selT);
+    selT = setTimeout(function(){
+      var o = selOffsets();
+      if(o){ lastSel = o; editing = null; showBar(o.rect, 'new', null); }
+      else if(!editing && Date.now() - barTouch > 700) host.style.display = 'none';
+    }, 280);
+  });
+  document.addEventListener('click', function(e){
+    if(e.composedPath && e.composedPath().indexOf(host) >= 0) return;
+    var m = e.target && e.target.closest ? e.target.closest('mark.__rv') : null;
+    var s = document.getSelection();
+    if(m && (!s || s.isCollapsed)){ var id = m.getAttribute('data-rvid'); if(HL[id]){ e.preventDefault(); editing = id; showBar(m.getBoundingClientRect(), 'edit', HL[id].color); return; } }
+    if(!s || s.isCollapsed) hide();
+  }, true);
+  var posT = null;
+  window.addEventListener('scroll', function(){
+    userScrolled = true; clearTimeout(posT);
+    posT = setTimeout(function(){ var max = document.documentElement.scrollHeight - window.innerHeight; post({t: 'pos', v: max > 0 ? window.scrollY / max : 0}); }, 400);
+  }, {passive: true});
+  function restore(v){ var max = document.documentElement.scrollHeight - window.innerHeight; if(v > 0 && max > 0) window.scrollTo(0, v * max); }
+  window.addEventListener('message', function(e){
+    if(e.source !== parent || !e.data || e.data.__rv !== 1) return;
+    var m = e.data;
+    if(m.t === 'init'){
+      var missing = []; (m.hls || []).forEach(function(h){ if(h && h.exact && !apply(h)) missing.push(h.id); });
+      post({t: 'applied', missing: missing});
+      if(m.pos > 0){ restore(m.pos); userScrolled = false; window.addEventListener('load', function(){ if(!userScrolled) restore(m.pos); }); }
+    } else if(m.t === 'set' && m.h && HL[m.h.id]){ HL[m.h.id] = m.h; style(m.h); }
+    else if(m.t === 'remove'){ unwrap(m.id); }
+    else if(m.t === 'goto'){ var ms = marks(m.id); if(ms[0]){ ms[0].scrollIntoView({block: 'center', behavior: 'smooth'}); for(var i = 0; i < ms.length; i++) ms[i].classList.add('__f'); setTimeout(function(){ for(var i = 0; i < ms.length; i++) ms[i].classList.remove('__f'); }, 1600); } }
+  });
+  post({t: 'ready'});
+}
+/* Notes often save small things (like their dark/light theme) in localStorage, which the sandbox blocks.
+   This gives them a stand-in that the app persists, so their own scripts keep working. ASCII only. */
+function rvStorage(init){
+  function mk(data, persist){
+    var s = {
+      getItem: function(k){ k = String(k); return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ k = String(k); data[k] = String(v); if(persist) parent.postMessage({__rv: 1, t: 'ls', k: k, v: String(v)}, '*'); },
+      removeItem: function(k){ k = String(k); delete data[k]; if(persist) parent.postMessage({__rv: 1, t: 'ls', k: k, v: null}, '*'); },
+      clear: function(){ for(var k in data) delete data[k]; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(s, 'length', {get: function(){ return Object.keys(data).length; }});
+    return s;
+  }
+  try{ window.localStorage; return; }catch(e){}
+  try{ Object.defineProperty(window, 'localStorage', {value: mk(init || {}, true), configurable: true}); }catch(e){}
+  try{ Object.defineProperty(window, 'sessionStorage', {value: mk({}, false), configurable: true}); }catch(e){}
+}
+const HL_SCRIPT = new TextEncoder().encode('\n<script>(' + rvHighlighter.toString() + ')();<\/script>\n');
+const NOTE_LS = 'revise-notes-ls';
+function insertAt(bytes, at, add){ const out = new Uint8Array(bytes.length + add.length); out.set(bytes.subarray(0, at), 0); out.set(add, at); out.set(bytes.subarray(at), at + add.length); return out; }
+function injectHighlighter(buf){
+  let bytes = new Uint8Array(buf);
+  const low = new TextDecoder('latin1').decode(bytes).toLowerCase();   // 1 byte ↔ 1 char, so indexes are byte offsets
+  // 1) storage stand-in, as early as possible (inside <head>, never before the doctype)
+  const init = JSON.stringify(lsGet(NOTE_LS) || {}).replace(/</g, '\\u003c').replace(/[\u0080-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+  const shim = new TextEncoder().encode('<script>(' + rvStorage.toString() + ')(' + init + ');<\/script>');
+  let head = -1;
+  const m = low.match(/<head[\s>][^>]*>|<head>/) || low.match(/<html[\s>][^>]*>|<html>/);
+  if(m) head = m.index + m[0].length;
+  else { const dt = low.match(/<!doctype[^>]*>/); head = dt ? dt.index + dt[0].length : 0; }
+  // 2) highlighter at the end of <body>
+  let end = low.lastIndexOf('</body');
+  if(end < 0) end = bytes.length;
+  bytes = insertAt(bytes, end, HL_SCRIPT);
+  return insertAt(bytes, head, shim);
+}
+const frameEl = () => $('rBody').querySelector('iframe');
+function postToFrame(m){ const f = frameEl(); if(f && f.contentWindow){ m.__rv = 1; f.contentWindow.postMessage(m, '*'); } }
+function cleanHl(h){
+  if(!h || typeof h.exact !== 'string' || !h.exact.trim()) return null;
+  return {id: String(h.id).slice(0, 40), exact: h.exact.slice(0, 8000), prefix: String(h.prefix || '').slice(-64), suffix: String(h.suffix || '').slice(0, 64),
+    color: HL_COLORS[h.color] ? h.color : 'y', note: '', pos: +h.pos || 0, at: today()};
+}
+window.addEventListener('message', e => {
+  const f = frameEl(); if(!f || e.source !== f.contentWindow) return;
+  const m = e.data; if(!m || m.__rv !== 1 || !readerId) return;
+  const id = readerId, n = notes[id];
+  if(m.t === 'ready') return postToFrame({t: 'init', hls: n ? n.data.highlights : [], pos: readerPosFor(id)});
+  if(m.t === 'pos'){ readerPos = Math.min(1, Math.max(0, +m.v || 0)); lsSet('revise-pos-' + id, readerPos); return; }
+  if(m.t === 'applied'){ readerMissing = Array.isArray(m.missing) ? m.missing.map(String) : []; return; }
+  if(m.t === 'ls'){
+    const store = lsGet(NOTE_LS) || {}, k = String(m.k).slice(0, 100);
+    if(m.v === null) delete store[k]; else if(Object.keys(store).length < 200 || k in store) store[k] = String(m.v).slice(0, 4000);
+    lsSet(NOTE_LS, store); return;
+  }
+  if(!n) return;
+  if(m.t === 'add'){ const h = cleanHl(m.h); if(h) changeNote(id, d => { d.highlights = d.highlights.filter(x => x.id !== h.id).concat([h]); d.pos = readerPos; }); toast(`Highlighted (${HL_NAMES[h ? h.color : 'y']})`, 1200); }
+  else if(m.t === 'upd'){ if(HL_COLORS[m.color]) changeNote(id, d => { const x = d.highlights.find(y => y.id === m.id); if(x) x.color = m.color; }); }
+  else if(m.t === 'del'){ changeNote(id, d => { d.highlights = d.highlights.filter(x => x.id !== m.id); }, String(m.id)); }
+  else if(m.t === 'note'){ hlNoteDlg(String(m.id)); }
+});
+function readerPosFor(id){ const local = lsGet('revise-pos-' + id); if(typeof local === 'number') return local; const n = notes[id]; return n ? n.data.pos || 0 : 0; }
+
 async function openReader(id){
   const it = db.items[id]; if(!it) return;
-  readerId = id;
+  if(readerId && readerId !== id) saveReaderState();
+  readerId = id; readerPos = 0; readerMissing = [];
   $('reader').classList.remove('hidden'); document.body.style.overflow = 'hidden';
   $('rName').textContent = it.name; $('rSub').textContent = folderLabel(it.folder);
   $('rZoomIn').classList.toggle('hidden', it.type !== 'pdf'); $('rZoomOut').classList.toggle('hidden', it.type !== 'pdf');
+  $('rHls').classList.toggle('hidden', it.type !== 'html');
   updateReaderBar();
   const body = $('rBody');
   body.innerHTML = '<div class="loading"><div>Loading…</div></div>';
   if(location.hash !== '#open=' + id) history.pushState({reader: id}, '', '#open=' + id);
   try{
-    const buf = await fetchFile(it);
+    const [buf] = await Promise.all([fetchFile(it), loadNote(id).catch(() => { notes[id] = notes[id] || {data: blankNote(), dirty: false, deleted: []}; })]);
     if(readerId !== id) return;
     if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl = null; }
+    readerPos = readerPosFor(id);
     if(it.type === 'pdf') await renderPdf(buf, body);
     else {
-      blobUrl = URL.createObjectURL(new Blob([buf], {type: htmlType(buf)}));
-      // sandboxed (no same-origin) so a note's scripts can never read your GitHub token
+      blobUrl = URL.createObjectURL(new Blob([injectHighlighter(buf)], {type: htmlType(buf)}));
+      // sandboxed without same-origin: scripts in a note can never read your GitHub token
       body.innerHTML = `<iframe sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals" referrerpolicy="no-referrer" title="${esc(it.name)}" src="${blobUrl}"></iframe>`;
     }
   }catch(e){
     if(readerId !== id) return;
-    body.innerHTML = `<div class="loading"><div style="text-align:center;padding:20px">Couldn’t load this file.<br><small>${esc(e.message)}</small><br><br><button class="btn" id="rRetry">Try again</button></div></div>`;
+    const offline = isNetErr(e);
+    body.innerHTML = `<div class="loading"><div style="text-align:center;padding:20px">${offline ? 'You’re offline and this file isn’t saved for offline reading yet.' : 'Couldn’t load this file.'}<br><small>${esc(e.message)}</small><br><br><button class="btn" id="rRetry">Try again</button></div></div>`;
     $('rRetry').onclick = () => openReader(id);
   }
 }
@@ -787,32 +1384,40 @@ function updateReaderBar(){
   const fmt = g => { const p = preview(it, g); return p.days === 1 ? 'tomorrow' : p.days + ' days'; };
   $('gHard').textContent = fmt('hard'); $('gGood').textContent = fmt('good'); $('gEasy').textContent = fmt('easy');
   const due = isDue(it);
-  $('rQ').textContent = it.done ? 'Mastered — revising anyway' : due ? (queue.length ? `How well do you remember this? · ${queue.length} more after this` : 'How well do you remember this?') : `Not due until ${niceDate(it.due)} — rate it to count an early revision`;
+  $('rQ').textContent = it.done ? 'Mastered — revising anyway' : due ? (queueIds.length ? `How well do you remember this? · ${queueIds.length} more after this` : 'How well do you remember this?') : `Not due until ${niceDate(it.due)} — rate it to count an early revision`;
   $('rSnooze').classList.toggle('hidden', !due);
 }
+function saveReaderState(){
+  const id = readerId, n = notes[id]; if(!id) return;
+  if(pdfState && pdfState.wrap){ const w = pdfState.wrap; readerPos = w.scrollHeight > w.clientHeight ? w.scrollTop / (w.scrollHeight - w.clientHeight) : 0; lsSet('revise-pos-' + id, readerPos); }
+  if(n && n.dirty){ n.data.pos = readerPos; flushNote(id); }
+}
 function closeReader(fromPop){
+  saveReaderState();
   $('reader').classList.add('hidden'); document.body.style.overflow = '';
-  $('rBody').innerHTML = ''; readerId = null; queue = []; pdfState = null;
+  $('rBody').innerHTML = ''; readerId = null; queueIds = []; pdfState = null;
   if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl = null; }
   if(!fromPop && location.hash.startsWith('#open=')) history.back();
   render();
 }
 function nextInQueue(){
-  while(queue.length && !(db.items[queue[0]] && isDue(db.items[queue[0]]))) queue.shift();
-  if(queue.length){ const n = queue.shift(); history.replaceState({reader: n}, '', '#open=' + n); openReader(n); }
+  while(queueIds.length && !isDue(db.items[queueIds[0]])) queueIds.shift();
+  if(queueIds.length){ const n = queueIds.shift(); history.replaceState({reader: n}, '', '#open=' + n); openReader(n); }
   else closeReader();
 }
 function grade(g){
   const id = readerId, it = db.items[id]; if(!it) return;
-  const p = preview(it, g);
-  commit(d => applyGrade(d, id, g), `Revise ${it.name} (${g})`);
-  toast(`Next revision ${p.days === 1 ? 'tomorrow' : 'in ' + p.days + ' days'} · ${niceDate(addDays(today(), p.days))}`);
+  commit('grade', {id, g, day: today()}, `Revise ${it.name} (${g})`);
+  const due = db.items[id] && db.items[id].due, days = due ? diffDays(today(), due) : 0;
+  toast(`Next revision ${days === 1 ? 'tomorrow' : 'in ' + days + ' days'} · ${niceDate(due)}`);
   nextInQueue();
 }
 $('rBar').addEventListener('click', e => { const b = e.target.closest('[data-grade]'); if(b) grade(b.dataset.grade); });
-$('rSnooze').onclick = () => { const id = readerId, it = db.items[id]; if(!it) return; commit(d => { if(d.items[id]) d.items[id].due = addDays(today(), 1); }, 'Snooze ' + it.name); toast('Moved to tomorrow'); nextInQueue(); };
+$('rSnooze').onclick = () => { const id = readerId, it = db.items[id]; if(!it) return; commit('snooze', {id, day: today()}, 'Snooze ' + it.name); toast('Moved to tomorrow'); nextInQueue(); };
 $('rClose').onclick = () => closeReader();
 $('rMore').onclick = () => itemMenu(readerId);
+$('rNotes').onclick = () => notesDlg(readerId);
+$('rHls').onclick = () => highlightsDlg();
 window.addEventListener('popstate', () => {
   const m = location.hash.match(/^#open=(.+)$/);
   if(!m && readerId) closeReader(true);
@@ -838,12 +1443,12 @@ async function renderPdf(buf, body){
   const wrap = document.createElement('div'); wrap.className = 'pdfwrap';
   body.innerHTML = ''; body.appendChild(wrap);
   pdfState = {doc, wrap, zoom: 1, rendered: new Map()};
-  await layoutPdf();
+  await layoutPdf(readerPos);
 }
-async function layoutPdf(){
+async function layoutPdf(ratio){
   const st = pdfState; if(!st) return;
   const {doc, wrap} = st;
-  const keepRatio = wrap.scrollHeight ? wrap.scrollTop / wrap.scrollHeight : 0;
+  const keep = typeof ratio === 'number' ? ratio : (wrap.scrollHeight > wrap.clientHeight ? wrap.scrollTop / (wrap.scrollHeight - wrap.clientHeight) : 0);
   wrap.innerHTML = ''; st.rendered.clear();
   const avail = Math.max(200, wrap.clientWidth - 16) * st.zoom;
   const first = await doc.getPage(1); const v1 = first.getViewport({scale: 1});
@@ -856,7 +1461,7 @@ async function layoutPdf(){
     wrap.appendChild(c); io.observe(c);
   }
   st.io && st.io.disconnect(); st.io = io;
-  wrap.scrollTop = keepRatio * wrap.scrollHeight;
+  wrap.scrollTop = keep * (wrap.scrollHeight - wrap.clientHeight);
 }
 async function drawPage(n, canvas, scale, dpr){
   const st = pdfState; if(!st || st.rendered.has(canvas)) return; st.rendered.set(canvas, true);
@@ -875,44 +1480,55 @@ $('main').addEventListener('click', e => {
   const im = t.closest('[data-itemmenu]'); if(im){ e.stopPropagation(); return itemMenu(im.dataset.itemmenu); }
   const act = t.closest('[data-act]');
   if(act){ e.stopPropagation(); const a = act.dataset.act;
-    if(a === 'upload') return pickFiles();
+    if(a === 'upload') return $('fileInput').click();
+    if(a === 'uploaddir') return $('dirInput').click();
     if(a === 'newfolder') return newFolderDlg();
     if(a === 'foldermenu') return folderMenu(act.dataset.path);
+    if(a === 'spread') return spreadBacklog();
   }
   const go = t.closest('[data-go]'); if(go) return setTab(go.dataset.go);
   const f = t.closest('[data-folder]'); if(f){ curFolder = f.dataset.folder; query = ''; render(); window.scrollTo(0, 0); return; }
   const o = t.closest('[data-open]');
   if(o){
     const id = o.dataset.open;
-    if(tab === 'today' && isDue(db.items[id])){ const ids = dueItems().map(x => x.id); const i = ids.indexOf(id); return startQueue(ids.slice(i).concat(ids.slice(0, i))); }
+    if(tab === 'today' && isDue(db.items[id])){ const ids = todayQueue().shown.map(x => x.id); const i = ids.indexOf(id); if(i >= 0) return startQueue(ids.slice(i).concat(ids.slice(0, i))); }
     return openReader(id);
   }
+  const cell = t.closest('#heat i[data-day]');
+  if(cell) showHeatDetail(cell);
 });
+function showHeatDetail(cell){
+  document.querySelectorAll('#heat i.on').forEach(x => x.classList.remove('on'));
+  cell.classList.add('on');
+  const n = +cell.dataset.n, d = cell.dataset.day;
+  $('heatDetail').textContent = `${WD[parseD(d).getDay()]}, ${niceDate(d)}: ${plural(n, 'revision')}`;
+}
+$('main').addEventListener('mouseover', e => { const c = e.target.closest('#heat i[data-day]'); if(c) showHeatDetail(c); });
+$('main').addEventListener('focusin', e => { const c = e.target.closest('#heat i[data-day]'); if(c) showHeatDetail(c); });
 $('main').addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === ' ') && e.target.matches('.row[role=button]')){ e.preventDefault(); e.target.click(); } });
 $('main').addEventListener('input', e => { if(e.target.id === 'search'){ query = e.target.value; render(); } });
 document.querySelector('nav.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if(b) setTab(b.dataset.tab); });
 $('dlgBody').addEventListener('click', e => { if(e.target.closest('[data-close]')) closeDlg(); });
 $('settingsBtn').onclick = settingsDlg;
-$('refreshBtn').onclick = async () => { try{ await chain; await pull(); render(); toast('Up to date'); }catch(e){ setSync('err', 'Offline'); toast('Refresh failed: ' + e.message); } };
+$('refreshBtn').onclick = async () => {
+  try{ await flush(); await pull(); render(); toast('Up to date'); }
+  catch(e){ syncIdle(); toast(isNetErr(e) ? 'You’re offline — showing saved copy' : 'Refresh failed: ' + e.message); }
+};
 document.addEventListener('keydown', e => {
   if(!readerId || dlg.open || e.target.matches('input,select,textarea')) return;
   if(e.key === 'Escape') closeReader();
   else if(e.key === '1') grade('hard'); else if(e.key === '2') grade('good'); else if(e.key === '3') grade('easy');
 });
-// drag & drop upload on desktop
-['dragover', 'drop'].forEach(ev => document.addEventListener(ev, e => {
-  if(!cfg || readerId || !e.dataTransfer || ![...e.dataTransfer.types].includes('Files')) return;
-  e.preventDefault();
-  if(ev === 'drop'){ if(tab !== 'library') setTab('library'); uploadDlg([...e.dataTransfer.files]); }
-}));
 let lastDay = today();
 document.addEventListener('visibilitychange', async () => {
-  if(document.visibilityState !== 'visible' || !cfg) return;
+  if(!cfg) return;
+  if(document.visibilityState === 'hidden'){ if(readerId) saveReaderState(); return; }
   if(today() !== lastDay){ lastDay = today(); render(); }
-  if(Date.now() - lastPull > 60000 && pending === 0){ try{ await pull(); render(); }catch(e){} }
+  if(Date.now() - lastPull > 60000 && !queue.length && navigator.onLine){ try{ await pull(); render(); }catch(e){} }
+  flush();
 });
 
-/* ================= setup ================= */
+/* ================= setup & start ================= */
 function showSetup(){
   $('setupView').classList.remove('hidden'); $('appView').classList.add('hidden');
   const g = guessRepo();
@@ -927,6 +1543,7 @@ $('cfGo').onclick = async () => {
   try{
     const r = await (await gh(`/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}`)).json();
     if(r.permissions && !r.permissions.push) throw new Error('This token can read but not write. Give it “Contents: Read and write”.');
+    queue = []; saveQueue();
     await pull();
     saveCfg(); startApp();
   }catch(e){
@@ -934,26 +1551,30 @@ $('cfGo').onclick = async () => {
     $('cfErr').textContent = e.status === 401 ? 'Token is invalid or expired.' : e.status === 404 ? 'Repo not found — check the name, and that the token has access to it.' : e.message;
   }finally{ $('cfGo').disabled = false; $('cfGo').textContent = 'Connect'; }
 };
-
-async function startApp(){
+function startApp(){
   $('setupView').classList.add('hidden'); $('appView').classList.remove('hidden');
   render();
   const m = location.hash.match(/^#open=(.+)$/);
-  if(m && db.items[m[1]]){ history.replaceState(null, '', location.pathname); history.pushState({reader: m[1]}, '', '#open=' + m[1]); openReader(m[1]); }
+  if(m && db.items[m[1]] && !readerId){ history.replaceState(null, '', location.pathname); history.pushState({reader: m[1]}, '', '#open=' + m[1]); openReader(m[1]); }
 }
 (async () => {
-  try{ const th = localStorage.getItem('revise-theme'); if(th) document.documentElement.dataset.theme = th; }catch(e){}
+  const th = lsGet('revise-theme'); if(th) document.documentElement.dataset.theme = th;
+  if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
   loadCfg();
   if(!cfg) return showSetup();
   $('appView').classList.remove('hidden');
-  $('main').innerHTML = '<p class="lead" style="margin-top:30px">Loading your library…</p>';
+  const cached = lsGet('revise-db');
+  if(cached){ db = normDb(cached); startApp(); setSync('busy', 'Checking…'); }   // instant start from the saved copy
+  else $('main').innerHTML = '<p class="lead" style="margin-top:30px">Loading your library…</p>';
   try{ await pull(); }
   catch(e){
-    if(e.status === 401 || e.status === 404){ toast('GitHub access failed — please reconnect.', 4000); cfg = null; return showSetup(); }
+    if(e.status === 401){ toast('Your GitHub token expired or was revoked — please reconnect.', 5000); cfg = null; lsDel(CFG_KEY); return showSetup(); }
+    if(cached){ syncIdle(); return; }   // offline: keep working from the saved copy
     setSync('err', 'Offline'); $('main').innerHTML = `<div class="empty" style="margin-top:30px"><b>Couldn’t reach GitHub</b>${esc(e.message)}<div class="actions" style="justify-content:center"><button class="btn" onclick="location.reload()">Retry</button></div></div>`;
     return;
   }
-  startApp();
+  if(cached) render(); else startApp();
+  flush(); flushAllNotes();
 })();
 </script>
 </body>

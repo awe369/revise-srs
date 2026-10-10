@@ -24,6 +24,22 @@ When you open a file, rate it at the bottom:
 - **Mastered:** use ⋮ → *Mark as mastered* to stop reminders for a file.
 - **Next date:** you can also set a file's next revision date by hand.
 
+## Highlights, notes and more
+
+- **Highlight (HTML files):** select text while reading. A small bar appears: pick a colour
+  (yellow / green / blue / pink) or ✎ to add a note. Tap a highlight to recolour it, add a note or remove it.
+  The 🖍 button in the reader lists all highlights, with *Go to*.
+- **Highlights file:** use 🖍 → **Make highlights file** (or a folder's options) to collect every
+  highlight and note into a new file, e.g. *biofertilizers — Highlights*. It goes into your library and
+  comes up for revision like any other file. Run it again later to update it; its schedule stays the same.
+- **Notes:** the 📝 button keeps your own notes for any file, HTML or PDF.
+- **Resume reading:** each file reopens where you stopped.
+- **Upload a whole folder** from a laptop (button or drag & drop). Sub-folders are created automatically.
+- **Max files per day** (⚙️ Settings): new dates are spread out, and a backlog can be spread over the next days.
+- **Offline:** open a folder's options → *Save for offline reading*. Revisions you make offline are saved
+  when you're back online.
+- **Stats tab:** revision activity, Hard/Good/Easy mix per subject, and your toughest files.
+
 ## One-time setup
 
 1. **Turn on GitHub Pages:** repo **Settings → Pages → Build and deployment →
@@ -37,15 +53,19 @@ When you open a file, rate it at the bottom:
    device (phone, laptop). The token is stored only in that browser.
 4. **Install it on your phone (optional):** browser menu → *Add to Home screen*.
 
-## Daily reminder
+## Daily reminder on Telegram (7:00 AM)
 
-The workflow in `.github/workflows/reminder.yml` runs every morning at 07:45 IST. If
-anything is due, it opens an issue listing the files with links that open them directly,
-and GitHub notifies you by email and in the GitHub mobile app. Yesterday's
-reminder issue is closed automatically.
+1. In Telegram, open **@BotFather**, send `/newbot`, and pick a name. Copy the **bot token** it gives you.
+2. Open your new bot and press **Start**, so it is allowed to message you.
+3. Get your **chat ID**: open **@userinfobot** in Telegram and press Start. It replies with your ID (a number).
+4. In this repo, go to **Settings → Secrets and variables → Actions → New repository secret** and add:
+   - `TELEGRAM_BOT_TOKEN` = the bot token
+   - `TELEGRAM_CHAT_ID` = your chat ID
+5. Test it: **Actions → Daily revision reminder → Run workflow**. You should get a message within a minute.
 
-- **Test it:** **Actions → Daily revision reminder → Run workflow**.
-- **Change the time:** edit the `cron` line in the workflow.
+Each morning the message lists what's due, and each name is a link that opens that file. GitHub sometimes
+starts scheduled runs a few minutes late. Without the Telegram secrets, the workflow falls back to opening a
+GitHub issue each morning, so GitHub notifies you instead.
 
 ## Where things are stored
 
@@ -53,6 +73,7 @@ reminder issue is closed automatically.
 | --- | --- |
 | `files/` | Your uploaded HTML / PDF files |
 | `data/srs.json` | Folders, schedules and revision history |
+| `data/notes/` | Highlights and notes, one file per note |
 | `index.html` | The whole app (no build step) |
 
 > ⚠️ On a free GitHub plan, Pages only works on **public** repos, so anyone with the link can see
