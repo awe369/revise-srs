@@ -54,7 +54,7 @@ When you open a file, rate it at the bottom:
    device (phone, laptop). The token is stored only in that browser.
 4. **Install it on your phone (optional):** browser menu → *Add to Home screen*.
 
-## Daily reminder on Telegram (7:00 AM)
+## Daily reminder on Telegram or WhatsApp (7:00 AM)
 
 1. In Telegram, open **@BotFather**, send `/newbot`, and pick a name. Copy the **bot token** it gives you.
 2. Open your new bot and press **Start**, so it is allowed to message you.
@@ -63,6 +63,24 @@ When you open a file, rate it at the bottom:
    - `TELEGRAM_BOT_TOKEN` = the bot token
    - `TELEGRAM_CHAT_ID` = your chat ID
 5. Test it: **Actions → Daily revision reminder → Run workflow**. You should get a message within a minute.
+
+### WhatsApp instead of (or as well as) Telegram
+
+WhatsApp has no free official way to send yourself messages, so this uses **CallMeBot**, a free
+third-party service for personal use. It's run by someone else and can sometimes be slow or down, and it
+sees the message text (file names and links).
+
+1. Get CallMeBot's current WhatsApp number from <https://www.callmebot.com/blog/free-api-whatsapp-messages/>
+   and save it in your phone contacts.
+2. Send it this exact WhatsApp message: `I allow callmebot to send me messages`.
+   It replies with your **API key**. If no reply comes within 2 minutes, wait a day and try again (the
+   service limits sign-ups).
+3. Add two repository secrets: `WHATSAPP_PHONE` = your number with country code (e.g. `+919876543210`)
+   and `WHATSAPP_APIKEY` = the key.
+4. Test with **Actions → Daily revision reminder → Run workflow**.
+
+If both Telegram and WhatsApp secrets are set, you get both messages. Delete the Telegram secrets to
+stop the Telegram message.
 
 Each morning the message lists what's due, and each name is a link that opens that file. GitHub sometimes
 starts scheduled runs a few minutes late. Without the Telegram secrets, the workflow falls back to opening a

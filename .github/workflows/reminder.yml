@@ -1,8 +1,9 @@
 name: Daily revision reminder
 
-# Every morning: sends a Telegram message listing the notes due today, with links that open each one.
-# Needs two repository secrets: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (see README).
-# Without them it falls back to opening a GitHub issue, so GitHub notifies you instead.
+# Every morning: sends a message listing the notes due today, with links that open each one.
+#   Telegram  → secrets TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID
+#   WhatsApp  → secrets WHATSAPP_PHONE + WHATSAPP_APIKEY (free CallMeBot service)
+# Set up either or both (see README). With neither, it opens a GitHub issue so GitHub notifies you instead.
 on:
   schedule:
     - cron: '30 1 * * *'   # 01:30 UTC = 07:00 IST (GitHub may start scheduled runs a few minutes late)
@@ -22,6 +23,8 @@ jobs:
           TIMEZONE: Asia/Kolkata
           TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WA_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          WA_KEY: ${{ secrets.WHATSAPP_APIKEY }}
           APP_URL: ${{ vars.APP_URL }}
         with:
           script: |
@@ -45,26 +48,65 @@ jobs:
             const where = it => it.folder ? it.folder.split('/').join(' › ') : 'Home';
             const late = it => Math.round((Date.parse(today) - Date.parse(it.due)) / 864e5);
 
+            const failures = [];
+            let channels = 0;
+
             if (process.env.TG_TOKEN) {
-              if (!process.env.TG_CHAT) { core.setFailed('TELEGRAM_CHAT_ID secret is missing — see README.'); return; }
-              const h = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-              let text;
-              if (shown.length) {
-                const lines = shown.slice(0, 40).map((it, i) => `${i + 1}. <a href="${h(app + '#open=' + it.id)}">${h(it.name)}</a> — <i>${h(where(it))}</i>${late(it) > 0 ? ` · ${late(it)}d late` : ''}`);
-                text = `📚 <b>Aaj ${shown.length} revision due</b> · ${pretty(today)}\n\n${lines.join('\n')}`
-                  + (shown.length > 40 ? `\n…and ${shown.length - 40} more` : '')
-                  + (due.length > shown.length ? `\n\n(${due.length - shown.length} more beyond your daily limit)` : '')
-                  + `\n\n👉 <a href="${h(app)}">Open Revise</a>`;
-              } else {
-                text = `✅ <b>Aaj kuch due nahi</b> · ${pretty(today)}\nKal: ${tomorrow} file${tomorrow === 1 ? '' : 's'}.`;
+              channels++;
+              if (!process.env.TG_CHAT) failures.push('Telegram: TELEGRAM_CHAT_ID secret is missing');
+              else {
+                const h = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                let text;
+                if (shown.length) {
+                  const lines = shown.slice(0, 40).map((it, i) => `${i + 1}. <a href="${h(app + '#open=' + it.id)}">${h(it.name)}</a> — <i>${h(where(it))}</i>${late(it) > 0 ? ` · ${late(it)}d late` : ''}`);
+                  text = `📚 <b>Aaj ${shown.length} revision due</b> · ${pretty(today)}\n\n${lines.join('\n')}`
+                    + (shown.length > 40 ? `\n…and ${shown.length - 40} more` : '')
+                    + (due.length > shown.length ? `\n\n(${due.length - shown.length} more beyond your daily limit)` : '')
+                    + `\n\n👉 <a href="${h(app)}">Open Revise</a>`;
+                } else {
+                  text = `✅ <b>Aaj kuch due nahi</b> · ${pretty(today)}\nKal: ${tomorrow} file${tomorrow === 1 ? '' : 's'}.`;
+                }
+                try {
+                  const r = await fetch(`https://api.telegram.org/bot${process.env.TG_TOKEN}/sendMessage`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: process.env.TG_CHAT, text, parse_mode: 'HTML', disable_web_page_preview: true })
+                  });
+                  const j = await r.json();
+                  if (!j.ok) failures.push(`Telegram: ${j.description} — check the bot token, the chat ID, and that you pressed Start in the bot chat`);
+                  else core.info(`Telegram reminder sent (${shown.length} due).`);
+                } catch (e) { failures.push('Telegram: ' + e.message); }
               }
-              const r = await fetch(`https://api.telegram.org/bot${process.env.TG_TOKEN}/sendMessage`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: process.env.TG_CHAT, text, parse_mode: 'HTML', disable_web_page_preview: true })
-              });
-              const j = await r.json();
-              if (!j.ok) core.setFailed(`Telegram error: ${j.description} — check the bot token, the chat ID, and that you pressed Start in the bot chat.`);
-              else core.info(`Telegram reminder sent (${shown.length} due).`);
+            }
+
+            if (process.env.WA_PHONE || process.env.WA_KEY) {
+              channels++;
+              if (!process.env.WA_PHONE || !process.env.WA_KEY) failures.push('WhatsApp: set both WHATSAPP_PHONE and WHATSAPP_APIKEY secrets');
+              else {
+                // WhatsApp shows links as plain URLs, so each file gets its own link line
+                let text;
+                if (shown.length) {
+                  const max = 25;
+                  const lines = shown.slice(0, max).map((it, i) => `${i + 1}. *${it.name}* — _${where(it)}_${late(it) > 0 ? ` · ${late(it)}d late` : ''}\n${app}#open=${it.id}`);
+                  text = `📚 *Aaj ${shown.length} revision due* · ${pretty(today)}\n\n${lines.join('\n\n')}`
+                    + (shown.length > max ? `\n\n…and ${shown.length - max} more in the app` : '')
+                    + (due.length > shown.length ? `\n\n(${due.length - shown.length} more beyond your daily limit)` : '')
+                    + `\n\n👉 Open Revise: ${app}`;
+                } else {
+                  text = `✅ *Aaj kuch due nahi* · ${pretty(today)}\nKal: ${tomorrow} file${tomorrow === 1 ? '' : 's'}.`;
+                }
+                const phone = process.env.WA_PHONE.replace(/[^\d+]/g, '');
+                const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&apikey=${encodeURIComponent(process.env.WA_KEY)}&text=${encodeURIComponent(text)}`;
+                try {
+                  const r = await fetch(url);
+                  const body = (await r.text()).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                  if (!r.ok || /error|invalid|not (allowed|registered)/i.test(body)) failures.push(`WhatsApp (CallMeBot): ${body.slice(0, 200) || 'HTTP ' + r.status}`);
+                  else core.info(`WhatsApp reminder sent (${shown.length} due).`);
+                } catch (e) { failures.push('WhatsApp (CallMeBot): ' + e.message); }
+              }
+            }
+
+            if (channels) {
+              if (failures.length) core.setFailed(failures.join('\n'));
               return;
             }
 
