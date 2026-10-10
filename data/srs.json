@@ -69,7 +69,9 @@
    "due": "2026-10-10",
    "schedule": null,
    "done": false,
-   "hist": []
+   "hist": [],
+   "hl": 1,
+   "note": false
   }
  },
  "stats": {
