@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Revise — Spaced Repetition</title>
+<meta name="theme-color" content="#14161c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f5f2; --surface:#ffffff; --surface-2:#efede8; --line:#e2dfd8;
+    --text:#1d1f24; --muted:#5f6370; --dim:#8a8e99;
+    --accent:#2f6fde; --accent-ink:#ffffff; --accent-soft:rgba(47,111,222,.1);
+    --hard:#d4573f; --good:#2f9e6e; --easy:#7a5bd6; --warn:#c98a12;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05);
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#14161c; --surface:#1c1f27; --surface-2:#252935; --line:#2f3442;
+      --text:#eceef3; --muted:#a3a8b5; --dim:#737988;
+      --accent:#6b9cff; --accent-ink:#0d1220; --accent-soft:rgba(107,156,255,.13);
+      --hard:#f07a62; --good:#4fc08d; --easy:#a68cff; --warn:#e3a93a;
+      --shadow:none;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14161c; --surface:#1c1f27; --surface-2:#252935; --line:#2f3442;
+    --text:#eceef3; --muted:#a3a8b5; --dim:#737988;
+    --accent:#6b9cff; --accent-ink:#0d1220; --accent-soft:rgba(107,156,255,.13);
+    --hard:#f07a62; --good:#4fc08d; --easy:#a68cff; --warn:#e3a93a;
+    --shadow:none;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased;font-size:15px}
+  button,input,select{font:inherit;color:inherit}
+  button{cursor:pointer;border:none;background:none;padding:0}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 110px}
+  .hidden{display:none!important}
+
+  /* top bar */
+  header.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  header.top .in{max-width:760px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
+  .logo{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .logo i{width:22px;height:22px;border-radius:7px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-style:normal;font-size:.8rem}
+  .sync{margin-left:auto;font-size:.76rem;color:var(--dim);display:flex;align-items:center;gap:6px}
+  .sync .dot{width:7px;height:7px;border-radius:50%;background:var(--good)}
+  .sync.busy .dot{background:var(--warn);animation:pulse 1s infinite}
+  .sync.err .dot{background:var(--hard)}
+  @keyframes pulse{50%{opacity:.3}}
+  .iconbtn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+  .iconbtn:hover{background:var(--surface-2);color:var(--text)}
+  .iconbtn svg{width:20px;height:20px}
+
+  /* tabs */
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+  nav.tabs button{padding:10px 0 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.74rem;color:var(--dim);font-weight:500;position:relative}
+  nav.tabs button svg{width:22px;height:22px}
+  nav.tabs button.on{color:var(--accent)}
+  .badge{position:absolute;top:5px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--hard);color:#fff;font-size:.68rem;font-weight:700;display:grid;place-items:center}
+
+  h1{font-size:1.6rem;letter-spacing:-.02em;margin:22px 0 2px;line-height:1.15}
+  .lead{color:var(--muted);margin:0 0 16px}
+  h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);font-weight:600;margin:24px 0 10px}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);min-width:0}
+  .stat b{display:block;font-size:1.5rem;letter-spacing:-.02em;line-height:1.1}
+  .stat span{font-size:.76rem;color:var(--muted)}
+
+  .list{display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 12px 12px 14px;box-shadow:var(--shadow);text-align:left;width:100%;min-width:0}
+  .row:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+  .row .ic{flex:none;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:.68rem;font-weight:700;letter-spacing:.03em}
+  .ic.html{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+  .ic.pdf{background:color-mix(in srgb,var(--hard) 14%,transparent);color:var(--hard)}
+  .ic.folder{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+  .ic.folder svg{width:20px;height:20px}
+  .row .mid{flex:1;min-width:0}
+  .row .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .sub{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chip{flex:none;font-size:.72rem;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+  .chip.due{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
+  .chip.late{background:color-mix(in srgb,var(--hard) 15%,transparent);color:var(--hard)}
+  .chip.done{background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good)}
+  .more{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--dim)}
+  .more:hover{background:var(--surface-2);color:var(--text)}
+  .more svg{width:18px;height:18px}
+
+  .empty{text-align:center;padding:34px 16px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:16px}
+  .empty .big{font-size:2rem;margin-bottom:4px}
+  .empty b{color:var(--text);display:block;font-size:1.05rem;margin-bottom:4px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:.9rem;border-radius:11px;padding:10px 15px;background:var(--surface);border:1px solid var(--line);color:var(--text)}
+  .btn:hover{border-color:var(--dim)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn.danger{color:var(--hard)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn svg{width:17px;height:17px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+
+  .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:.9rem;margin:20px 0 4px}
+  .crumbs button{color:var(--accent);font-weight:500;padding:2px 4px;border-radius:6px}
+  .crumbs button:hover{background:var(--accent-soft)}
+  .crumbs .sep{color:var(--dim)}
+  .crumbs .cur{font-weight:700;padding:2px 4px}
+  .search{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);margin-top:12px}
+  .search:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+
+  .forecast{display:flex;align-items:flex-end;gap:4px;height:70px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px 22px;position:relative;box-shadow:var(--shadow)}
+  .forecast .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative}
+  .forecast .bar{width:100%;max-width:18px;border-radius:4px 4px 2px 2px;background:var(--accent);opacity:.85;min-height:2px}
+  .forecast .bar.zero{background:var(--line)}
+  .forecast .lab{position:absolute;bottom:-17px;font-size:.62rem;color:var(--dim)}
+  .forecast .n{font-size:.62rem;color:var(--muted);margin-bottom:2px}
+
+  .day{margin-bottom:14px}
+  .day .dh{display:flex;justify-content:space-between;font-size:.84rem;font-weight:600;margin:0 2px 6px}
+  .day .dh span{color:var(--dim);font-weight:500}
+
+  /* reader */
+  #reader{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column}
+  #reader .rtop{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+  #reader .rtitle{flex:1;min-width:0}
+  #reader .rtitle b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.95rem}
+  #reader .rtitle span{font-size:.74rem;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #reader .rbody{flex:1;min-height:0;position:relative;background:#fff}
+  #reader iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+  #reader .pdfwrap{position:absolute;inset:0;overflow:auto;background:#525659;padding:10px 0}
+  #reader .pdfwrap canvas{display:block;margin:0 auto 10px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4);max-width:100%}
+  #reader .loading{position:absolute;inset:0;display:grid;place-items:center;color:#555;background:var(--bg)}
+  #reader .loading div{color:var(--muted)}
+  #reader .rbar{border-top:1px solid var(--line);background:var(--surface);padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+  #reader .rq{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--muted);margin-bottom:8px;gap:8px}
+  #reader .rq button{color:var(--accent);font-weight:500;font-size:.8rem}
+  .grades{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .grades button{border-radius:12px;padding:9px 6px;font-weight:600;font-size:.9rem;color:#fff;display:flex;flex-direction:column;align-items:center;line-height:1.2}
+  .grades button small{font-weight:500;font-size:.72rem;opacity:.9}
+  .g-hard{background:var(--hard)} .g-good{background:var(--good)} .g-easy{background:var(--easy)}
+  :root[data-theme="dark"] .grades button, .grades button{text-shadow:0 1px 1px rgba(0,0,0,.15)}
+  .rbar.min .grades{display:none}
+
+  /* dialog */
+  dialog{border:none;border-radius:18px;padding:0;background:var(--surface);color:var(--text);width:min(460px,calc(100% - 24px));box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  dialog::backdrop{background:rgba(10,12,18,.55)}
+  .dlg{padding:18px 18px 16px}
+  .dlg h3{margin:0 0 4px;font-size:1.1rem}
+  .dlg p.hint{margin:0 0 12px;color:var(--muted);font-size:.84rem}
+  .field{margin:12px 0}
+  .field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:5px;color:var(--muted)}
+  .field input[type=text],.field input[type=password],.field input[type=date],.field select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+  .field .help{font-size:.76rem;color:var(--dim);margin-top:4px}
+  .check{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;margin:12px 0}
+  .check input{margin-top:3px;width:17px;height:17px;accent-color:var(--accent)}
+  .dlg .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+  .menu{display:flex;flex-direction:column;margin:8px -6px 0}
+  .menu button{text-align:left;padding:11px 10px;border-radius:10px;font-weight:500;display:flex;gap:10px;align-items:center}
+  .menu button:hover{background:var(--surface-2)}
+  .menu button.danger{color:var(--hard)}
+  .filelist{font-size:.84rem;color:var(--muted);max-height:120px;overflow:auto;background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:8px}
+  .meta{font-size:.82rem;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:8px;line-height:1.6}
+  .meta b{color:var(--text);font-weight:600}
+
+  /* setup */
+  .setup{max-width:520px;margin:0 auto;padding:28px 16px 60px}
+  .setup .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+  .setup ol{padding-left:20px;margin:8px 0 0;color:var(--muted);font-size:.86rem}
+  .setup ol li{margin:5px 0}
+  .setup code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:.82rem;color:var(--text)}
+  .err{color:var(--hard);font-size:.84rem;margin-top:8px}
+
+  .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(16px);opacity:0;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.86rem;font-weight:500;transition:.22s;pointer-events:none;z-index:40;max-width:calc(100% - 32px);text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .progress{height:4px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin-top:10px}
+  .progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+
+  .drop{border:2px dashed var(--accent);background:var(--accent-soft)}
+  @media (max-width:420px){ h1{font-size:1.4rem} .stat b{font-size:1.3rem} }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setupView" class="setup hidden">
+  <div class="logo" style="font-size:1.25rem;margin-bottom:6px"><i>R</i>Revise</div>
+  <p class="lead">Spaced repetition for your HTML &amp; PDF notes. Files are saved in your own GitHub repo, so phone and laptop stay in sync.</p>
+  <div class="card">
+    <h3 style="margin:0 0 4px">Connect your GitHub repo</h3>
+    <p class="hint" style="color:var(--muted);font-size:.84rem;margin:0">One-time setup, takes ~1 minute.</p>
+    <ol>
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></li>
+      <li>Name: <code>revise</code> · Expiration: pick the longest you're comfortable with</li>
+      <li>Repository access → <b>Only select repositories</b> → choose this repo</li>
+      <li>Permissions → Repository → <b>Contents: Read and write</b></li>
+      <li>Generate token, copy it, paste below.</li>
+    </ol>
+    <div class="field"><label for="cfOwner">GitHub username</label><input type="text" id="cfOwner" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div class="field"><label for="cfRepo">Repository name</label><input type="text" id="cfRepo" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div class="field"><label for="cfBranch">Branch</label><input type="text" id="cfBranch" value="main" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div class="field"><label for="cfToken">Access token</label><input type="password" id="cfToken" placeholder="github_pat_…" autocomplete="off"><div class="help">Stays only in this browser. Never shared with anyone except GitHub.</div></div>
+    <button class="btn primary" id="cfGo" style="width:100%;margin-top:6px">Connect</button>
+    <div class="err" id="cfErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appView" class="hidden">
+  <header class="top"><div class="in">
+    <div class="logo"><i>R</i>Revise</div>
+    <div class="sync" id="sync"><span class="dot"></span><span id="syncTxt">Synced</span></div>
+    <button class="iconbtn" id="refreshBtn" title="Refresh from GitHub" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+    <button class="iconbtn" id="settingsBtn" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </div></header>
+  <main class="wrap" id="main"></main>
+  <nav class="tabs"><div class="in">
+    <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Today<span class="badge hidden" id="dueBadge"></span></button>
+    <button data-tab="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Library</button>
+    <button data-tab="upcoming"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Upcoming</button>
+  </div></nav>
+</div>
+
+<!-- READER -->
+<div id="reader" class="hidden" role="dialog" aria-modal="true" aria-label="Reader">
+  <div class="rtop">
+    <button class="iconbtn" id="rClose" aria-label="Close reader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="rtitle"><b id="rName"></b><span id="rSub"></span></div>
+    <button class="iconbtn hidden" id="rZoomOut" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
+    <button class="iconbtn hidden" id="rZoomIn" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button class="iconbtn" id="rMore" aria-label="File options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
+  </div>
+  <div class="rbody" id="rBody"></div>
+  <div class="rbar" id="rBar">
+    <div class="rq"><span id="rQ">How well do you remember this?</span><button id="rSnooze">Snooze 1 day</button></div>
+    <div class="grades">
+      <button class="g-hard" data-grade="hard">Hard<small id="gHard"></small></button>
+      <button class="g-good" data-grade="good">Good<small id="gGood"></small></button>
+      <button class="g-easy" data-grade="easy">Easy<small id="gEasy"></small></button>
+    </div>
+  </div>
+</div>
+
+<dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
+<input type="file" id="fileInput" accept=".html,.htm,.pdf,text/html,application/pdf" multiple hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ================= utils ================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const ymd = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+const today = () => ymd();
+const parseD = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); };
+const diffDays = (a, b) => Math.round((parseD(b) - parseD(a)) / 864e5);
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const niceDate = s => { const d = parseD(s); return d.getDate() + ' ' + MONTHS[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : ''); };
+const relDay = s => { const n = diffDays(today(), s); return n === 0 ? 'Today' : n === 1 ? 'Tomorrow' : n === -1 ? 'Yesterday' : n < 0 ? (-n) + ' days ago' : 'in ' + n + ' days'; };
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const slug = s => s.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').slice(0, 40) || 'file';
+
+function bytesToB64(bytes){ let s = ''; for(let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
+function b64ToBytes(b64){ const bin = atob(b64.replace(/\s/g, '')); const u = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+const strToB64 = s => bytesToB64(new TextEncoder().encode(s));
+const b64ToStr = b => new TextDecoder().decode(b64ToBytes(b));
+
+let toastT;
+function toast(msg, ms = 2400){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+
+/* ================= config ================= */
+const CFG_KEY = 'revise-cfg';
+let cfg = null;
+function loadCfg(){ try{ cfg = JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ cfg = null; } if(cfg && !(cfg.owner && cfg.repo && cfg.token)) cfg = null; }
+function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} }
+function guessRepo(){
+  // https://<owner>.github.io/<repo>/  →  prefill
+  const h = location.hostname.match(/^([^.]+)\.github\.io$/i);
+  const seg = location.pathname.split('/').filter(Boolean)[0];
+  return { owner: h ? h[1] : '', repo: h ? (seg && !seg.includes('.') ? seg : h[1] + '.github.io') : '' };
+}
+
+/* ================= GitHub API ================= */
+const DB_PATH = 'data/srs.json';
+async function gh(path, {method = 'GET', body, accept} = {}){
+  const r = await fetch('https://api.github.com' + path, {
+    method, cache: 'no-store',
+    headers: Object.assign({'Authorization': 'Bearer ' + cfg.token, 'Accept': accept || 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'}, body ? {'Content-Type': 'application/json'} : {}),
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(!r.ok){ let m = ''; try{ m = (await r.json()).message; }catch(e){} const err = new Error(m || ('GitHub error ' + r.status)); err.status = r.status; throw err; }
+  return r;
+}
+const cpath = p => `/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${p.split('/').map(encodeURIComponent).join('/')}`;
+const refQ = () => '?ref=' + encodeURIComponent(cfg.branch || 'main');
+async function ghGetJSON(p){
+  try{
+    const j = await (await gh(cpath(p) + refQ())).json();
+    let text;
+    if(j.encoding === 'base64' && j.content) text = b64ToStr(j.content);
+    else text = await (await gh(cpath(p) + refQ(), {accept: 'application/vnd.github.raw+json'})).text(); // >1 MB
+    return {sha: j.sha, data: JSON.parse(text)};
+  }catch(e){ if(e.status === 404) return {sha: null, data: null}; throw e; }
+}
+async function ghPut(p, b64, message, sha){
+  const j = await (await gh(cpath(p), {method: 'PUT', body: Object.assign({message, content: b64, branch: cfg.branch || 'main'}, sha ? {sha} : {})})).json();
+  return j.content.sha;
+}
+async function ghDelete(p, sha, message){
+  if(!sha){ try{ sha = (await (await gh(cpath(p) + refQ())).json()).sha; }catch(e){ if(e.status === 404) return; throw e; } }
+  try{ await gh(cpath(p), {method: 'DELETE', body: {message, sha, branch: cfg.branch || 'main'}}); }
+  catch(e){
+    if(e.status === 404) return;
+    if(e.status === 409 || e.status === 422){ const s = (await (await gh(cpath(p) + refQ())).json()).sha; await gh(cpath(p), {method: 'DELETE', body: {message, sha: s, branch: cfg.branch || 'main'}}); }
+    else throw e;
+  }
+}
+async function ghRaw(p){ return (await gh(cpath(p) + refQ(), {accept: 'application/vnd.github.raw+json'})).arrayBuffer(); }
+
+/* ================= database ================= */
+const DEFAULT_SCHED = [3, 10, 30, 60];
+function blankDb(){ return {version: 1, settings: {schedule: DEFAULT_SCHED.slice(), hardDays: 1}, folders: [], items: {}, stats: {}}; }
+function normDb(d){
+  const b = blankDb();
+  if(!d || typeof d !== 'object') return b;
+  d.settings = Object.assign(b.settings, d.settings || {});
+  if(!Array.isArray(d.settings.schedule) || !d.settings.schedule.length) d.settings.schedule = DEFAULT_SCHED.slice();
+  d.folders = Array.isArray(d.folders) ? d.folders : [];
+  d.items = d.items && typeof d.items === 'object' ? d.items : {};
+  d.stats = d.stats && typeof d.stats === 'object' ? d.stats : {};
+  return d;
+}
+let db = blankDb(), dbSha = null, lastPull = 0;
+let chain = Promise.resolve(), pending = 0;
+
+function setSync(mode, txt){ const s = $('sync'); s.className = 'sync' + (mode ? ' ' + mode : ''); $('syncTxt').textContent = txt; }
+function bumpSync(){ if(pending > 0) setSync('busy', 'Saving…'); else setSync('', 'Synced'); }
+
+async function pull(){
+  setSync('busy', 'Loading…');
+  const {sha, data} = await ghGetJSON(DB_PATH);
+  if(!data){ db = blankDb(); dbSha = await ghPut(DB_PATH, strToB64(JSON.stringify(db, null, 1)), 'Create revision database', null); }
+  else { db = normDb(data); dbSha = sha; }
+  lastPull = Date.now();
+  bumpSync();
+}
+/** Apply a change locally right away, then replay it on the latest remote copy and save (retries on conflicts). */
+function commit(fn, message){
+  fn(db); render();
+  pending++; bumpSync();
+  chain = chain.then(async () => {
+    for(let attempt = 0; attempt < 4; attempt++){
+      const {sha, data} = await ghGetJSON(DB_PATH);
+      const fresh = normDb(data);
+      fn(fresh);
+      try{
+        dbSha = await ghPut(DB_PATH, strToB64(JSON.stringify(fresh, null, 1)), message, sha);
+        if(pending === 1){ db = fresh; render(); }
+        lastPull = Date.now();
+        return;
+      }catch(e){ if(e.status !== 409 && e.status !== 422) throw e; }
+    }
+    throw new Error('Save conflict — please refresh');
+  }).catch(e => {
+    setSync('err', 'Not saved'); toast('Could not save: ' + e.message, 4000);
+    return pull().then(render).catch(() => {});
+  }).finally(() => { pending--; if(pending === 0 && !$('sync').classList.contains('err')) bumpSync(); });
+  return chain;
+}
+
+/* ================= spaced repetition ================= */
+const schedOf = (it, st = db.settings) => (Array.isArray(it.schedule) && it.schedule.length) ? it.schedule : st.schedule;
+const intervalAt = (it, reads, st) => { const s = schedOf(it, st); return s[Math.min(Math.max(reads, 1) - 1, s.length - 1)]; };
+/** reads = how many times the file has been read so far. Good → next gap, Easy → skips a gap, Hard → back soon. */
+function preview(it, grade, st = db.settings){
+  if(grade === 'hard') return {days: Math.max(1, +st.hardDays || 1), reads: it.reads || 0};
+  const reads = (it.reads || 0) + (grade === 'easy' ? 2 : 1);
+  return {days: intervalAt(it, reads, st), reads};
+}
+function applyGrade(d, id, grade){
+  const it = d.items[id]; if(!it) return;
+  const p = preview(it, grade, d.settings);
+  it.reads = p.reads; it.due = addDays(today(), p.days); it.last = today(); it.done = false;
+  it.hist = (it.hist || []).concat([[today(), grade[0]]]).slice(-60);
+  d.stats[today()] = (d.stats[today()] || 0) + 1;
+}
+const isDue = it => !it.done && it.due && it.due <= today();
+const dueItems = () => Object.values(db.items).filter(isDue).sort((a, b) => a.due < b.due ? -1 : a.due > b.due ? 1 : a.name.localeCompare(b.name));
+function streak(){
+  let n = 0, d = today();
+  if(!db.stats[d]) d = addDays(d, -1);
+  while(db.stats[d]){ n++; d = addDays(d, -1); }
+  return n;
+}
+const folderLabel = f => f ? f.split('/').join(' › ') : 'Home';
+
+/* ================= views ================= */
+let tab = 'today', curFolder = '', query = '';
+function setTab(t){ tab = t; query = ''; render(); window.scrollTo(0, 0); }
+
+const SVG_FOLDER = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+const SVG_MORE = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>';
+
+function dueChip(it){
+  if(it.done) return '<span class="chip done">Mastered</span>';
+  if(!it.due) return '';
+  const n = diffDays(today(), it.due);
+  if(n < 0) return `<span class="chip late">${-n}d late</span>`;
+  if(n === 0) return '<span class="chip due">Due today</span>';
+  return `<span class="chip">${n === 1 ? 'Tomorrow' : niceDate(it.due)}</span>`;
+}
+function itemRow(it, {showFolder = true, menu = true} = {}){
+  const sub = [showFolder ? folderLabel(it.folder) : null, it.reads ? 'read ' + plural(it.reads, 'time') : 'not read yet'].filter(Boolean).join(' · ');
+  return `<div class="row" data-open="${esc(it.id)}" role="button" tabindex="0">
+    <div class="ic ${it.type}">${it.type.toUpperCase()}</div>
+    <div class="mid"><div class="nm">${esc(it.name)}</div><div class="sub">${esc(sub)}</div></div>
+    ${dueChip(it)}
+    ${menu ? `<button class="more" data-itemmenu="${esc(it.id)}" aria-label="Options for ${esc(it.name)}">${SVG_MORE}</button>` : ''}
+  </div>`;
+}
+
+function renderToday(){
+  const due = dueItems(), all = Object.values(db.items);
+  const doneToday = db.stats[today()] || 0;
+  let h = `<h1>${due.length ? plural(due.length, 'file') + ' to revise' : 'All caught up'}</h1>
+    <p class="lead">${WD[new Date().getDay()]}, ${niceDate(today())}</p>
+    <div class="stats">
+      <div class="stat"><b>${doneToday}</b><span>revised today</span></div>
+      <div class="stat"><b>${streak()}${streak() >= 3 ? ' 🔥' : ''}</b><span>day streak</span></div>
+      <div class="stat"><b>${all.length}</b><span>files total</span></div>
+    </div>`;
+  if(due.length){
+    h += `<h2>Due now</h2><div class="list">${due.map(it => itemRow(it)).join('')}</div>`;
+  } else if(!all.length){
+    h += `<h2>Get started</h2><div class="empty"><div class="big">📚</div><b>Your library is empty</b>Create a folder (like “Ghatna Chakra”) and upload the HTML or PDF notes you read today.<div class="actions" style="justify-content:center"><button class="btn primary" data-go="library">Open library</button></div></div>`;
+  } else {
+    const next = all.filter(it => !it.done && it.due).sort((a, b) => a.due < b.due ? -1 : 1)[0];
+    const nextN = next ? all.filter(it => !it.done && it.due === next.due).length : 0;
+    h += `<h2>Due now</h2><div class="empty"><div class="big">🎉</div><b>Nothing due today</b>${next ? `Next: ${plural(nextN, 'file')} ${relDay(next.due).toLowerCase()} (${niceDate(next.due)}).` : 'Everything is mastered.'}</div>`;
+  }
+  if(all.length){
+    h += `<h2>Next 14 days</h2>` + forecastHTML();
+    const recent = all.filter(it => it.last === today() && !isDue(it)).sort((a, b) => a.name.localeCompare(b.name));
+    if(recent.length) h += `<h2>Revised today</h2><div class="list">${recent.map(it => itemRow(it)).join('')}</div>`;
+  }
+  return h;
+}
+function forecastHTML(){
+  const counts = [], t = today();
+  for(let i = 0; i < 14; i++){
+    const d = addDays(t, i);
+    counts.push([d, Object.values(db.items).filter(it => !it.done && it.due && (i === 0 ? it.due <= d : it.due === d)).length]);
+  }
+  const max = Math.max(1, ...counts.map(c => c[1]));
+  return `<div class="forecast" role="img" aria-label="Reviews due over the next 14 days">${counts.map(([d, n], i) =>
+    `<div class="col" title="${niceDate(d)}: ${n}"><span class="n">${n || ''}</span><div class="bar${n ? '' : ' zero'}" style="height:${n ? Math.max(8, n / max * 100) : 3}%"></div><span class="lab">${i === 0 ? 'Now' : i % 2 ? '' : parseD(d).getDate()}</span></div>`).join('')}</div>`;
+}
+
+function childFolders(parent){
+  return db.folders.filter(f => {
+    if(parent === '') return !f.includes('/');
+    return f.startsWith(parent + '/') && !f.slice(parent.length + 1).includes('/');
+  }).sort((a, b) => a.localeCompare(b));
+}
+const inTree = (it, f) => it.folder === f || (f && it.folder.startsWith(f + '/'));
+function renderLibrary(){
+  if(curFolder && !db.folders.includes(curFolder)) curFolder = '';
+  const parts = curFolder ? curFolder.split('/') : [];
+  let h = `<div class="crumbs"><button data-folder="">Home</button>${parts.map((p, i) => {
+    const path = parts.slice(0, i + 1).join('/');
+    return `<span class="sep">›</span>` + (i === parts.length - 1 ? `<span class="cur">${esc(p)}</span>` : `<button data-folder="${esc(path)}">${esc(p)}</button>`);
+  }).join('')}</div>
+  <input class="search" id="search" type="search" placeholder="Search all files…" value="${esc(query)}" autocomplete="off">
+  <div class="actions">
+    <button class="btn primary" data-act="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>Upload notes</button>
+    <button class="btn" data-act="newfolder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New folder</button>
+    ${curFolder ? `<button class="btn" data-act="foldermenu" data-path="${esc(curFolder)}">${SVG_MORE.replace('<svg', '<svg style="width:17px;height:17px"')}Folder options</button>` : ''}
+  </div>`;
+  if(query){
+    const q = query.toLowerCase();
+    const res = Object.values(db.items).filter(it => (it.name + ' ' + it.folder).toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+    h += `<h2>${plural(res.length, 'result')}</h2>` + (res.length ? `<div class="list">${res.map(it => itemRow(it)).join('')}</div>` : `<div class="empty">No files match “${esc(query)}”.</div>`);
+    return h;
+  }
+  const subs = childFolders(curFolder);
+  const files = Object.values(db.items).filter(it => it.folder === curFolder).sort((a, b) => a.name.localeCompare(b.name));
+  if(subs.length){
+    h += `<h2>Folders</h2><div class="list">${subs.map(f => {
+      const items = Object.values(db.items).filter(it => inTree(it, f)), dueN = items.filter(isDue).length;
+      const nSub = db.folders.filter(x => x.startsWith(f + '/')).length;
+      return `<div class="row" data-folder="${esc(f)}" role="button" tabindex="0"><div class="ic folder">${SVG_FOLDER}</div>
+        <div class="mid"><div class="nm">${esc(f.split('/').pop())}</div><div class="sub">${[nSub ? plural(nSub, 'folder') : null, plural(items.length, 'file')].filter(Boolean).join(' · ')}</div></div>
+        ${dueN ? `<span class="chip due">${dueN} due</span>` : ''}
+        <button class="more" data-act="foldermenu" data-path="${esc(f)}" aria-label="Folder options">${SVG_MORE}</button></div>`;
+    }).join('')}</div>`;
+  }
+  if(files.length) h += `<h2>Files</h2><div class="list">${files.map(it => itemRow(it, {showFolder: false})).join('')}</div>`;
+  if(!subs.length && !files.length){
+    h += `<div class="empty" style="margin-top:16px"><div class="big">${curFolder ? '📂' : '🗂️'}</div><b>${curFolder ? 'This folder is empty' : 'Build your library'}</b>${curFolder ? 'Upload notes here, or add a sub-folder (e.g. Science → Biology).' : 'Start with a folder like “Ghatna Chakra”, then add sub-folders such as Science → Biology.'}</div>`;
+  }
+  return h;
+}
+
+function renderUpcoming(){
+  const items = Object.values(db.items).filter(it => !it.done && it.due);
+  const groups = {};
+  items.forEach(it => { const k = it.due < today() ? today() : it.due; (groups[k] = groups[k] || []).push(it); });
+  const keys = Object.keys(groups).sort();
+  let h = `<h1>Upcoming</h1><p class="lead">Your revision calendar. Tap a file to read it early — that counts as a review.</p>`;
+  if(!keys.length) return h + `<div class="empty"><div class="big">🗓️</div><b>Nothing scheduled</b>Upload notes in the Library to start.</div>`;
+  keys.slice(0, 60).forEach(k => {
+    const list = groups[k].sort((a, b) => a.name.localeCompare(b.name));
+    const n = diffDays(today(), k);
+    h += `<div class="day"><div class="dh">${n === 0 ? 'Today (incl. overdue)' : n === 1 ? 'Tomorrow' : WD[parseD(k).getDay()] + ', ' + niceDate(k)}<span>${plural(list.length, 'file')}</span></div><div class="list">${list.map(it => itemRow(it)).join('')}</div></div>`;
+  });
+  const mastered = Object.values(db.items).filter(it => it.done);
+  if(mastered.length) h += `<h2>Mastered</h2><div class="list">${mastered.map(it => itemRow(it)).join('')}</div>`;
+  return h;
+}
+
+function render(){
+  if(!cfg) return;
+  const m = $('main');
+  const focusSearch = document.activeElement && document.activeElement.id === 'search';
+  const caret = focusSearch ? document.activeElement.selectionStart : 0;
+  m.innerHTML = tab === 'today' ? renderToday() : tab === 'library' ? renderLibrary() : renderUpcoming();
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  const n = dueItems().length, b = $('dueBadge');
+  b.textContent = n; b.classList.toggle('hidden', !n);
+  document.title = (n ? `(${n}) ` : '') + 'Revise — Spaced Repetition';
+  if(focusSearch){ const s = $('search'); if(s){ s.focus(); s.setSelectionRange(caret, caret); } }
+  if(readerId && !$('reader').classList.contains('hidden')) updateReaderBar();
+}
+
+/* ================= dialogs ================= */
+const dlg = $('dlg');
+function openDlg(html, onReady){ $('dlgBody').innerHTML = html; if(!dlg.open) dlg.showModal(); onReady && onReady($('dlgBody')); const f = $('dlgBody').querySelector('input[autofocus],select[autofocus]'); if(f) setTimeout(() => f.focus(), 30); }
+function closeDlg(){ if(dlg.open) dlg.close(); }
+dlg.addEventListener('click', e => { if(e.target === dlg) closeDlg(); });
+
+function validName(n){ n = n.trim(); if(!n) return 'Name can’t be empty'; if(n.includes('/')) return 'Name can’t contain “/”'; return null; }
+
+function newFolderDlg(){
+  openDlg(`<h3>New folder</h3><p class="hint">Inside <b>${esc(folderLabel(curFolder))}</b></p>
+    <div class="field"><label for="fName">Folder name</label><input type="text" id="fName" placeholder="e.g. Ghatna Chakra" autofocus></div>
+    <div class="err" id="fErr"></div>
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="fOk">Create</button></div>`, b => {
+    const go = () => {
+      const name = $('fName').value.trim(), bad = validName(name);
+      const path = curFolder ? curFolder + '/' + name : name;
+      if(bad) return $('fErr').textContent = bad;
+      if(db.folders.includes(path)) return $('fErr').textContent = 'That folder already exists';
+      closeDlg();
+      commit(d => { if(!d.folders.includes(path)) d.folders.push(path); }, 'Add folder ' + path);
+      curFolder = path; render();
+    };
+    $('fOk').onclick = go; $('fName').onkeydown = e => { if(e.key === 'Enter') go(); };
+  });
+}
+function folderMenu(path){
+  const items = Object.values(db.items).filter(it => inTree(it, path));
+  const subs = db.folders.filter(f => f.startsWith(path + '/'));
+  openDlg(`<h3>${esc(path.split('/').pop())}</h3><p class="hint">${esc(folderLabel(path))} · ${plural(items.length, 'file')}</p>
+    <div class="menu">
+      <button data-m="rename">✏️ Rename</button>
+      <button data-m="review" ${items.filter(isDue).length ? '' : 'disabled style="opacity:.5"'}>▶️ Revise due files in this folder (${items.filter(isDue).length})</button>
+      <button data-m="delete" class="danger">🗑️ Delete folder${items.length || subs.length ? ' (must be empty)' : ''}</button>
+    </div>
+    <div class="foot"><button class="btn" data-close>Close</button></div>`, b => {
+    b.querySelector('[data-m=rename]').onclick = () => renameFolderDlg(path);
+    b.querySelector('[data-m=review]').onclick = () => { const q = items.filter(isDue).sort((a, b) => a.due < b.due ? -1 : 1); if(!q.length) return; closeDlg(); startQueue(q.map(it => it.id)); };
+    b.querySelector('[data-m=delete]').onclick = () => {
+      if(items.length || subs.length){ toast('Move or delete the files and sub-folders inside first.', 3200); return; }
+      if(!confirm(`Delete folder “${path.split('/').pop()}”?`)) return;
+      closeDlg();
+      if(curFolder === path) curFolder = path.split('/').slice(0, -1).join('/');
+      commit(d => { d.folders = d.folders.filter(f => f !== path); }, 'Delete folder ' + path);
+    };
+  });
+}
+function renameFolderDlg(path){
+  const parent = path.split('/').slice(0, -1).join('/');
+  openDlg(`<h3>Rename folder</h3>
+    <div class="field"><label for="fName">Folder name</label><input type="text" id="fName" value="${esc(path.split('/').pop())}" autofocus></div>
+    <div class="err" id="fErr"></div>
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="fOk">Rename</button></div>`, () => {
+    const go = () => {
+      const name = $('fName').value.trim(), bad = validName(name);
+      if(bad) return $('fErr').textContent = bad;
+      const np = parent ? parent + '/' + name : name;
+      if(np === path) return closeDlg();
+      if(db.folders.includes(np)) return $('fErr').textContent = 'A folder with that name already exists';
+      closeDlg();
+      const re = f => f === path ? np : f.startsWith(path + '/') ? np + f.slice(path.length) : f;
+      if(curFolder === path || curFolder.startsWith(path + '/')) curFolder = re(curFolder);
+      commit(d => { d.folders = d.folders.map(re); Object.values(d.items).forEach(it => it.folder = re(it.folder)); }, `Rename folder ${path} → ${np}`);
+    };
+    $('fOk').onclick = go; $('fName').onkeydown = e => { if(e.key === 'Enter') go(); };
+  });
+}
+
+function folderOptions(sel){
+  return ['', ...db.folders.slice().sort((a, b) => a.localeCompare(b))].map(f => `<option value="${esc(f)}" ${f === sel ? 'selected' : ''}>${esc(folderLabel(f))}</option>`).join('');
+}
+function parseSched(s){
+  s = s.trim(); if(!s) return null;
+  const arr = s.split(/[\s,]+/).filter(Boolean).map(Number);
+  if(!arr.length || arr.some(n => !Number.isInteger(n) || n < 1 || n > 3650)) return false;
+  return arr;
+}
+
+function itemMenu(id){
+  const it = db.items[id]; if(!it) return;
+  const s = schedOf(it);
+  openDlg(`<h3 style="word-break:break-word">${esc(it.name)}</h3><p class="hint">${esc(folderLabel(it.folder))} · ${it.type.toUpperCase()}</p>
+    <div class="meta">
+      Next revision: <b>${it.done ? 'mastered — not scheduled' : it.due ? niceDate(it.due) + ' (' + relDay(it.due).toLowerCase() + ')' : '—'}</b><br>
+      Read <b>${plural(it.reads || 0, 'time')}</b>${it.last ? ' · last on ' + niceDate(it.last) : ''} · added ${niceDate(it.added)}<br>
+      Schedule: <b>${s.join(', ')} days</b>${it.schedule ? ' (custom)' : ' (default)'}
+    </div>
+    <div class="menu">
+      <button data-m="open">📖 Read now</button>
+      <button data-m="edit">⚙️ Edit name, folder &amp; schedule</button>
+      <button data-m="done">${it.done ? '↩️ Bring back into revision' : '✅ Mark as mastered (stop reminders)'}</button>
+      <button data-m="reset">🔄 Restart schedule from today</button>
+      <button data-m="delete" class="danger">🗑️ Delete file</button>
+    </div>
+    <div class="foot"><button class="btn" data-close>Close</button></div>`, b => {
+    b.querySelector('[data-m=open]').onclick = () => { closeDlg(); openReader(id); };
+    b.querySelector('[data-m=edit]').onclick = () => editItemDlg(id);
+    b.querySelector('[data-m=done]').onclick = () => { closeDlg(); const back = it.done; commit(d => { const x = d.items[id]; if(!x) return; x.done = !back; if(back && (!x.due || x.due < today())) x.due = today(); }, (back ? 'Unmaster ' : 'Master ') + it.name); toast(back ? 'Back in your revision cycle' : 'Marked as mastered'); };
+    b.querySelector('[data-m=reset]').onclick = () => { closeDlg(); commit(d => { const x = d.items[id]; if(!x) return; x.reads = 1; x.done = false; x.last = today(); x.due = addDays(today(), schedOf(x, d.settings)[0]); }, 'Restart ' + it.name); toast('Next revision in ' + plural(schedOf(it)[0], 'day')); };
+    b.querySelector('[data-m=delete]').onclick = async () => {
+      if(!confirm(`Delete “${it.name}” permanently? This removes the file from your repo.`)) return;
+      closeDlg(); if(readerId === id) closeReader();
+      const path = it.file, sha = it.sha;
+      commit(d => { delete d.items[id]; }, 'Delete ' + it.name);
+      try{ await ghDelete(path, sha, 'Delete file ' + it.name); }catch(e){ toast('File record removed, but deleting the file failed: ' + e.message, 4000); }
+    };
+  });
+}
+function editItemDlg(id){
+  const it = db.items[id]; if(!it) return;
+  openDlg(`<h3>Edit file</h3>
+    <div class="field"><label for="eName">Name</label><input type="text" id="eName" value="${esc(it.name)}"></div>
+    <div class="field"><label for="eFolder">Folder</label><select id="eFolder">${folderOptions(it.folder)}</select></div>
+    <div class="field"><label for="eSched">Revision gaps in days</label><input type="text" id="eSched" inputmode="numeric" value="${esc(it.schedule ? it.schedule.join(', ') : '')}" placeholder="Default: ${db.settings.schedule.join(', ')}"><div class="help">Leave blank to use the default. Example: <b>1, 3, 7, 21</b> — after the last gap it keeps repeating the last one.</div></div>
+    <div class="field"><label for="eDue">Next revision date</label><input type="date" id="eDue" value="${esc(it.due || today())}"></div>
+    <div class="err" id="eErr"></div>
+    <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="eOk">Save</button></div>`, () => {
+    $('eOk').onclick = () => {
+      const name = $('eName').value.trim(), folder = $('eFolder').value, sched = parseSched($('eSched').value), due = $('eDue').value;
+      if(!name) return $('eErr').textContent = 'Name can’t be empty';
+      if(sched === false) return $('eErr').textContent = 'Gaps must be whole numbers of days, like 3, 10, 30';
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(due)) return $('eErr').textContent = 'Pick a valid date';
+      closeDlg();
+      commit(d => { const x = d.items[id]; if(!x) return; x.name = name; x.folder = folder; x.schedule = sched; x.due = due; if(x.done && due) x.done = false; }, 'Edit ' + name);
+      toast('Saved');
+    };
+  });
+}
+
+function settingsDlg(){
+  openDlg(`<h3>Settings</h3>
+    <div class="field"><label for="sSched">Default revision gaps (days)</label><input type="text" id="sSched" inputmode="numeric" value="${esc(db.settings.schedule.join(', '))}"><div class="help">Read today → shown again after each gap. Files with a custom schedule keep theirs.</div></div>
+    <div class="field"><label for="sHard">“Hard” brings it back after (days)</label><input type="text" id="sHard" inputmode="numeric" value="${esc(db.settings.hardDays)}"></div>
+    <div class="field"><label for="sTheme">Theme</label><select id="sTheme"><option value="">Match device</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+    <div class="meta">Connected to <b>${esc(cfg.owner)}/${esc(cfg.repo)}</b> (${esc(cfg.branch || 'main')})<br>Daily reminders: a GitHub Action opens an issue each morning listing what’s due, so GitHub notifies you.</div>
+    <div class="err" id="sErr"></div>
+    <div class="foot"><button class="btn danger" id="sOut">Disconnect</button><span style="flex:1"></span><button class="btn" data-close>Cancel</button><button class="btn primary" id="sOk">Save</button></div>`, () => {
+    let th = ''; try{ th = localStorage.getItem('revise-theme') || ''; }catch(e){}
+    $('sTheme').value = th;
+    $('sOk').onclick = () => {
+      const sched = parseSched($('sSched').value), hard = Number($('sHard').value);
+      if(!sched) return $('sErr').textContent = 'Gaps must be whole numbers of days, like 3, 10, 30, 60';
+      if(!Number.isInteger(hard) || hard < 1 || hard > 60) return $('sErr').textContent = '“Hard” must be between 1 and 60 days';
+      setTheme($('sTheme').value);
+      closeDlg();
+      if(sched.join() !== db.settings.schedule.join() || hard !== +db.settings.hardDays)
+        commit(d => { d.settings.schedule = sched; d.settings.hardDays = hard; }, 'Update settings');
+      toast('Settings saved');
+    };
+    $('sOut').onclick = () => { if(!confirm('Disconnect this browser? Your files stay safe in GitHub.')) return; try{ localStorage.removeItem(CFG_KEY); }catch(e){} location.reload(); };
+  });
+}
+function setTheme(v){ try{ v ? localStorage.setItem('revise-theme', v) : localStorage.removeItem('revise-theme'); }catch(e){} if(v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; }
+
+/* ================= upload ================= */
+let pendingFiles = [];
+function pickFiles(){ $('fileInput').click(); }
+$('fileInput').onchange = e => { const f = [...e.target.files]; e.target.value = ''; if(f.length) uploadDlg(f); };
+function fileType(f){ const n = f.name.toLowerCase(); if(n.endsWith('.pdf') || f.type === 'application/pdf') return 'pdf'; if(/\.html?$/.test(n) || f.type === 'text/html') return 'html'; return null; }
+function uploadDlg(files){
+  const ok = files.filter(fileType), skipped = files.length - ok.length;
+  if(!ok.length){ toast('Only .html and .pdf files are supported'); return; }
+  pendingFiles = ok;
+  const tooBig = ok.filter(f => f.size > 45 * 1024 * 1024);
+  openDlg(`<h3>Upload ${plural(ok.length, 'file')}</h3>
+    <div class="filelist">${ok.map(f => esc(f.name) + ` <span style="color:var(--dim)">(${(f.size / 1024 / 1024).toFixed(f.size > 1e6 ? 1 : 2)} MB)</span>`).join('<br>')}</div>
+    ${skipped ? `<p class="hint" style="margin-top:8px">${plural(skipped, 'file')} skipped (only HTML/PDF).</p>` : ''}
+    ${tooBig.length ? `<p class="err">Files over 45 MB can’t be stored on GitHub this way: ${tooBig.map(f => esc(f.name)).join(', ')}</p>` : ''}
+    <div class="field"><label for="uFolder">Folder</label><select id="uFolder">${folderOptions(curFolder)}</select></div>
+    <label class="check"><input type="checkbox" id="uRead" checked><span><b>I already read ${ok.length > 1 ? 'these' : 'this'} today</b><br><span style="color:var(--muted);font-size:.8rem">First revision in <span id="uFirst">${db.settings.schedule[0]}</span> days. Untick to put ${ok.length > 1 ? 'them' : 'it'} in today’s list instead.</span></span></label>
+    <div class="field"><label for="uSched">Custom revision gaps (optional)</label><input type="text" id="uSched" inputmode="numeric" placeholder="Default: ${db.settings.schedule.join(', ')}"></div>
+    <div class="progress hidden" id="uProg"><i></i></div>
+    <div class="err" id="uErr"></div>
+    <div class="foot"><button class="btn" data-close id="uCancel">Cancel</button><button class="btn primary" id="uOk" ${tooBig.length === ok.length ? 'disabled' : ''}>Upload</button></div>`, () => {
+    $('uSched').oninput = () => { const s = parseSched($('uSched').value); $('uFirst').textContent = (s || db.settings.schedule)[0]; };
+    $('uOk').onclick = () => doUpload(ok.filter(f => !tooBig.includes(f)));
+  });
+}
+function readB64(file){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = () => rej(r.error); r.readAsDataURL(file); }); }
+async function doUpload(files){
+  const folder = $('uFolder').value, read = $('uRead').checked, sched = parseSched($('uSched').value);
+  if(sched === false){ $('uErr').textContent = 'Gaps must be whole numbers of days, like 3, 10, 30'; return; }
+  $('uOk').disabled = true; $('uCancel').disabled = true; $('uProg').classList.remove('hidden');
+  const added = [];
+  for(let i = 0; i < files.length; i++){
+    const f = files[i], type = fileType(f), id = uid();
+    const name = f.name.replace(/\.(html?|pdf)$/i, '');
+    $('uErr').textContent = ''; $('uOk').textContent = `Uploading ${i + 1}/${files.length}…`;
+    try{
+      const path = `files/${id}-${slug(name)}.${type}`;
+      const sha = await ghPut(path, await readB64(f), 'Upload ' + name, null);
+      added.push({id, name, type, file: path, sha, folder, size: f.size, added: today(), reads: read ? 1 : 0, last: read ? today() : null,
+        due: read ? addDays(today(), (sched || db.settings.schedule)[0]) : today(), schedule: sched, done: false, hist: read ? [[today(), 'r']] : []});
+    }catch(e){ toast(`“${f.name}” failed: ${e.message}`, 4000); }
+    $('uProg').firstElementChild.style.width = ((i + 1) / files.length * 100) + '%';
+  }
+  closeDlg();
+  if(!added.length) return;
+  commit(d => { added.forEach(it => { d.items[it.id] = it; }); if(read) d.stats[today()] = (d.stats[today()] || 0); }, `Add ${added.length} file(s) to ${folder || 'Home'}`);
+  toast(read ? `Saved. First revision on ${niceDate(added[0].due)} 👍` : 'Saved to today’s list');
+}
+
+/* ================= reader ================= */
+let readerId = null, queue = [], blobUrl = null, pdfState = null;
+function startQueue(ids){ queue = ids.slice(1); openReader(ids[0]); }
+async function fetchFile(it){
+  const key = new Request(location.href.split('#')[0].replace(/[^/]*$/, '') + '__cache/' + encodeURIComponent(it.file) + '?v=' + encodeURIComponent(it.sha || ''));
+  let cache = null;
+  try{ cache = await caches.open('revise-files'); const hit = await cache.match(key); if(hit) return await hit.arrayBuffer(); }catch(e){ cache = null; }
+  const buf = await ghRaw(it.file);
+  try{ if(cache) await cache.put(key, new Response(buf.slice(0))); }catch(e){}
+  return buf;
+}
+function htmlType(buf){
+  const head = new TextDecoder('latin1').decode(new Uint8Array(buf, 0, Math.min(2048, buf.byteLength)));
+  return /<meta[^>]+charset\s*=\s*["']?\s*(?!utf-?8)[\w-]+/i.test(head) ? 'text/html' : 'text/html;charset=utf-8';
+}
+async function openReader(id){
+  const it = db.items[id]; if(!it) return;
+  readerId = id;
+  $('reader').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  $('rName').textContent = it.name; $('rSub').textContent = folderLabel(it.folder);
+  $('rZoomIn').classList.toggle('hidden', it.type !== 'pdf'); $('rZoomOut').classList.toggle('hidden', it.type !== 'pdf');
+  updateReaderBar();
+  const body = $('rBody');
+  body.innerHTML = '<div class="loading"><div>Loading…</div></div>';
+  if(location.hash !== '#open=' + id) history.pushState({reader: id}, '', '#open=' + id);
+  try{
+    const buf = await fetchFile(it);
+    if(readerId !== id) return;
+    if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl = null; }
+    if(it.type === 'pdf') await renderPdf(buf, body);
+    else {
+      blobUrl = URL.createObjectURL(new Blob([buf], {type: htmlType(buf)}));
+      // sandboxed (no same-origin) so a note's scripts can never read your GitHub token
+      body.innerHTML = `<iframe sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals" referrerpolicy="no-referrer" title="${esc(it.name)}" src="${blobUrl}"></iframe>`;
+    }
+  }catch(e){
+    if(readerId !== id) return;
+    body.innerHTML = `<div class="loading"><div style="text-align:center;padding:20px">Couldn’t load this file.<br><small>${esc(e.message)}</small><br><br><button class="btn" id="rRetry">Try again</button></div></div>`;
+    $('rRetry').onclick = () => openReader(id);
+  }
+}
+function updateReaderBar(){
+  const it = db.items[readerId]; if(!it) return;
+  const fmt = g => { const p = preview(it, g); return p.days === 1 ? 'tomorrow' : p.days + ' days'; };
+  $('gHard').textContent = fmt('hard'); $('gGood').textContent = fmt('good'); $('gEasy').textContent = fmt('easy');
+  const due = isDue(it);
+  $('rQ').textContent = it.done ? 'Mastered — revising anyway' : due ? (queue.length ? `How well do you remember this? · ${queue.length} more after this` : 'How well do you remember this?') : `Not due until ${niceDate(it.due)} — rate it to count an early revision`;
+  $('rSnooze').classList.toggle('hidden', !due);
+}
+function closeReader(fromPop){
+  $('reader').classList.add('hidden'); document.body.style.overflow = '';
+  $('rBody').innerHTML = ''; readerId = null; queue = []; pdfState = null;
+  if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl = null; }
+  if(!fromPop && location.hash.startsWith('#open=')) history.back();
+  render();
+}
+function nextInQueue(){
+  while(queue.length && !(db.items[queue[0]] && isDue(db.items[queue[0]]))) queue.shift();
+  if(queue.length){ const n = queue.shift(); history.replaceState({reader: n}, '', '#open=' + n); openReader(n); }
+  else closeReader();
+}
+function grade(g){
+  const id = readerId, it = db.items[id]; if(!it) return;
+  const p = preview(it, g);
+  commit(d => applyGrade(d, id, g), `Revise ${it.name} (${g})`);
+  toast(`Next revision ${p.days === 1 ? 'tomorrow' : 'in ' + p.days + ' days'} · ${niceDate(addDays(today(), p.days))}`);
+  nextInQueue();
+}
+$('rBar').addEventListener('click', e => { const b = e.target.closest('[data-grade]'); if(b) grade(b.dataset.grade); });
+$('rSnooze').onclick = () => { const id = readerId, it = db.items[id]; if(!it) return; commit(d => { if(d.items[id]) d.items[id].due = addDays(today(), 1); }, 'Snooze ' + it.name); toast('Moved to tomorrow'); nextInQueue(); };
+$('rClose').onclick = () => closeReader();
+$('rMore').onclick = () => itemMenu(readerId);
+window.addEventListener('popstate', () => {
+  const m = location.hash.match(/^#open=(.+)$/);
+  if(!m && readerId) closeReader(true);
+  else if(m && m[1] !== readerId && db.items[m[1]]) openReader(m[1]);
+});
+
+/* PDF via pdf.js (renders on phones too, where inline PDF viewing is unreliable) */
+let pdfjsReady = null;
+function loadPdfjs(){
+  if(pdfjsReady) return pdfjsReady;
+  pdfjsReady = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; res(window.pdfjsLib); };
+    s.onerror = () => { pdfjsReady = null; rej(new Error('Could not load the PDF viewer (offline?)')); };
+    document.head.appendChild(s);
+  });
+  return pdfjsReady;
+}
+async function renderPdf(buf, body){
+  const lib = await loadPdfjs();
+  const doc = await lib.getDocument({data: new Uint8Array(buf)}).promise;
+  const wrap = document.createElement('div'); wrap.className = 'pdfwrap';
+  body.innerHTML = ''; body.appendChild(wrap);
+  pdfState = {doc, wrap, zoom: 1, rendered: new Map()};
+  await layoutPdf();
+}
+async function layoutPdf(){
+  const st = pdfState; if(!st) return;
+  const {doc, wrap} = st;
+  const keepRatio = wrap.scrollHeight ? wrap.scrollTop / wrap.scrollHeight : 0;
+  wrap.innerHTML = ''; st.rendered.clear();
+  const avail = Math.max(200, wrap.clientWidth - 16) * st.zoom;
+  const first = await doc.getPage(1); const v1 = first.getViewport({scale: 1});
+  const scale = avail / v1.width, dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  const io = new IntersectionObserver(entries => entries.forEach(en => { if(en.isIntersecting) drawPage(+en.target.dataset.p, en.target, scale, dpr); }), {root: wrap, rootMargin: '600px 0px'});
+  for(let p = 1; p <= doc.numPages; p++){
+    const c = document.createElement('canvas'); c.dataset.p = p;
+    c.style.width = Math.round(v1.width * scale) + 'px'; c.style.height = Math.round(v1.height * scale) + 'px';
+    if(st.zoom > 1) c.style.maxWidth = 'none';
+    wrap.appendChild(c); io.observe(c);
+  }
+  st.io && st.io.disconnect(); st.io = io;
+  wrap.scrollTop = keepRatio * wrap.scrollHeight;
+}
+async function drawPage(n, canvas, scale, dpr){
+  const st = pdfState; if(!st || st.rendered.has(canvas)) return; st.rendered.set(canvas, true);
+  const page = await st.doc.getPage(n); const vp = page.getViewport({scale: scale * dpr});
+  canvas.width = vp.width; canvas.height = vp.height;
+  canvas.style.height = Math.round(vp.height / dpr) + 'px'; canvas.style.width = Math.round(vp.width / dpr) + 'px';
+  await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise;
+}
+$('rZoomIn').onclick = () => { if(pdfState){ pdfState.zoom = Math.min(3, pdfState.zoom + .25); layoutPdf(); } };
+$('rZoomOut').onclick = () => { if(pdfState){ pdfState.zoom = Math.max(.5, pdfState.zoom - .25); layoutPdf(); } };
+let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => pdfState && layoutPdf(), 250); });
+
+/* ================= events ================= */
+$('main').addEventListener('click', e => {
+  const t = e.target;
+  const im = t.closest('[data-itemmenu]'); if(im){ e.stopPropagation(); return itemMenu(im.dataset.itemmenu); }
+  const act = t.closest('[data-act]');
+  if(act){ e.stopPropagation(); const a = act.dataset.act;
+    if(a === 'upload') return pickFiles();
+    if(a === 'newfolder') return newFolderDlg();
+    if(a === 'foldermenu') return folderMenu(act.dataset.path);
+  }
+  const go = t.closest('[data-go]'); if(go) return setTab(go.dataset.go);
+  const f = t.closest('[data-folder]'); if(f){ curFolder = f.dataset.folder; query = ''; render(); window.scrollTo(0, 0); return; }
+  const o = t.closest('[data-open]');
+  if(o){
+    const id = o.dataset.open;
+    if(tab === 'today' && isDue(db.items[id])){ const ids = dueItems().map(x => x.id); const i = ids.indexOf(id); return startQueue(ids.slice(i).concat(ids.slice(0, i))); }
+    return openReader(id);
+  }
+});
+$('main').addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === ' ') && e.target.matches('.row[role=button]')){ e.preventDefault(); e.target.click(); } });
+$('main').addEventListener('input', e => { if(e.target.id === 'search'){ query = e.target.value; render(); } });
+document.querySelector('nav.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if(b) setTab(b.dataset.tab); });
+$('dlgBody').addEventListener('click', e => { if(e.target.closest('[data-close]')) closeDlg(); });
+$('settingsBtn').onclick = settingsDlg;
+$('refreshBtn').onclick = async () => { try{ await chain; await pull(); render(); toast('Up to date'); }catch(e){ setSync('err', 'Offline'); toast('Refresh failed: ' + e.message); } };
+document.addEventListener('keydown', e => {
+  if(!readerId || dlg.open || e.target.matches('input,select,textarea')) return;
+  if(e.key === 'Escape') closeReader();
+  else if(e.key === '1') grade('hard'); else if(e.key === '2') grade('good'); else if(e.key === '3') grade('easy');
+});
+// drag & drop upload on desktop
+['dragover', 'drop'].forEach(ev => document.addEventListener(ev, e => {
+  if(!cfg || readerId || !e.dataTransfer || ![...e.dataTransfer.types].includes('Files')) return;
+  e.preventDefault();
+  if(ev === 'drop'){ if(tab !== 'library') setTab('library'); uploadDlg([...e.dataTransfer.files]); }
+}));
+let lastDay = today();
+document.addEventListener('visibilitychange', async () => {
+  if(document.visibilityState !== 'visible' || !cfg) return;
+  if(today() !== lastDay){ lastDay = today(); render(); }
+  if(Date.now() - lastPull > 60000 && pending === 0){ try{ await pull(); render(); }catch(e){} }
+});
+
+/* ================= setup ================= */
+function showSetup(){
+  $('setupView').classList.remove('hidden'); $('appView').classList.add('hidden');
+  const g = guessRepo();
+  $('cfOwner').value = g.owner; $('cfRepo').value = g.repo;
+}
+$('cfGo').onclick = async () => {
+  const c = {owner: $('cfOwner').value.trim(), repo: $('cfRepo').value.trim(), branch: $('cfBranch').value.trim() || 'main', token: $('cfToken').value.trim()};
+  $('cfErr').textContent = '';
+  if(!c.owner || !c.repo || !c.token){ $('cfErr').textContent = 'Fill in all fields.'; return; }
+  $('cfGo').disabled = true; $('cfGo').textContent = 'Connecting…';
+  cfg = c;
+  try{
+    const r = await (await gh(`/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}`)).json();
+    if(r.permissions && !r.permissions.push) throw new Error('This token can read but not write. Give it “Contents: Read and write”.');
+    await pull();
+    saveCfg(); startApp();
+  }catch(e){
+    cfg = null;
+    $('cfErr').textContent = e.status === 401 ? 'Token is invalid or expired.' : e.status === 404 ? 'Repo not found — check the name, and that the token has access to it.' : e.message;
+  }finally{ $('cfGo').disabled = false; $('cfGo').textContent = 'Connect'; }
+};
+
+async function startApp(){
+  $('setupView').classList.add('hidden'); $('appView').classList.remove('hidden');
+  render();
+  const m = location.hash.match(/^#open=(.+)$/);
+  if(m && db.items[m[1]]){ history.replaceState(null, '', location.pathname); history.pushState({reader: m[1]}, '', '#open=' + m[1]); openReader(m[1]); }
+}
+(async () => {
+  try{ const th = localStorage.getItem('revise-theme'); if(th) document.documentElement.dataset.theme = th; }catch(e){}
+  loadCfg();
+  if(!cfg) return showSetup();
+  $('appView').classList.remove('hidden');
+  $('main').innerHTML = '<p class="lead" style="margin-top:30px">Loading your library…</p>';
+  try{ await pull(); }
+  catch(e){
+    if(e.status === 401 || e.status === 404){ toast('GitHub access failed — please reconnect.', 4000); cfg = null; return showSetup(); }
+    setSync('err', 'Offline'); $('main').innerHTML = `<div class="empty" style="margin-top:30px"><b>Couldn’t reach GitHub</b>${esc(e.message)}<div class="actions" style="justify-content:center"><button class="btn" onclick="location.reload()">Retry</button></div></div>`;
+    return;
+  }
+  startApp();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+ "version": 1,
+ "settings": {
+  "schedule": [3, 10, 30, 60],
+  "hardDays": 1
+ },
+ "folders": [],
+ "items": {},
+ "stats": {}
+}
