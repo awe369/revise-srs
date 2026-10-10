@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Genetics and Heredity — concepts, tools, tricks and every question solved</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F2F9; --paper:#FFFFFF; --ink:#211F33; --soft:#5B5873; --line:#D9D6EA;
+  --dna:#5B47C9; --dna-bg:#E6E2F8; --rna:#1F7F82; --rna-bg:#DDF0F0; --prot:#A8691A; --prot-bg:#F8EBD0;
+  --pink:#C2446B; --pink-bg:#F8E3EA; --leaf:#3F8A4B; --warn:#B3261E; --warn-bg:#FBE6E4; --ok:#2E7D32; --ok-bg:#E3F2E4;
+  --h:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --b:"Literata",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14121F; --paper:#1D1A2C; --ink:#EAE8F6; --soft:#ABA8C4; --line:#33304A;
+    --dna:#9D8CFF; --dna-bg:#262049; --rna:#5CC3C6; --rna-bg:#16312F; --prot:#E3AE5C; --prot-bg:#35280F;
+    --pink:#F27CA2; --pink-bg:#3A1E2B; --leaf:#7DCB88; --warn:#FF8A80; --warn-bg:#3B1D1B; --ok:#81C784; --ok-bg:#1C3320;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14121F; --paper:#1D1A2C; --ink:#EAE8F6; --soft:#ABA8C4; --line:#33304A;
+  --dna:#9D8CFF; --dna-bg:#262049; --rna:#5CC3C6; --rna-bg:#16312F; --prot:#E3AE5C; --prot-bg:#35280F;
+  --pink:#F27CA2; --pink-bg:#3A1E2B; --leaf:#7DCB88; --warn:#FF8A80; --warn-bg:#3B1D1B; --ok:#81C784; --ok-bg:#1C3320;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--b);font-size:1.06rem;line-height:1.7}
+img,svg{max-width:100%}
+h1,h2,h3{font-family:var(--h);line-height:1.15;margin:0}
+h2{font-size:clamp(1.6rem,4vw,2.3rem);font-weight:800;margin:0 0 .4em}
+h3{font-size:1.2rem;font-weight:700;margin:1.6em 0 .4em}
+p{margin:.6em 0}
+b,strong{font-weight:600}
+a{color:var(--rna)}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px}
+
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:10px;padding-bottom:10px;align-items:center}
+nav.top a{font-family:var(--h);font-weight:500;font-size:.92rem;text-decoration:none;color:var(--ink);padding:6px 12px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+nav.top a:hover,nav.top a:focus-visible{border-color:var(--line);background:var(--paper)}
+#themeBtn{margin-left:auto;font:inherit;font-family:var(--h);font-size:.9rem;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+:focus-visible{outline:3px solid var(--rna);outline-offset:2px}
+
+header.hero{padding:42px 0 10px}
+header.hero h1{font-size:clamp(2.4rem,8vw,4.8rem);font-weight:800;letter-spacing:-.02em}
+header.hero .lede{font-size:1.15rem;color:var(--soft);max-width:62ch}
+.stage{background:var(--paper);border:1px solid var(--line);border-radius:18px;margin:22px 0 8px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.cap{font-size:.93rem;color:var(--soft);padding:12px 18px 16px;border-top:1px solid var(--line)}
+.cap b{color:var(--ink)}
+
+section{padding:46px 0 10px;border-top:1px solid var(--line);margin-top:30px}
+.big-idea{font-family:var(--h);font-size:1.28rem;font-weight:500;line-height:1.4;border-left:5px solid var(--dna);padding:4px 0 4px 16px;margin:14px 0}
+
+.trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:18px 0}
+.tile{padding:16px 18px;border-radius:14px;border:1px solid var(--line);background:var(--paper)}
+.tile h3{margin:0 0 .3em;font-size:1.08rem}
+.tile.d{border-top:6px solid var(--dna)} .tile.r{border-top:6px solid var(--rna)} .tile.p{border-top:6px solid var(--prot)} .tile.k{border-top:6px solid var(--pink)}
+.tile p{font-size:.96rem;margin:.3em 0}
+
+.scroll{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-family:var(--h);font-weight:700;background:color-mix(in srgb,var(--dna) 12%,var(--paper))}
+tr:last-child td{border-bottom:none}
+.tag{display:inline-block;font-family:var(--h);font-size:.8rem;font-weight:500;padding:2px 8px;border-radius:6px;margin:1px 2px 1px 0}
+.tag.d{background:var(--dna-bg);color:var(--dna)} .tag.r{background:var(--rna-bg);color:var(--rna)} .tag.p{background:var(--prot-bg);color:var(--prot)} .tag.k{background:var(--pink-bg);color:var(--pink)} .tag.x{background:var(--warn-bg);color:var(--warn)}
+
+.anim{background:var(--paper);border:1px solid var(--line);border-radius:16px;margin:18px 0;overflow:hidden}
+.anim svg{display:block;width:100%;height:auto}
+
+.trap{background:var(--warn-bg);border-radius:12px;padding:12px 16px;margin:12px 0;font-size:.98rem}
+.trap strong{color:var(--warn);font-family:var(--h)}
+.hook{background:var(--rna-bg);border-radius:12px;padding:12px 16px;margin:12px 0;font-size:.98rem}
+.hook strong{color:var(--rna);font-family:var(--h)}
+.logic{background:var(--dna-bg);border-radius:12px;padding:12px 16px;margin:12px 0;font-size:.98rem}
+.logic strong{color:var(--dna);font-family:var(--h)}
+
+ul.facts{padding-left:1.1em} ul.facts li{margin:.35em 0}
+code,.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+
+/* tools */
+.tool{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:18px 0}
+.tool h3{margin-top:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
+select,textarea,input[type=text]{font:inherit;font-family:var(--h);color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px}
+textarea{width:100%;min-height:64px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.btn{font-family:var(--h);font-weight:700;font-size:.95rem;padding:10px 18px;border-radius:10px;border:none;background:var(--ink);color:var(--bg);cursor:pointer}
+.btn.ghost{background:none;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:.88rem}
+.pgrid{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;max-width:340px;margin:12px 0;font-family:var(--h);font-weight:700;text-align:center}
+.pgrid div{padding:12px 6px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.pgrid .hd{background:var(--dna-bg);color:var(--dna)}
+.pgrid .c-tall{background:var(--ok-bg)} .pgrid .c-dw{background:var(--prot-bg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-family:ui-monospace,Menlo,Consolas,monospace;padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line);text-align:center}
+.chip small{display:block;font-family:var(--h);font-size:.72rem;color:var(--soft)}
+.chip.stop{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.chip.start{background:var(--ok-bg);border-color:var(--ok)}
+.out{min-height:1.4em}
+.flowrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--h);font-weight:700;margin:12px 0}
+.flowrow .bx{padding:10px 14px;border-radius:10px;background:var(--paper);border:1px solid var(--line)}
+.flowrow .ar{color:var(--soft)}
+
+/* solved bank */
+details.sol{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0}
+details.sol>summary{cursor:pointer;padding:12px 16px;font-family:var(--h);font-weight:700;font-size:1rem;list-style:none}
+details.sol>summary::-webkit-details-marker{display:none}
+details.sol>summary small{display:block;font-weight:500;color:var(--soft);font-size:.8rem;margin-top:2px}
+details.sol[open]>summary{border-bottom:1px solid var(--line)}
+.sbody{padding:12px 16px 16px}
+.sbody ol{list-style:none;padding:0;margin:0 0 10px}
+.sbody li{padding:6px 10px;border-radius:8px;margin:3px 0;border:1px solid transparent}
+.sbody li.right{background:var(--ok-bg);border-color:var(--ok)}
+.grp{font-family:var(--h);font-weight:800;margin:26px 0 8px;font-size:1.15rem}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+
+/* flashcards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:16px 0}
+.fc{perspective:900px;min-height:150px;cursor:pointer;border:none;background:none;padding:0;font:inherit;color:inherit;text-align:left}
+.fc .in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .45s;transform-style:preserve-3d}
+.fc.flip .in{transform:rotateY(180deg)}
+.fc .fa,.fc .ba{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:14px 16px;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.fc .fa{background:var(--paper);font-family:var(--h);font-weight:700;font-size:1.02rem}
+.fc .fa small{font-family:var(--b);font-weight:400;color:var(--soft);font-size:.8rem;margin-top:8px}
+.fc .ba{background:var(--ink);color:var(--bg);transform:rotateY(180deg);font-size:.92rem;line-height:1.5}
+
+/* quiz */
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin:18px 0}
+.qmeta{display:flex;justify-content:space-between;font-family:var(--h);font-size:.9rem;color:var(--soft);gap:10px;flex-wrap:wrap}
+.qsrc{font-style:italic}
+.qtext{font-family:var(--h);font-size:1.18rem;font-weight:700;margin:12px 0 14px;line-height:1.35}
+.opts{display:grid;gap:8px}
+.opt{font:inherit;text-align:left;padding:11px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--dna)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-bg)}
+.opt:disabled{cursor:default}
+.expl{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--bg);display:none;font-size:.97rem}
+.expl.show{display:block}
+.qnav{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.bar{height:6px;background:var(--line);border-radius:6px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--dna);width:0;transition:width .3s}
+.miss{margin-top:10px;font-size:.95rem}
+
+footer{padding:40px 0 60px;color:var(--soft);font-size:.9rem}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .fc .in{transition:none}
+  .pulse,.flow{animation:none!important}
+}
+.flow{stroke-dasharray:6 8;animation:dash 1.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-28}}
+.pulse{animation:pulse 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{50%{transform:scale(1.08)}}
+</style>
+</head>
+<body>
+
+<nav class="top" aria-label="Sections">
+  <div class="wrap">
+    <a href="#big">Big picture</a>
+    <a href="#cell">Cell</a>
+    <a href="#mendel">Mendel</a>
+    <a href="#dna">DNA &amp; RNA</a>
+    <a href="#code">Genetic code</a>
+    <a href="#chrom">Chromosomes</a>
+    <a href="#jump">Jumping genes</a>
+    <a href="#who">Scientists</a>
+    <a href="#tricks">Tricks</a>
+    <a href="#play">Playbook</a>
+    <a href="#bank">Solved</a>
+    <a href="#cards">Flashcards</a>
+    <a href="#quiz">Quiz</a>
+    <button id="themeBtn" type="button" aria-label="Toggle light or dark theme">Theme</button>
+  </div>
+</nav>
+
+<div class="wrap">
+<header class="hero">
+  <h1>Genetics &amp; Heredity</h1>
+  <p class="lede">Why a child looks like the parents, written in one chain of ideas. Understand the chain once and every question in the PDF (and the ones that are not in it) becomes a reasoning job, not a memory job.</p>
+
+  <div class="stage">
+    <svg viewBox="0 0 800 290" role="img" aria-labelledby="heroT">
+      <title id="heroT">Animation: zooming from a cell to its nucleus, to a chromosome, to the DNA double helix, to the letters A, T, G, C</title>
+      <rect width="800" height="290" fill="var(--paper)"/>
+      <text x="400" y="34" text-anchor="middle" font-family="var(--h)" font-size="17" font-weight="700" fill="var(--ink)">Zoom in: from a cell down to a single letter of code</text>
+      <!-- highlight -->
+      <rect y="58" width="134" height="182" rx="16" fill="none" stroke="var(--prot)" stroke-width="4">
+        <animate attributeName="x" values="13;173;333;493;653" calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+      </rect>
+      <g fill="var(--bg)" stroke="var(--line)">
+        <rect x="15" y="62" width="130" height="174" rx="14"/><rect x="175" y="62" width="130" height="174" rx="14"/><rect x="335" y="62" width="130" height="174" rx="14"/><rect x="495" y="62" width="130" height="174" rx="14"/><rect x="655" y="62" width="130" height="174" rx="14"/>
+      </g>
+      <!-- 1 cell -->
+      <circle cx="80" cy="128" r="40" fill="var(--rna-bg)" stroke="var(--rna)" stroke-width="3"/>
+      <circle cx="80" cy="128" r="14" fill="var(--dna)"/>
+      <!-- 2 nucleus -->
+      <circle cx="240" cy="128" r="40" fill="var(--dna-bg)" stroke="var(--dna)" stroke-width="3"/>
+      <g stroke="var(--pink)" stroke-width="7" stroke-linecap="round"><path d="M222 112 L236 124"/><path d="M250 108 L258 130"/><path d="M226 142 L246 146"/></g>
+      <!-- 3 chromosome -->
+      <path d="M375 98 L425 158 M425 98 L375 158" stroke="var(--dna)" stroke-width="15" stroke-linecap="round" fill="none"/>
+      <circle cx="400" cy="128" r="7" fill="var(--paper)"/>
+      <!-- 4 helix -->
+      <path d="M537 96 C587 112 537 144 587 160" stroke="var(--dna)" stroke-width="5" fill="none"/>
+      <path d="M587 96 C537 112 587 144 537 160" stroke="var(--rna)" stroke-width="5" fill="none"/>
+      <g stroke="var(--pink)" stroke-width="3"><path d="M548 106 H576"/><path d="M552 128 H572"/><path d="M548 150 H576"/></g>
+      <!-- 5 bases -->
+      <g font-family="var(--h)" font-size="24" font-weight="800" text-anchor="middle">
+        <text x="720" y="108" fill="var(--pink)">A<tspan fill="var(--soft)"> = </tspan><tspan fill="var(--prot)">T</tspan></text>
+        <text x="720" y="140" fill="var(--rna)">G<tspan fill="var(--soft)"> ≡ </tspan><tspan fill="var(--dna)">C</tspan></text>
+        <text x="720" y="172" fill="var(--prot)">T<tspan fill="var(--soft)"> = </tspan><tspan fill="var(--pink)">A</tspan></text>
+      </g>
+      <g font-family="var(--h)" text-anchor="middle" fill="var(--ink)">
+        <text x="80" y="206" font-size="15" font-weight="700">Cell</text><text x="80" y="224" font-size="12" fill="var(--soft)">basic unit</text>
+        <text x="240" y="206" font-size="15" font-weight="700">Nucleus</text><text x="240" y="224" font-size="12" fill="var(--soft)">control centre</text>
+        <text x="400" y="206" font-size="15" font-weight="700">Chromosome</text><text x="400" y="224" font-size="12" fill="var(--soft)">46 in humans</text>
+        <text x="560" y="206" font-size="15" font-weight="700">DNA</text><text x="560" y="224" font-size="12" fill="var(--soft)">double helix</text>
+        <text x="720" y="206" font-size="15" font-weight="700">Bases</text><text x="720" y="224" font-size="12" fill="var(--soft)">A T G C</text>
+      </g>
+      <text x="400" y="272" text-anchor="middle" font-family="var(--h)" font-size="13" fill="var(--soft)">A gene is a stretch of letters on the DNA that holds one instruction.</text>
+    </svg>
+    <div class="cap"><b>The whole chapter in one picture.</b> Heredity is the copying of instructions. The instructions are written in DNA, packed into chromosomes, kept in the nucleus, and passed from parent to child through the egg and sperm.</div>
+  </div>
+</header>
+
+<!-- BIG PICTURE -->
+<section id="big">
+  <h2>The big picture: one chain of ideas</h2>
+  <p class="big-idea">Genome &gt; chromosome &gt; DNA &gt; gene &gt; codon &gt; base. Almost every "what is X" question in this chapter is asking you to place something on this ladder.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Thing</th><th>Library picture</th><th>Exam handle</th></tr>
+    <tr><td><b>Genome</b></td><td>The whole library</td><td>Complete set of DNA of an organism. Human haploid set is about 3 billion base pairs.</td></tr>
+    <tr><td><b>Chromosome</b></td><td>One volume of the library</td><td>DNA + protein (nucleoprotein). 23 pairs = 46 in humans. Name given by Waldeyer.</td></tr>
+    <tr><td><b>DNA</b></td><td>The ink and paper</td><td>The hereditary material. Double helix by Watson and Crick (1953).</td></tr>
+    <tr><td><b>Gene</b></td><td>One recipe in the book</td><td><span class="tag d">Unit of heredity</span> A segment of DNA. Not DNA + histone.</td></tr>
+    <tr><td><b>Allele</b></td><td>Different editions of the same recipe</td><td>T and t are alleles of the height gene.</td></tr>
+    <tr><td><b>Codon</b></td><td>One word (3 letters)</td><td>64 codons: 61 sense, 3 stop.</td></tr>
+    <tr><td><b>Base</b></td><td>One letter</td><td>A, T, G, C in DNA. U replaces T in RNA.</td></tr>
+  </table></div>
+
+  <div class="hook"><strong>Hinglish hook:</strong> Genome = poori library, Chromosome = ek volume, Gene = ek recipe, Codon = ek shabd, Base = ek akshar. Jab bhi koi option confuse kare, bas poochho: "kaun sa bada hai, kaun sa chhota?"</div>
+
+  <h3>Where do differences between children and parents come from?</h3>
+  <ul class="facts">
+    <li><b>Crossing over:</b> chromosome pairs swap pieces in meiosis.</li>
+    <li><b>Independent assortment:</b> chromosomes get shuffled into the gametes.</li>
+    <li><b>Random fertilisation:</b> any sperm meets any egg.</li>
+    <li><b>Mutation:</b> a change in the base sequence. It is the ultimate source of all new variation.</li>
+  </ul>
+  <p style="font-size:.93rem;color:var(--soft)">That list answers Q16 and Q11 of the question bank. Asexual reproduction also has variation, but it is small and hard to notice, so Mendel's ratios need <b>sexual</b> reproduction (Q5).</p>
+</section>
+
+<!-- CELL -->
+<section id="cell">
+  <h2>Cell quick-map (page G-509 questions)</h2>
+  <p class="big-idea">Each organelle has one headline job. Learn the job, and the exam option is a one-second decision.</p>
+  <div class="scroll"><table>
+    <tr><th>Organelle / structure</th><th>One-line job</th><th>Hook</th></tr>
+    <tr><td>Mitochondria</td><td>Make ATP by aerobic respiration</td><td>"Powerhouse"</td></tr>
+    <tr><td>Ribosome</td><td>Build proteins by reading mRNA</td><td>Protein factory floor</td></tr>
+    <tr><td>Rough ER</td><td>Studded with ribosomes, so protein synthesis and folding</td><td>Rough = ribosomes</td></tr>
+    <tr><td>Golgi apparatus</td><td>Sort, pack and dispatch proteins</td><td>Post office</td></tr>
+    <tr><td>Lysosome</td><td>Digest waste and worn-out parts</td><td>Suicide bag</td></tr>
+    <tr><td>Nucleus</td><td>Holds DNA, controls cell activity and cell division</td><td>Control centre</td></tr>
+    <tr><td>Plasma membrane</td><td>Selective barrier: phospholipid bilayer + proteins (fluid mosaic model)</td><td>Gatekeeper</td></tr>
+  </table></div>
+
+  <h3>ATP: who makes the most? (Q14)</h3>
+  <div class="scroll"><table>
+    <tr><th>Stage</th><th>Where</th><th>ATP made</th></tr>
+    <tr><td>Glycolysis</td><td>Cytoplasm</td><td>Net 2 (plus 2 NADH)</td></tr>
+    <tr><td>Krebs cycle</td><td>Mitochondrial matrix</td><td>2 (plus lots of NADH, FADH₂)</td></tr>
+    <tr><td><b>Electron transport chain (oxidative phosphorylation)</b></td><td>Inner mitochondrial membrane</td><td><span class="tag d">About 27–34, the majority</span></td></tr>
+  </table></div>
+  <div class="logic"><strong>Why the last stage wins:</strong> Glycolysis and Krebs mostly load up carrier molecules (NADH, FADH₂). The electron transport chain cashes them in using oxygen. "Last respiratory series" in the question means this stage. Total per glucose: 30–38 ATP depending on the textbook.</div>
+
+  <h3>Apoptosis vs necrosis (Q13)</h3>
+  <div class="trio">
+    <div class="tile d"><h3>Apoptosis</h3><p><b>Programmed</b> cell death. Planned, tidy, removes old or unhealthy cells and shapes the body (e.g. the webbing between fingers).</p></div>
+    <div class="tile k"><h3>Necrosis</h3><p>Death by <b>injury</b> or infection. Messy, cell bursts, causes inflammation.</p></div>
+  </div>
+  <div class="hook"><strong>Hook:</strong> <b>A</b>poptosis = <b>A</b> Plan. <b>N</b>ecrosis = <b>N</b>eglect or injury. Ageing and degeneration are processes, not the name for programmed death.</div>
+</section>
+
+<!-- MENDEL -->
+<section id="mendel">
+  <h2>Mendel: the logic of inheritance</h2>
+  <p class="big-idea">Traits are controlled by paired "factors" (genes). You get one from each parent, so both contribute equally. Which one shows depends on dominance.</p>
+
+  <ul class="facts">
+    <li>Gregor Johann Mendel, an Augustinian monk at Brünn (now Brno, Czech Republic), is the <b>Father of Genetics</b>.</li>
+    <li>He crossed <b>garden pea, <i>Pisum sativum</i></b>, over several years and presented his results in 1865.</li>
+    <li>Nobody noticed. In <b>1900</b> De Vries, Correns and Tschermak independently rediscovered his laws.</li>
+    <li>Why pea? Short life, many seeds, easy to cross, self-pollinating, and clean either/or traits.</li>
+  </ul>
+
+  <h3>The seven pairs of traits</h3>
+  <div class="scroll"><table>
+    <tr><th>Trait</th><th>Dominant</th><th>Recessive</th></tr>
+    <tr><td>Stem height</td><td>Tall</td><td>Dwarf</td></tr>
+    <tr><td>Seed shape</td><td>Round</td><td>Wrinkled</td></tr>
+    <tr><td>Seed colour</td><td>Yellow</td><td>Green</td></tr>
+    <tr><td>Flower colour</td><td>Purple</td><td>White</td></tr>
+    <tr><td>Pod shape</td><td>Inflated</td><td>Constricted</td></tr>
+    <tr><td>Pod colour</td><td>Green</td><td>Yellow</td></tr>
+    <tr><td>Flower position</td><td>Axial</td><td>Terminal</td></tr>
+  </table></div>
+
+  <h3>Words you must be able to define</h3>
+  <div class="scroll"><table>
+    <tr><th>Term</th><th>Meaning</th><th>Example</th></tr>
+    <tr><td>Gene</td><td>Basic unit of inheritance, a stretch of DNA</td><td>The height gene</td></tr>
+    <tr><td>Allele</td><td>Alternative form of a gene, same position on the chromosome</td><td>T and t</td></tr>
+    <tr><td>Genotype</td><td>The actual alleles carried</td><td>TT, Tt, tt</td></tr>
+    <tr><td>Phenotype</td><td>What you can observe (the genotype expressed)</td><td>Tall, dwarf</td></tr>
+    <tr><td>Dominant</td><td>Shows even with one copy. Capital letter.</td><td>T</td></tr>
+    <tr><td>Recessive</td><td>Shows only when the dominant allele is absent. Small letter.</td><td>t</td></tr>
+    <tr><td>Homozygous</td><td>Two identical alleles</td><td>TT or tt</td></tr>
+    <tr><td>Heterozygous</td><td>Two different alleles</td><td>Tt</td></tr>
+  </table></div>
+  <div class="hook"><strong>Hook:</strong> <b>Geno</b>type = <b>Gene</b> letters (what is written). <b>Pheno</b>type = what you <b>see</b> (Pheno ~ "photo"). Homo = same, Hetero = different.</div>
+
+  <h3>The three laws, in plain words</h3>
+  <div class="scroll"><table>
+    <tr><th>Law</th><th>Says</th><th>Number to remember</th></tr>
+    <tr><td><b>Dominance</b></td><td>In a Tt plant the dominant allele hides the recessive one.</td><td>F1 all tall</td></tr>
+    <tr><td><b>Segregation</b></td><td>The two alleles separate when gametes form, so each gamete carries only one.</td><td>F2: 3 tall : 1 dwarf (genotype 1:2:1)</td></tr>
+    <tr><td><b>Independent assortment</b></td><td>Genes for different traits are sorted into gametes independently.</td><td>Dihybrid F2: 9:3:3:1</td></tr>
+  </table></div>
+  <div class="hook"><strong>Order trick:</strong> <b>D</b>on't <b>S</b>kip <b>I</b>ce-cream = Dominance, Segregation, Independent assortment.</div>
+
+  <div class="flowrow">
+    <span class="bx">P: TT × tt</span><span class="ar">→</span>
+    <span class="bx">F1: all Tt (all tall)</span><span class="ar">→ self →</span>
+    <span class="bx">F2: 1 TT : 2 Tt : 1 tt</span><span class="ar">→</span>
+    <span class="bx">3 tall : 1 dwarf</span>
+  </div>
+
+  <div class="tool" id="punnettTool">
+    <h3>Try it: Punnett square</h3>
+    <p style="margin-top:0;color:var(--soft)">Pick two parents. Tall (T) is dominant over dwarf (t).</p>
+    <div class="row">
+      <label>Parent 1 <select id="pp1"><option>Tt</option><option>TT</option><option>tt</option></select></label>
+      <label>Parent 2 <select id="pp2"><option>Tt</option><option>TT</option><option>tt</option></select></label>
+    </div>
+    <div id="pgrid" class="pgrid" aria-live="polite"></div>
+    <div id="pres" class="out"></div>
+  </div>
+
+  <h3>Beyond Mendel (appears in exams as "exceptions")</h3>
+  <div class="scroll"><table>
+    <tr><th>Case</th><th>What happens</th><th>Example</th></tr>
+    <tr><td>Incomplete dominance</td><td>Heterozygote is in between. F2 ratio 1:2:1.</td><td>Red × white snapdragon or four o'clock gives pink</td></tr>
+    <tr><td>Codominance</td><td>Both alleles show fully</td><td>AB blood group</td></tr>
+    <tr><td>Sex-linked (X-linked recessive)</td><td>Gene on X; males have one X so they show it more often</td><td>Haemophilia, colour blindness</td></tr>
+    <tr><td>Test cross</td><td>Cross an unknown dominant-looking individual with a recessive (tt). All tall offspring: unknown was TT. 1:1: it was Tt.</td><td>Finds the genotype</td></tr>
+  </table></div>
+</section>
+
+<!-- DNA -->
+<section id="dna">
+  <h2>DNA and RNA: what the instructions are made of</h2>
+  <p class="big-idea">A nucleotide is three parts: <b>sugar + phosphate + base</b>. Join many nucleotides and you get a nucleic acid (DNA or RNA).</p>
+
+  <div class="anim">
+    <svg viewBox="0 0 800 290" role="img" aria-labelledby="hxT">
+      <title id="hxT">Animation: a rotating DNA double helix with coloured base pairs</title>
+      <rect width="800" height="290" fill="var(--paper)"/>
+      <g id="helix"></g>
+      <g font-family="var(--h)" font-size="15">
+        <text x="520" y="60" font-weight="800" fill="var(--ink)">Base pairing rule</text>
+        <rect x="520" y="76" width="18" height="18" rx="4" fill="var(--pink)"/><text x="546" y="91" fill="var(--ink)">Adenine (A)</text>
+        <rect x="520" y="104" width="18" height="18" rx="4" fill="var(--prot)"/><text x="546" y="119" fill="var(--ink)">Thymine (T)  ← A pairs with T (2 H-bonds)</text>
+        <rect x="520" y="132" width="18" height="18" rx="4" fill="var(--rna)"/><text x="546" y="147" fill="var(--ink)">Guanine (G)</text>
+        <rect x="520" y="160" width="18" height="18" rx="4" fill="var(--dna)"/><text x="546" y="175" fill="var(--ink)">Cytosine (C)  ← G pairs with C (3 H-bonds)</text>
+        <text x="520" y="215" fill="var(--soft)" font-size="13">Sugar-phosphate backbone on the outside,</text>
+        <text x="520" y="233" fill="var(--soft)" font-size="13">bases inside, held by hydrogen bonds.</text>
+      </g>
+    </svg>
+    <div class="cap"><b>Complementarity</b> is the key. Because A always pairs with T and G with C, either strand can rebuild the other. That is why DNA is "uniquely suited" to store and copy information (Q15).</div>
+  </div>
+
+  <div class="trio">
+    <div class="tile d"><h3>Purines (2 rings)</h3><p><b>Adenine, Guanine.</b> Found in both DNA and RNA.</p></div>
+    <div class="tile r"><h3>Pyrimidines (1 ring)</h3><p><b>Cytosine, Thymine, Uracil.</b> C is in both, T only in DNA, U only in RNA.</p></div>
+  </div>
+  <div class="hook"><strong>Hooks:</strong> Purines = "<b>PUR</b>e <b>A</b>s <b>G</b>old" (A, G). Pyrimidines = "<b>CUT</b> the <b>PY</b>" (C, U, T). "<b>U R</b> in <b>RNA</b>" = Uracil lives in RNA. Gold chain G≡C is heavier (3 bonds) than A=T (2 bonds).</div>
+
+  <h3>DNA vs RNA</h3>
+  <div class="scroll"><table>
+    <tr><th></th><th>DNA</th><th>RNA</th></tr>
+    <tr><td>Sugar</td><td>Deoxyribose</td><td>Ribose</td></tr>
+    <tr><td>Bases</td><td>A, T, G, C</td><td>A, U, G, C</td></tr>
+    <tr><td>Strands</td><td>Double (helix)</td><td>Usually single</td></tr>
+    <tr><td>Role</td><td>Stores hereditary information (in most organisms)</td><td>Carries and uses it: mRNA, tRNA, rRNA</td></tr>
+    <tr><td>Genetic material in some viruses?</td><td>Many viruses</td><td>Yes: TMV, Qβ phage, HIV</td></tr>
+  </table></div>
+
+  <h3>Chargaff's rule: free marks</h3>
+  <p>Amount of A = amount of T, and G = C. So if a DNA sample is 30% adenine, then T is 30%, which leaves 40% for G + C, so <b>G = 20%</b> and C = 20%.</p>
+
+  <h3>The central dogma</h3>
+  <div class="anim">
+    <svg viewBox="0 0 800 270" role="img" aria-labelledby="cdT">
+      <title id="cdT">Diagram: DNA copies itself (replication), is copied into RNA (transcription), RNA is read to make protein (translation); reverse transcription goes RNA to DNA</title>
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--soft)"/></marker></defs>
+      <rect width="800" height="270" fill="var(--paper)"/>
+      <g font-family="var(--h)" text-anchor="middle" font-weight="800" font-size="20">
+        <rect x="60" y="100" width="140" height="62" rx="14" fill="var(--dna-bg)" stroke="var(--dna)" stroke-width="2"/><text x="130" y="139" fill="var(--dna)">DNA</text>
+        <rect x="330" y="100" width="140" height="62" rx="14" fill="var(--rna-bg)" stroke="var(--rna)" stroke-width="2"/><text x="400" y="139" fill="var(--rna)">RNA</text>
+        <rect x="600" y="100" width="140" height="62" rx="14" fill="var(--prot-bg)" stroke="var(--prot)" stroke-width="2"/><text x="670" y="139" fill="var(--prot)">Protein</text>
+      </g>
+      <g fill="none" stroke="var(--soft)" stroke-width="3">
+        <path class="flow" d="M204 126 L324 126" marker-end="url(#ah)"/>
+        <path class="flow" d="M474 126 L594 126" marker-end="url(#ah)"/>
+        <path class="flow" d="M96 98 C86 40 174 40 164 98" marker-end="url(#ah)"/>
+        <path class="flow" d="M340 166 C300 226 250 226 204 166" marker-end="url(#ah)"/>
+      </g>
+      <g font-family="var(--h)" text-anchor="middle" font-size="13" fill="var(--ink)">
+        <text x="264" y="112" font-weight="700">Transcription</text>
+        <text x="534" y="112" font-weight="700">Translation</text>
+        <text x="534" y="150" fill="var(--soft)">at the ribosome</text>
+        <text x="130" y="38" font-weight="700">Replication</text>
+        <text x="272" y="246" font-weight="700">Reverse transcription</text>
+        <text x="272" y="262" fill="var(--soft)">(reverse transcriptase, retroviruses)</text>
+      </g>
+    </svg>
+    <div class="cap">Copying <b>DNA into RNA</b> is transcription. Copying <b>RNA into DNA</b> is reverse transcription, done by the enzyme <b>reverse transcriptase (RT)</b>. Translation reads the RNA in groups of three letters and builds the protein.</div>
+  </div>
+</section>
+
+<!-- CODE -->
+<section id="code">
+  <h2>The genetic code</h2>
+  <p class="big-idea">The code is read in groups of three letters called <b>codons</b>. Four letters taken three at a time give 4³ = <b>64 codons</b>, but only 20 amino acids are needed. So several codons share one amino acid.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Feature</th><th>Meaning</th></tr>
+    <tr><td>Triplet</td><td>3 bases = 1 codon = 1 amino acid</td></tr>
+    <tr><td>Universal</td><td>Same code in nearly all organisms</td></tr>
+    <tr><td>Non-overlapping</td><td>Each base is read only once</td></tr>
+    <tr><td>Commaless</td><td>No gaps between codons</td></tr>
+    <tr><td>Non-ambiguous</td><td>One codon never codes for two different amino acids</td></tr>
+    <tr><td>Degenerate (redundant)</td><td>One amino acid can have more than one codon</td></tr>
+    <tr><td>Has start and stop signals</td><td>Start: AUG. Stop: UAA, UAG, UGA</td></tr>
+  </table></div>
+  <div class="trio">
+    <div class="tile d"><h3>64 total</h3><p>61 sense codons + 3 stop codons</p></div>
+    <div class="tile r"><h3>Start</h3><p><b>AUG</b>, which also codes for <b>methionine</b></p></div>
+    <div class="tile k"><h3>Stop (non-sense)</h3><p><b>UAA, UAG, UGA</b>. They code for no amino acid.</p></div>
+  </div>
+  <div class="hook"><strong>Stop trick:</strong> "<b>U A</b>re <b>A</b>way" (UAA), "<b>U A</b>re <b>G</b>one" (UAG), "<b>U G</b>o <b>A</b>way" (UGA). Start: <b>AUG</b> = <b>Aug</b>ust, the month the session starts, and Met = "I Met you at the start".</div>
+
+  <div class="tool" id="transTool">
+    <h3>Try it: DNA → mRNA → protein</h3>
+    <div class="row">
+      <label>Input is <select id="tmode"><option value="dna">DNA template strand</option><option value="mrna">mRNA</option></select></label>
+      <button class="btn sm ghost" id="tdemo" type="button">Load example</button>
+    </div>
+    <textarea id="tin" aria-label="Sequence input" spellcheck="false">TACTTTGGGATT</textarea>
+    <div id="tout" class="out" aria-live="polite"></div>
+  </div>
+  <p style="font-size:.93rem;color:var(--soft)">When the template is read as DNA, each base is swapped with its partner (A→U, T→A, G→C, C→G) to make the mRNA.</p>
+</section>
+
+<!-- CHROMOSOMES -->
+<section id="chrom">
+  <h2>Chromosomes and sex determination</h2>
+  <div class="scroll"><table>
+    <tr><th>Fact</th><th>Value</th></tr>
+    <tr><td>Chromosomes per human cell</td><td>46 (23 pairs)</td></tr>
+    <tr><td>Autosomes</td><td>22 pairs, same in both sexes</td></tr>
+    <tr><td>Sex chromosomes</td><td>1 pair (the 23rd). Female XX, male XY.</td></tr>
+    <tr><td>Male / female formula</td><td>44 + XY / 44 + XX</td></tr>
+    <tr><td>Does the number change with age or weight?</td><td>No. It is constant for a species.</td></tr>
+  </table></div>
+
+  <div class="big-idea">The mother always gives an X. The father gives X or Y. So the <b>father's sperm decides the sex</b> of the child.</div>
+
+  <div class="tool" id="sexTool">
+    <h3>Try it: fertilisation simulator</h3>
+    <div class="row">
+      <button class="btn" id="fert1" type="button">Fertilise once</button>
+      <button class="btn ghost" id="fert50" type="button">× 50</button>
+      <button class="btn ghost" id="fertR" type="button">Reset</button>
+    </div>
+    <div id="fout" class="out" aria-live="polite">Egg is always X. Press the button to see which sperm wins.</div>
+  </div>
+
+  <h3>Sex determination across life</h3>
+  <div class="scroll"><table>
+    <tr><th>Group</th><th>System</th><th>Who decides?</th></tr>
+    <tr><td>Humans, other mammals, Drosophila</td><td>Female XX, male XY</td><td>Father's sperm</td></tr>
+    <tr><td>Birds, butterflies and moths</td><td>Female ZW, male ZZ</td><td>Mother's egg</td></tr>
+    <tr><td>Grasshopper</td><td>Female XX, male XO</td><td>Sperm with or without X</td></tr>
+    <tr><td>Crocodiles, many turtles</td><td>No sex chromosomes needed: nest temperature</td><td>Temperature</td></tr>
+  </table></div>
+
+  <h3>When the count goes wrong</h3>
+  <div class="scroll"><table>
+    <tr><th>Disorder</th><th>Chromosomes</th><th>Notes</th></tr>
+    <tr><td>Down syndrome</td><td>47, trisomy 21</td><td>Extra chromosome 21</td></tr>
+    <tr><td>Turner syndrome</td><td>45, X (XO)</td><td>Female, one X only</td></tr>
+    <tr><td>Klinefelter syndrome</td><td>47, XXY</td><td>Male with an extra X</td></tr>
+  </table></div>
+  <div class="trap"><strong>Trap (Q35):</strong> "Females play the major role in deciding sex because they have two X" sounds sensible but is wrong. Having XX only means every egg is X. The deciding variable is the sperm.</div>
+</section>
+
+<!-- JUMPING GENES -->
+<section id="jump">
+  <h2>Jumping genes (transposons)</h2>
+  <p class="big-idea">A transposable element is a piece of DNA that can <b>move</b> from one place in the genome to another. Barbara McClintock found them in <b>maize</b> and won the <b>Nobel Prize in Medicine, 1983</b>.</p>
+
+  <div class="anim">
+    <svg viewBox="0 0 800 230" role="img" aria-labelledby="tpT">
+      <title id="tpT">Animation: a transposon jumps along a chromosome and lands inside a pigment gene, switching it off</title>
+      <rect width="800" height="230" fill="var(--paper)"/>
+      <text x="30" y="34" font-family="var(--h)" font-size="16" font-weight="700" fill="var(--ink)">A transposon lands inside a pigment gene</text>
+      <rect x="40" y="96" width="720" height="34" rx="17" fill="var(--dna-bg)" stroke="var(--dna)" stroke-width="2"/>
+      <rect x="500" y="90" width="120" height="46" rx="8" fill="var(--leaf)">
+        <animate attributeName="fill" values="#3F8A4B;#3F8A4B;#9a9a9a;#9a9a9a;#3F8A4B" keyTimes="0;.45;.55;.85;1" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="560" y="168" text-anchor="middle" font-family="var(--h)" font-size="13" fill="var(--ink)">pigment gene</text>
+      <rect y="80" width="60" height="30" rx="8" fill="var(--pink)">
+        <animate attributeName="x" values="150;150;520;520;150" keyTimes="0;.2;.5;.85;1" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="96;50;50;96;96" keyTimes="0;.2;.5;.55;1" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="180" y="190" text-anchor="middle" font-family="var(--h)" font-size="13" fill="var(--pink)" font-weight="700">transposon (jumping gene)</text>
+      <text x="400" y="216" text-anchor="middle" font-family="var(--h)" font-size="13" fill="var(--soft)">Gene switched off in some cells, so those kernel cells lack pigment: spotted kernels</text>
+    </svg>
+    <div class="cap">Spotted seeds in maize come from jumping genes. Roughly half of human DNA is transposon-derived, but most of it is inactive. When one does move it can cause a mutation (diseases like haemophilia and cancer have been linked).</div>
+  </div>
+  <div class="hook"><strong>Hook:</strong> <b>Mc</b>Clintock = <b>M</b>aize <b>C</b>orn. 1983. "Jumping" is her word for transposition.</div>
+</section>
+
+<!-- SCIENTISTS -->
+<section id="who">
+  <h2>Who did what: the scientist map</h2>
+  <p>This chapter is 40% "who". Read the table in time order. It is a story, not a list.</p>
+  <div class="scroll"><table>
+    <tr><th>Year</th><th>Person</th><th>Contribution</th></tr>
+    <tr><td>1865</td><td>Gregor Mendel</td><td>Laws of inheritance on garden pea. Father of Genetics.</td></tr>
+    <tr><td>1869</td><td>Friedrich Miescher</td><td>First isolated DNA ("nuclein") from white blood cells in pus.</td></tr>
+    <tr><td>1888</td><td>Waldeyer</td><td>Coined the word "chromosome".</td></tr>
+    <tr><td>1900</td><td>De Vries, Correns, Tschermak</td><td>Rediscovered Mendel's work independently.</td></tr>
+    <tr><td>1902–03</td><td>Sutton and Boveri</td><td>Chromosomal theory of inheritance.</td></tr>
+    <tr><td>1909</td><td>Wilhelm Johannsen</td><td>Coined the terms gene, genotype, phenotype.</td></tr>
+    <tr><td>1910s</td><td>T.H. Morgan</td><td>Fruit fly (<i>Drosophila</i>): linkage and proof of the chromosome theory.</td></tr>
+    <tr><td>1928, 1944, 1952</td><td>Griffith; Avery–MacLeod–McCarty; Hershey–Chase</td><td>Chain of experiments proving DNA is the genetic material.</td></tr>
+    <tr><td>1953</td><td>Watson and Crick</td><td>Double helix model of DNA (Nobel 1962 with Wilkins). Franklin's X-ray work was key.</td></tr>
+    <tr><td>1958</td><td>Meselson and Stahl</td><td>DNA replication is semi-conservative.</td></tr>
+    <tr><td>1960s</td><td>Nirenberg, Khorana, Holley</td><td>Cracked the genetic code (Nobel 1968). Khorana also made the first artificial gene in the lab.</td></tr>
+    <tr><td>1983</td><td>Barbara McClintock</td><td>Nobel (Medicine) for jumping genes in maize.</td></tr>
+    <tr><td>1989</td><td>Cech and Altman</td><td>Nobel (Chemistry) for ribozymes: RNA that acts as an enzyme.</td></tr>
+  </table></div>
+
+  <h3>The decoy matrix: names that show up in wrong options</h3>
+  <div class="scroll"><table>
+    <tr><th>Decoy</th><th>Real claim to fame</th><th>Used against question</th></tr>
+    <tr><td>T.H. Morgan</td><td>Fruit fly, linkage</td><td>Father of genetics (Q1–Q3), Drosophila trap (Q4)</td></tr>
+    <tr><td>Hugo de Vries</td><td>Mutation theory, rediscovery</td><td>Father of genetics (Q1), double helix (Q21)</td></tr>
+    <tr><td>Jacob and Monod</td><td>Lac operon (gene regulation)</td><td>Double helix (Q23)</td></tr>
+    <tr><td>H.G. Khorana</td><td>Genetic code, artificial gene</td><td>Double helix (Q23), father of genetics (Q3 as "Khurana")</td></tr>
+    <tr><td>Johannsen</td><td>Named "gene"</td><td>Who discovered DNA (Q24)</td></tr>
+    <tr><td>Linus Pauling</td><td>Chemical bond, proposed a (wrong) triple helix</td><td>Double helix (Q20)</td></tr>
+    <tr><td>Rosalind Franklin, M. Wilkins</td><td>X-ray data that helped</td><td>Double helix (Q20)</td></tr>
+    <tr><td>Waldeyer</td><td>Named chromosomes</td><td>Chromosome theory (Q17)</td></tr>
+  </table></div>
+  <div class="logic"><strong>Verb rule:</strong> "<b>discovered / isolated</b> DNA" → Miescher (1869). "<b>Structure</b> of DNA" → Watson and Crick (1953). "<b>Made DNA</b> in the lab" → Khorana. Read the verb before you read the names.</div>
+</section>
+
+<!-- TRICKS -->
+<section id="tricks">
+  <h2>Tricks that make facts stick</h2>
+
+  <div class="trio">
+    <div class="tile d"><h3>Scientist timeline sentence</h3>
+      <p><b>"Mere Mummy Wale Samose Jyada Mast, Wah Kya Mazaa!"</b></p>
+      <p style="font-size:.9rem">Mendel · Miescher · Waldeyer · Sutton-Boveri · Johannsen · Morgan · Watson-Crick · Khorana · McClintock. This is the exact time order.</p></div>
+    <div class="tile r"><h3>Nobel years chant</h3>
+      <p><b>Sixty-two Watson, sixty-eight Khorana, eighty-three McClintock, eighty-nine Cech.</b></p>
+      <p style="font-size:.9rem">62, 68, 83, 89 only go up, so you can never mix the order.</p></div>
+    <div class="tile p"><h3>Rediscoverers of Mendel</h3>
+      <p><b>"V-C-T = Very Clever Topper"</b></p>
+      <p style="font-size:.9rem">De <b>V</b>ries, <b>C</b>orrens, <b>T</b>schermak, 1900.</p></div>
+    <div class="tile k"><h3>Bases</h3>
+      <p><b>PURe As Gold</b> = A, G (purines). <b>CUT the PY</b> = C, U, T (pyrimidines).</p>
+      <p style="font-size:.9rem">Pairs: <b>A</b>pple on the <b>T</b>ree, <b>C</b>ar in the <b>G</b>arage.</p></div>
+    <div class="tile d"><h3>Stop codons</h3>
+      <p><b>U Are Away · U Are Gone · U Go Away</b></p>
+      <p style="font-size:.9rem">UAA · UAG · UGA. Start = AUG ("August").</p></div>
+    <div class="tile r"><h3>64 = 61 + 3</h3>
+      <p>4 letters, 3 at a time: 4×4×4 = 64. Subtract the 3 stops: 61 sense.</p></div>
+    <div class="tile p"><h3>Chromosome count</h3>
+      <p>23 pairs = <b>22 Auto + 1 Sex</b>. Male 44+X<b>Y</b> (Y in bo<b>Y</b>). Female 44+XX.</p></div>
+    <div class="tile k"><h3>Nucleotide</h3>
+      <p><b>S-P-B</b> = Sugar, Phosphate, Base. Nucleo<b>S</b>ide lacks the <b>P</b>.</p></div>
+    <div class="tile d"><h3>Mendel's laws</h3>
+      <p><b>D</b>on't <b>S</b>kip <b>I</b>ce-cream. Pea = <b>Pisum</b>. Monk at <b>Brünn</b>.</p></div>
+    <div class="tile r"><h3>Genotype or phenotype?</h3>
+      <p><b>Geno</b> = <b>G</b>ene letters. <b>Pheno</b> = <b>Photo</b> (what you see).</p></div>
+    <div class="tile p"><h3>Ribozyme</h3>
+      <p><b>Ribo-zyme</b> = RNA that is an enzyme. Remember: "RNA can do <b>chemistry</b>", so the 1989 Nobel was <b>Chemistry</b>.</p></div>
+    <div class="tile k"><h3>Apoptosis vs necrosis</h3>
+      <p><b>A</b>poptosis = <b>A</b> plan. <b>N</b>ecrosis = <b>N</b>eglect or injury.</p></div>
+  </div>
+
+  <h3>Three habits that win GS Science questions</h3>
+  <ul class="facts">
+    <li><b>Name the family first.</b> Is this a "who", a "what", a "how many" or a "which is NOT"? Each family has its own table above.</li>
+    <li><b>Kill the odd one.</b> In Q28 three options are DNA bases and one is an amino acid. In Q4 one is a plant used in a different famous experiment. The odd one is usually the answer to "which is NOT".</li>
+    <li><b>Pair a fact with a picture.</b> McClintock + spotted maize kernel. Watson-Crick + twisted ladder. Khorana + test tube. One image per scientist.</li>
+  </ul>
+</section>
+
+<!-- PLAYBOOK -->
+<section id="play">
+  <h2>Question playbook: solve ones you have never seen</h2>
+  <div class="scroll"><table>
+    <tr><th>Question looks like</th><th>Do this</th></tr>
+    <tr><td>"Father of ..." / "Who discovered ..."</td><td>Go to the scientist map. Check the verb (discover, isolate, structure, synthesise, coin).</td></tr>
+    <tr><td>"Unit of heredity", "carries heredity"</td><td>Gene = unit. Chromosome = carrier. DNA = material.</td></tr>
+    <tr><td>Count questions (chromosomes, codons)</td><td>46 / 23 pairs / 64 / 61 / 3 / 22 autosome pairs.</td></tr>
+    <tr><td>"Which is NOT true"</td><td>Check each statement. The false one usually has a "never", "only" or "does not play any role".</td></tr>
+    <tr><td>Statements I, II, III, IV</td><td>Test each one independently. If every one holds, pick "All of the above" (Q9).</td></tr>
+    <tr><td>Assertion and Reason</td><td>Judge A alone. Judge R alone. Only then ask if R explains A.</td></tr>
+    <tr><td>Ratio or probability</td><td>Draw the 2×2 Punnett square. It takes 10 seconds.</td></tr>
+    <tr><td>Options with "(e) none / more than one"</td><td>BPSC style. Choose (e) only if no listed option is right (Q24).</td></tr>
+    <tr><td>Disputed or withdrawn key</td><td>Learn the textbook fact, and expect that the commission may cancel it (Q17).</td></tr>
+  </table></div>
+</section>
+
+<!-- SOLVED BANK -->
+<section id="bank">
+  <h2>Every question in the PDF, solved</h2>
+  <p>Tap a question to open the answer, the reasoning, and why the other options fail. Try to answer before you open it.</p>
+  <div class="toolbar">
+    <button class="btn sm ghost" id="openAll" type="button">Open all</button>
+    <button class="btn sm ghost" id="closeAll" type="button">Close all</button>
+  </div>
+  <div id="bankList"></div>
+  <div class="trap"><strong>Flags from your own PDF:</strong> <b>Q17</b> says JPSC revised its key to "all options incorrect". <b>Q24</b> uses option (e). <b>Q25</b>'s key is "synthesis of protein" even though Khorana is also famous for the first artificial gene. <b>Q28</b> is badly worded (it means "which is not part of DNA"). <b>Q32</b>'s key is lizard, though real lizards are mixed. <b>Q35</b>'s options were cut off in the scan, so I used the standard assertion-reason code.</div>
+</section>
+
+<!-- FLASHCARDS -->
+<section id="cards">
+  <h2>Flashcards</h2>
+  <p>Tap a card to flip it. Say the answer aloud before you flip.</p>
+  <div class="cards" id="cardGrid"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <h2>Practice quiz</h2>
+  <p>All PDF questions plus new ones that test the same concepts from a different angle. Each answer explains the reasoning.</p>
+  <div class="toolbar" id="qmodes">
+    <button class="btn sm" data-m="all" type="button">All</button>
+    <button class="btn sm ghost" data-m="pdf" type="button">PDF questions</button>
+    <button class="btn sm ghost" data-m="new" type="button">New (beyond PDF)</button>
+  </div>
+  <div class="qbox" id="qbox" aria-live="polite"></div>
+</section>
+
+<footer>Made for revision from General Science, Cell and Heredity (G-509 to G-515). Questions that were cut off in the scan are marked. Facts beyond the PDF are included to cover next-level questions.</footer>
+</div>
+
+<script>
+/* theme toggle */
+(function(){
+  const r=document.documentElement,b=document.getElementById('themeBtn');
+  try{const t=localStorage.getItem('gtheme');if(t)r.dataset.theme=t;}catch(e){}
+  b.addEventListener('click',()=>{
+    const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme=dark?'light':'dark';
+    try{localStorage.setItem('gtheme',r.dataset.theme);}catch(e){}
+  });
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('svg').forEach(s=>{try{s.pauseAnimations();}catch(e){}});
+  }
+})();
+
+/* helix animation */
+(function(){
+  const g=document.getElementById('helix');if(!g)return;
+  const NS='http://www.w3.org/2000/svg';
+  const x0=30,x1=480,step=6,cy=145,amp=78;
+  const col=['var(--pink)','var(--prot)','var(--rna)','var(--dna)'];
+  const pairs=[[0,1],[2,3],[1,0],[3,2],[0,1],[3,2],[2,3],[1,0],[2,3],[0,1],[1,0],[3,2],[2,3],[1,0],[0,1],[3,2]];
+  const p1=document.createElementNS(NS,'path'),p2=document.createElementNS(NS,'path');
+  [p1,p2].forEach((p,i)=>{p.setAttribute('fill','none');p.setAttribute('stroke-width','5');p.setAttribute('stroke-linecap','round');p.setAttribute('stroke',i?'var(--rna)':'var(--dna)');g.appendChild(p);});
+  const rungs=pairs.map(()=>{const a=document.createElementNS(NS,'line'),b=document.createElementNS(NS,'line');[a,b].forEach(l=>{l.setAttribute('stroke-width','5');l.setAttribute('stroke-linecap','round');g.appendChild(l);});return [a,b];});
+  function draw(ph){
+    let d1='',d2='';
+    for(let x=x0;x<=x1;x+=step){
+      const t=(x-x0)/55+ph;
+      const y1=cy+amp*Math.sin(t),y2=cy-amp*Math.sin(t);
+      d1+=(x===x0?'M':'L')+x+' '+y1.toFixed(1);d2+=(x===x0?'M':'L')+x+' '+y2.toFixed(1);
+    }
+    p1.setAttribute('d',d1);p2.setAttribute('d',d2);
+    rungs.forEach((r,i)=>{
+      const x=x0+14+i*(x1-x0-28)/(pairs.length-1);
+      const t=(x-x0)/55+ph;const y1=cy+amp*Math.sin(t),y2=cy-amp*Math.sin(t),m=(y1+y2)/2;
+      r[0].setAttribute('x1',x);r[0].setAttribute('x2',x);r[0].setAttribute('y1',y1.toFixed(1));r[0].setAttribute('y2',m.toFixed(1));r[0].setAttribute('stroke',col[pairs[i][0]]);
+      r[1].setAttribute('x1',x);r[1].setAttribute('x2',x);r[1].setAttribute('y1',m.toFixed(1));r[1].setAttribute('y2',y2.toFixed(1));r[1].setAttribute('stroke',col[pairs[i][1]]);
+    });
+  }
+  let ph=0;draw(ph);
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    (function loop(){ph+=0.02;draw(ph);requestAnimationFrame(loop);})();
+  }
+})();
+
+/* Punnett tool */
+(function(){
+  const s1=document.getElementById('pp1'),s2=document.getElementById('pp2'),grid=document.getElementById('pgrid'),res=document.getElementById('pres');
+  function make(a,b){return [a,b].sort().join('');}
+  function run(){
+    const a=s1.value.split(''),b=s2.value.split('');
+    const cells=[];a.forEach(x=>b.forEach(y=>cells.push(make(x,y))));
+    const tall=g=>g.indexOf('T')>-1;
+    let h='<div></div><div class="hd">'+b[0]+'</div><div class="hd">'+b[1]+'</div>';
+    h+='<div class="hd">'+a[0]+'</div><div class="'+(tall(cells[0])?'c-tall':'c-dw')+'">'+cells[0]+'</div><div class="'+(tall(cells[1])?'c-tall':'c-dw')+'">'+cells[1]+'</div>';
+    h+='<div class="hd">'+a[1]+'</div><div class="'+(tall(cells[2])?'c-tall':'c-dw')+'">'+cells[2]+'</div><div class="'+(tall(cells[3])?'c-tall':'c-dw')+'">'+cells[3]+'</div>';
+    grid.innerHTML=h;
+    const cnt={TT:0,Tt:0,tt:0};cells.forEach(c=>cnt[c]++);
+    const t=cells.filter(tall).length,d=4-t;
+    const gt=['TT','Tt','tt'].filter(k=>cnt[k]>0).map(k=>cnt[k]+' '+k).join(' : ');
+    res.innerHTML='<b>Genotypes:</b> '+gt+'<br><b>Phenotypes:</b> '+t+' tall : '+d+' dwarf ('+(t*25)+'% tall)';
+  }
+  s1.onchange=run;s2.onchange=run;run();
+})();
+
+/* Translator tool */
+(function(){
+  const CODE="FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",B="UCAG";
+  const NAME={F:'Phe',L:'Leu',S:'Ser',Y:'Tyr','*':'Stop',C:'Cys',W:'Trp',P:'Pro',H:'His',Q:'Gln',R:'Arg',I:'Ile',M:'Met',T:'Thr',N:'Asn',K:'Lys',V:'Val',A:'Ala',D:'Asp',E:'Glu',G:'Gly'};
+  const COMP={A:'U',T:'A',G:'C',C:'G'};
+  const inp=document.getElementById('tin'),mode=document.getElementById('tmode'),out=document.getElementById('tout');
+  function aa(c){return CODE[B.indexOf(c[0])*16+B.indexOf(c[1])*4+B.indexOf(c[2])];}
+  function run(){
+    let s=inp.value.toUpperCase().replace(/[^A-Z]/g,'');
+    const dna=mode.value==='dna';
+    const ok=dna?/^[ATGC]*$/:/^[AUGC]*$/;
+    if(!s){out.textContent='Type a sequence above.';return;}
+    if(!ok.test(s)){out.innerHTML='<span style="color:var(--warn)">Use only '+(dna?'A, T, G, C':'A, U, G, C')+'.</span>';return;}
+    const m=dna?s.split('').map(c=>COMP[c]).join(''):s;
+    const cods=[];for(let i=0;i+3<=m.length;i+=3)cods.push(m.slice(i,i+3));
+    let chips='',stopped=false,prot=[];
+    cods.forEach((c,i)=>{
+      if(stopped)return;
+      const a=aa(c);
+      let cls='';
+      if(a==='*'){cls=' stop';stopped=true;}else if(c==='AUG'&&i===0){cls=' start';}
+      if(a!=='*')prot.push(NAME[a]);
+      chips+='<div class="chip'+cls+'">'+c+'<small>'+NAME[a]+'</small></div>';
+    });
+    const extra=m.length%3?'<p style="font-size:.9rem;color:var(--soft)">Leftover '+(m.length%3)+' base(s) do not make a full codon.</p>':'';
+    out.innerHTML=(dna?'<p><b>mRNA:</b> <span class="mono">'+m+'</span></p>':'')+'<div class="chips">'+chips+'</div><p><b>Protein:</b> '+(prot.join(' – ')||'(nothing, stops at once)')+(stopped?' <span class="tag x">stopped at a stop codon</span>':'')+'</p>'+extra;
+  }
+  inp.addEventListener('input',run);mode.addEventListener('change',run);
+  document.getElementById('tdemo').onclick=()=>{inp.value=mode.value==='dna'?'TACTTTGGGATT':'AUGAAACCCUAA';run();};
+  run();
+})();
+
+/* Sex tool */
+(function(){
+  let b=0,g=0;const out=document.getElementById('fout');
+  function once(){return Math.random()<.5;}
+  function show(last){
+    out.innerHTML=(last?'<p><b>Last result:</b> egg X + sperm '+(last==='b'?'<b>Y</b> → XY → <span class="tag r">boy</span>':'<b>X</b> → XX → <span class="tag k">girl</span>')+'</p>':'')+'<p>Boys: <b>'+b+'</b> · Girls: <b>'+g+'</b>'+((b+g)?' · Boys '+Math.round(b/(b+g)*100)+'%':'')+'</p><p style="font-size:.9rem;color:var(--soft)">Small samples wobble. Over many births it settles near 50:50 because sperm are X or Y in equal numbers.</p>';
+  }
+  document.getElementById('fert1').onclick=()=>{const y=once();y?b++:g++;show(y?'b':'g');};
+  document.getElementById('fert50').onclick=()=>{for(let i=0;i<50;i++){once()?b++:g++;}show();};
+  document.getElementById('fertR').onclick=()=>{b=0;g=0;out.textContent='Egg is always X. Press the button to see which sperm wins.';};
+})();
+
+/* ===== QUESTION DATA ===== */
+const Q=[
+/* Cell page G-509 */
+{g:'cell',n:'C9',q:"The powerhouse of the cell is:",o:["Cell wall","Mitochondria","Ribosome","Nucleus","None of the above / More than one of the above"],a:1,s:"64th B.P.S.C. (Pre) 2018",e:"Mitochondria run the last, biggest ATP-making stage (oxidative phosphorylation), so they are the powerhouse.",t:"Option (e) is BPSC's favourite decoy. Choose it only when no other option is right."},
+{g:'cell',n:'C10',q:"Plasma membrane is built up of:",o:["Protein","Lipid","Carbohydrate","Both (a) and (b)"],a:3,s:"U.P.P.C.S. (Mains) 2008",e:"The membrane is a phospholipid bilayer with proteins embedded in it (fluid mosaic model). Of the choices given, lipid plus protein fits best.",t:"Carbohydrates exist too, as short sugar chains on the outer surface, but they are a minor part. The key accepts (d)."},
+{g:'cell',n:'C11',q:"The biological membranes are composed of:",o:["Lipids and proteins in varying combinations which are specific to each species, cell type and organelle","Lipids only","Proteins only","None of the above"],a:0,s:"71st B.P.S.C. (Pre) 2025",e:"Every biological membrane is a lipid bilayer plus proteins (and some carbohydrate), with the exact mix tuned to the species, cell type and organelle.",t:"'Only' answers (lipids only, proteins only) are almost always wrong in biology."},
+{g:'cell',n:'C12',q:"Which of the following cell organelles play the most significant role in protein synthesis?",o:["Lysosome and Centrosome","Endoplasmic reticulum and Ribosome","Golgi apparatus and Mitochondria","Lysosome and Mitochondria"],a:1,s:"I.A.S. (Pre) 2001",e:"Ribosomes assemble proteins. Rough ER is covered with ribosomes, so the pair ER + ribosome is the protein-making site.",t:"Golgi only packs and ships proteins. Lysosomes digest. Mitochondria supply ATP."},
+{g:'cell',n:'C13',q:"The cellular and molecular control of programmed cell death is known as:",o:["Apoptosis","Ageing","Degeneration","Necrosis"],a:0,s:"I.A.S. (Pre) 2001",e:"Programmed cell death is apoptosis.",t:"Necrosis is death from injury. A for Apoptosis = A plan."},
+{g:'cell',n:'C14',q:"The process that generates the maximum number of ATP in our system is:",o:["Decomposition of glucose","Kreb's cycle","Last respiratory series","Water decomposition"],a:2,s:"R.A.S./R.T.S. (Pre) 1999",e:"The 'last respiratory series' is the electron transport chain with oxidative phosphorylation, making most (about 27–34) of the 30–38 ATP from one glucose.",t:"Glycolysis nets just 2 ATP and Krebs makes 2. They mainly load carriers that the last stage cashes in."},
+/* Heredity Q1-35 */
+{g:'her',n:'1',q:"Who is the father of modern genetics?",o:["Gregor Johann Mendel","Hugo De Vries","Charles Darwin","Thomas Hunt Morgan"],a:0,s:"Chhattisgarh P.C.S. (Pre) 2011",e:"Mendel crossed pea plants and discovered the laws of inheritance.",t:"Morgan = fruit fly and linkage. De Vries = mutation theory. Darwin = evolution."},
+{g:'her',n:'2',q:"The scientist known as father of genetics is:",o:["Johnson","G.J. Mendel","F.B. Morrison","Morgan"],a:1,s:"Uttarakhand Lower Sub. (Pre) 2010",e:"Same fact as Q1: Mendel.",t:"Johnson and Morrison are made-up decoys."},
+{g:'her',n:'3',q:"Who is known as father of Genetics?",o:["Hargobind Khurana","Thomas Hunt Morgan","Robert Brown","Johann Gregor Mendel"],a:3,s:"Uttarakhand P.C.S. (Pre) 2021",e:"Johann Gregor Mendel.",t:"Khorana (spelled Khurana here) cracked the genetic code. Robert Brown discovered the nucleus."},
+{g:'her',n:'4',q:"The classical Mendel's work on his 'laws of inheritance' was performed on the organism:",o:["Drosophila","Snapdragon","Garden pea","Sweet Pea"],a:2,s:"U.P.P.C.S. (Mains) 2002",e:"Mendel worked on the garden pea, Pisum sativum, tracking seven pairs of traits.",t:"Drosophila = Morgan. Snapdragon = a classic of incomplete dominance. Sweet pea = Bateson and Punnett's linkage work."},
+{g:'her',n:'5',q:"Mendel's principle of inheritance is based on:",o:["Vegetative reproduction","Asexual reproduction","Sexual reproduction","All of the above"],a:2,s:"53rd to 55th B.P.S.C. (Pre) 2011",e:"Each parent gives one allele through a gamete. Segregation and recombination only happen in sexual reproduction.",t:"Asexual or vegetative reproduction makes clones, so no Mendelian ratios appear."},
+{g:'her',n:'6',q:"Genome mapping relates to:",o:["Blood grouping","Mapping of genes","Mapping of nerve centers","Mapping of brain"],a:1,s:"U.P.P.C.S. (Pre) 2002",e:"Genome mapping fixes the position of genes (and markers) on chromosomes and the distances between them."},
+{g:'her',n:'7',q:"The unit of heredity in our body is called:",o:["Chromosome","DNA","Gene","Nucleus"],a:2,s:"U.P.P.S.C. (GIC) 2010",e:"The gene is the basic physical and functional unit of heredity.",t:"Chromosome carries genes. DNA is the molecule. Gene is the unit."},
+{g:'her',n:'8',q:"Gene is:",o:["A segment of DNA","A segment of DNA and histone","A segment of DNA, RNA and histone","All of the above"],a:0,s:"Uttarkhand P.C.S. (Pre) 2016",e:"A gene is a stretch of DNA. Histones are only the packing proteins of the chromosome, not part of the gene.",t:"'All of the above' tempts, but two of the three claims are false."},
+{g:'her',n:'9',q:"The characteristic features of genetic code are: (i) It is always universal (ii) It is triplet of nucleotide bases corresponding to 20 amino acids (iii) It is non-overlapping, non-ambiguous and commaless (iv) It has start and stop codon. Which are true?",o:["i, ii and iv only","i, iii and iv only","i, ii and iii only","All of the above"],a:3,s:"M.P. P.C.S. (Pre) 2020",e:"All four statements describe the genetic code correctly: universal, triplet, non-overlapping, commaless, non-ambiguous, with AUG start and three stops.",t:"Test each statement on its own. When all pass, the answer is 'All of the above'."},
+{g:'her',n:'10',q:"Which of the following is a non-sense codon?",o:["UAA","AUG","UUU","UGC"],a:0,s:"71st B.P.S.C. (Pre) 2025",e:"The stop (non-sense) codons are UAA, UAG, UGA. AUG = start/Met, UUU = Phe, UGC = Cys.",t:"U Are Away (UAA)."},
+{g:'her',n:'11',q:"Change in the base sequence within a gene is called:",o:["Mutation","Cloning","Fusion","Breeding"],a:0,s:"U.P.P.C.S. (Pre) 2020",e:"A change in the base sequence of a gene is a mutation. It is the ultimate source of genetic variation.",t:"Cloning = making copies. Fusion = joining. Breeding = crossing organisms."},
+{g:'her',n:'12',q:"Which of the following statements is not true?",o:["Chromosomes are composed of DNA and Protein.","Nucleus of a cell does not play a role in cellular reproduction.","Chromosomes contain information for inheritance.","Functional segment of DNA is called genes."],a:1,s:"U.P.P.C.S. (Pre) 2024",e:"The nucleus holds and copies the DNA and directs cell division, so it plays a central role in reproduction. Statement (b) is the false one.",t:"In 'NOT true' questions, hunt for the extreme wording ('does not play a role')."},
+{g:'her',n:'13',q:"Hereditary symptoms are moved in the descendant of creatures by:",o:["Ribosome","Chromosome","Plasma","Lysosome"],a:1,s:"R.A.S./R.T.S. (Pre) 1992",e:"Chromosomes (made of nucleoprotein) carry the genes from parents to offspring."},
+{g:'her',n:'14',q:"Which of the following is responsible for controlling hereditary characters of the living cells?",o:["Enzyme","Hormone","RNA","DNA","None of the above / More than one of the above"],a:3,s:"60th to 62nd B.P.S.C. (Pre) 2016",e:"DNA is the hereditary material in nearly all organisms and controls inherited characters.",t:"RNA is the genetic material only in a few viruses (TMV, Qβ phage), so it does not beat DNA here. (e) is a decoy."},
+{g:'her',n:'15',q:"Which of the following features of DNA makes it uniquely suited to store and transmit genetic information from generation to generation?",o:["Complementarity of the two strands","Double helix","Number of base-pairs per turn","Sugar-phosphate backbone"],a:0,s:"I.A.S. (Pre) 2001",e:"A pairs only with T and G only with C, so each strand carries the full information needed to rebuild the other. That allows exact copying and repair.",t:"Double helix and the backbone give structure and stability, but only complementarity gives copying."},
+{g:'her',n:'16',q:"Sexual reproduction causes genetic variation because of:",o:["Blending of genes","Chromosomal changes","Shuffling of genes","All of the above"],a:3,s:"53rd to 55th B.P.S.C. (Pre) 2011",e:"Gene mixing, chromosomal changes and shuffling (crossing over and independent assortment) all create new combinations."},
+{g:'her',n:'17',q:"Chromosomal theory of inheritance was given by:",o:["Waldeyer","Mendel","Sutton and Boveri","Muller"],a:2,s:"Jharkhand P.C.S. (Pre) 2021",e:"Walter Sutton and Theodor Boveri (1902–03) showed chromosomes behave like Mendel's factors. Morgan's fruit-fly work (1915) gave strong proof.",t:"Your PDF notes that JPSC's revised key declared all options incorrect. Learn it as Sutton–Boveri. Waldeyer only named chromosomes."},
+{g:'her',n:'18',q:"Who first outlined the structure of the gene molecule (D.N.A.)?",o:["Dr. Maghnad Saha","Dr. Stephan Hawking","Dr. James Watson and Dr. Francis Crick","Dr. Alexander Fleming"],a:2,s:"M.P.P.C.S. (Pre) 1994",e:"Watson and Crick proposed the double helix in 1953 and shared the 1962 Nobel Prize with Maurice Wilkins.",t:"Saha = astrophysics, Hawking = cosmology, Fleming = penicillin."},
+{g:'her',n:'19',q:"James D. Watson and Francis Crick are associated with the discovery of:",o:["Vaccine","Structure of DNA","Anti-malarial drugs","Penicillin"],a:1,s:"U.P.P.C.S. (Mains) 2012",e:"Same fact as Q18: the structure of DNA."},
+{g:'her',n:'20',q:"The DNA double helix structure was discovered by:",o:["James Watson and Francis Crick","Rosalind Franklin and Maurice Wilkins","Linus Pauling","Gregor Mendel"],a:0,s:"69th B.P.S.C. (Pre) 2023",e:"Watson and Crick built the model (1953) using X-ray data from Franklin and Wilkins.",t:"Franklin's Photo 51 was crucial, but she died in 1958, before the Nobel. Pauling proposed a wrong triple-helix model."},
+{g:'her',n:'21',q:"Who has proposed for the first time the double helix model of DNA?",o:["Watson and Crick","Fisher the Haldoni","Lamark and Darwin","Hugo de Vries"],a:0,s:"U.P.P.C.S. (Pre) 2012",e:"Same fact as Q18.",t:"Fisher and Haldane = population genetics. Lamarck and Darwin = evolution."},
+{g:'her',n:'22',q:"Nobel Prize winning scientist James D. Watson is known for his work in which area?",o:["Metallurgy","Meteorology","Environmental protection","Genetics"],a:3,s:"I.A.S. (Pre) 2008",e:"Watson co-discovered the DNA double helix, which is genetics (molecular biology)."},
+{g:'her',n:'23',q:"Double-helical structure of DNA was given by whom?",o:["Jacob and Monod","Watson and Crick","H.G. Khorana","None of the above"],a:1,s:"U.P. P.C.S. (Pre) 2018",e:"Watson and Crick, 1953.",t:"Jacob and Monod = lac operon. Khorana = genetic code."},
+{g:'her',n:'24',q:"Who discovered DNA?",o:["James Watson and Francis Crick","Gregor Mendel","Johannsen","Hargovind Khorana","None of the above / More than one of the above"],a:4,s:"64th B.P.S.C. (Pre) 2018",e:"DNA was first identified and isolated by Friedrich Miescher in 1869. He is not among options (a)–(d), so (e) is correct.",t:"Read the verb: 'discovered DNA' → Miescher. 'Structure of DNA' → Watson and Crick."},
+{g:'her',n:'25',q:"Har Gobind Khorana is credited for the discovery of:",o:["Synthesis of Protein","Synthesis of gene","Synthesis of Nitrogenous","None of these"],a:0,s:"39th B.P.S.C. (Pre) 1994",e:"Khorana shared the 1968 Nobel Prize (with Holley and Nirenberg) for interpreting the genetic code and its role in protein synthesis. The book key is (a).",t:"He also made the first artificial gene (see Q26). If a paper offers both, 'making a gene/DNA in the lab' is the sharper Khorana fact."},
+{g:'her',n:'26',q:"In laboratory, who did the synthesis of DNA?",o:["Miller","Khorana","D. Weris","Kelvin"],a:1,s:"43rd B.P.S.C. (Pre) 1999",e:"Khorana chemically synthesised a gene in the laboratory.",t:"Miller = Miller-Urey experiment (amino acids). Kelvin = temperature."},
+{g:'her',n:'27',q:"Who delivered the principle of 'jumping genes'?",o:["Gregor Johann Mendel","Tomas Hunt Morgan","Barbara McClintock","Watson and Crick"],a:2,s:"I.A.S. (Pre) 1993",e:"McClintock discovered transposons in maize and won the 1983 Nobel Prize in Medicine.",t:"Mc = Maize Corn."},
+{g:'her',n:'28',q:"Which compound present in D.N.A. does not form amino acid?",o:["Adenine","Tyrosine","Guanine","Cytosine"],a:1,s:"U.P.P.C.S. (Pre) 1994",e:"The question is clumsy. It really asks which option is not a part of DNA. Adenine, guanine and cytosine are DNA bases. Tyrosine is itself an amino acid, so it is the odd one out.",t:"Three bases plus one amino-acid name: the amino acid is the answer."},
+{g:'her',n:'29',q:"The sugar present in DNA is:",o:["Glucose","Fructose","Deoxyribose","Ribose"],a:2,s:"U.P. P.C.S. (Mains) 2016",e:"DNA has deoxyribose. RNA has ribose.",t:"Deoxy = one oxygen less. Glucose and fructose are six-carbon sugars."},
+{g:'her',n:'30',q:"Ribozymes are:",o:["DNA","RNA","Proteins","None of these"],a:1,s:"Jharkhand P.C.S. (Pre) 2016",e:"A ribozyme is an RNA molecule that works as an enzyme. Cech and Altman received the 1989 Nobel Prize (Chemistry) for this."},
+{g:'her',n:'31',q:"Chromosome number in any species:",o:["Increase by age","Decrease by age","Is constant","Increase with the weight"],a:2,s:"Chhattisgarh P.C.S. (Pre) 2019",e:"Chromosome number is fixed for a species. Humans always have 46."},
+{g:'her',n:'32',q:"Which of the following does not have sex-chromosome?",o:["Monkey","Tiger","Butterfly","Lizard"],a:3,s:"U.P.P.C.S. (Spl.) (Mains) 2004",e:"Monkey and tiger (mammals) have XY. Butterflies have ZW. The exam key says lizards lack morphologically distinct sex chromosomes.",t:"Science check: many lizards do have sex chromosomes, while crocodiles and many turtles use nest temperature. Use the key for the exam but don't generalise."},
+{g:'her',n:'33',q:"How many chromosomes are there in humans?",o:["36","46","56","26"],a:1,s:"U.P.P.C.S. (Pre) 1992 / 1991",e:"23 pairs = 46."},
+{g:'her',n:'34',q:"The number of chromosome pairs, found in the cells of human body is:",o:["21","22","23","24"],a:2,s:"Uttarakhand P.C.S. (Pre) 2003",e:"23 pairs: 22 autosome pairs + 1 pair of sex chromosomes.",t:"22 is the autosome count, a favourite trap."},
+{g:'her',n:'35',q:"Assertion (A): In human being, the females play a major role in determining the sex of the offspring. Reason (R): Women have two 'X' chromosomes.",o:["Both A and R are true and R is the correct explanation of A","Both A and R are true but R is not the correct explanation of A","A is true but R is false","A is false but R is true"],a:3,s:"PDF Q35 (options cut off in the scan; standard A/R code used)",e:"Every egg carries an X. The sperm carries X or Y, so the father decides the sex. A is false. Women do have XX, so R is true.",t:"Match the logic (A false, R true) to whichever option says that in your paper."},
+/* Beyond the PDF */
+{g:'new',n:'B1',q:"In a cross Tt × Tt, what percentage of offspring are tall?",o:["25%","50%","75%","100%"],a:2,s:"Concept: monohybrid cross",e:"The offspring are TT, Tt, Tt, tt. Three of four carry T, so they are tall: 75%.",t:"3:1 = three tall, one dwarf."},
+{g:'new',n:'B2',q:"The genotypic ratio of a Tt × Tt cross is:",o:["3:1","1:2:1","9:3:3:1","1:1"],a:1,s:"Concept: monohybrid cross",e:"TT : Tt : tt = 1 : 2 : 1. The phenotypic ratio is 3:1.",t:"Genotype gives three numbers (1:2:1), phenotype gives two (3:1)."},
+{g:'new',n:'B3',q:"A test cross is made by crossing an individual of unknown genotype with:",o:["A homozygous dominant","A homozygous recessive","A heterozygote","Itself"],a:1,s:"Concept: Mendelian genetics",e:"The recessive parent (tt) can only give t, so the offspring reveal what the unknown parent carries. All tall means TT; half dwarf means Tt."},
+{g:'new',n:'B4',q:"The phenotypic ratio in the F2 of a dihybrid cross is:",o:["3:1","1:2:1","9:3:3:1","1:1:1:1"],a:2,s:"Concept: Law of Independent Assortment",e:"Two traits sorting independently give 9:3:3:1 across 16 combinations."},
+{g:'new',n:'B5',q:"The Law of Segregation states that:",o:["The two alleles of a gene separate so each gamete receives only one","Genes for different traits assort independently","The dominant allele always hides the recessive","Genes mutate randomly"],a:0,s:"Concept: Mendel's laws",e:"Alleles separate during gamete formation (meiosis). Option (b) is Independent Assortment; option (c) is Dominance."},
+{g:'new',n:'B6',q:"Red × white snapdragon gives pink F1. This is an example of:",o:["Complete dominance","Incomplete dominance","Codominance","Mutation"],a:1,s:"Concept: exceptions to Mendel",e:"Neither allele fully masks the other, so the heterozygote is an intermediate colour. F2 shows 1 red : 2 pink : 1 white.",t:"In codominance both alleles show fully (AB blood group), nothing blends."},
+{g:'new',n:'B7',q:"A DNA sample has 30% adenine. What percentage of guanine does it contain?",o:["20%","30%","40%","60%"],a:0,s:"Concept: Chargaff's rule",e:"A = T = 30%, so A + T = 60%. The remaining 40% is G + C, split equally: G = 20%."},
+{g:'new',n:'B8',q:"How many hydrogen bonds join guanine and cytosine?",o:["1","2","3","4"],a:2,s:"Concept: base pairing",e:"G≡C has three, A=T has two.",t:"Gold chain (GC) is heavier: 3."},
+{g:'new',n:'B9',q:"Which base is present in DNA but absent from RNA?",o:["Adenine","Thymine","Uracil","Cytosine"],a:1,s:"Concept: DNA vs RNA",e:"RNA uses uracil in place of thymine."},
+{g:'new',n:'B10',q:"Which of the following is a purine?",o:["Cytosine","Thymine","Adenine","Uracil"],a:2,s:"Concept: nitrogenous bases",e:"Purines are adenine and guanine. The others are pyrimidines.",t:"PURe As Gold."},
+{g:'new',n:'B11',q:"Translation (making protein from mRNA) takes place at the:",o:["Nucleus","Ribosome","Golgi apparatus","Lysosome"],a:1,s:"Concept: central dogma",e:"mRNA is read in the ribosome while tRNA brings amino acids. Transcription is the part that happens in the nucleus."},
+{g:'new',n:'B12',q:"The enzyme reverse transcriptase makes:",o:["RNA from DNA","DNA from RNA","Protein from RNA","DNA from DNA"],a:1,s:"Concept: reverse transcription",e:"It builds DNA using an RNA template. Retroviruses such as HIV rely on it."},
+{g:'new',n:'B13',q:"How many sense codons are there in the genetic code?",o:["64","61","60","3"],a:1,s:"Concept: genetic code",e:"64 total minus 3 stop codons = 61 sense codons."},
+{g:'new',n:'B14',q:"The start codon AUG codes for which amino acid?",o:["Tyrosine","Methionine","Tryptophan","None, it is a stop signal"],a:1,s:"Concept: genetic code",e:"AUG signals the start and also codes for methionine."},
+{g:'new',n:'B15',q:"Which is NOT a stop codon?",o:["UAA","UAG","UGA","AUG"],a:3,s:"Concept: extends Q10",e:"AUG is the start codon. The stops are UAA, UAG, UGA."},
+{g:'new',n:'B16',q:"Meselson and Stahl showed that DNA replication is:",o:["Conservative","Semi-conservative","Dispersive only","Random"],a:1,s:"Concept: DNA replication",e:"Each new DNA molecule has one old strand and one new strand."},
+{g:'new',n:'B17',q:"Hershey and Chase proved that DNA is the genetic material using:",o:["Drosophila","Pea plants","Bacteriophage labelled with radioactive phosphorus and sulphur","Neurospora"],a:2,s:"Concept: DNA as genetic material",e:"Phage DNA contains phosphorus and its protein coat contains sulphur. Only the labelled phosphorus (DNA) entered the bacteria."},
+{g:'new',n:'B18',q:"Griffith's 1928 experiment on Streptococcus pneumoniae demonstrated:",o:["Transformation","Transcription","Conjugation","Crossing over"],a:0,s:"Concept: DNA as genetic material",e:"Harmless bacteria picked up something from dead virulent bacteria and became virulent. Avery et al. later showed this 'something' was DNA."},
+{g:'new',n:'B19',q:"A carrier mother (XᴴXʰ) and a normal father marry. What is the chance that a son has haemophilia?",o:["0%","25%","50%","100%"],a:2,s:"Concept: X-linked inheritance",e:"The son gets Y from the father and one X from the mother, Xᴴ or Xʰ with equal chance. So half of the sons are affected.",t:"Daughters are never affected here, though half are carriers."},
+{g:'new',n:'B20',q:"Down syndrome is caused by:",o:["Monosomy of the X chromosome","Trisomy of chromosome 21","Extra X in males","Trisomy of chromosome 18"],a:1,s:"Concept: chromosomal disorders",e:"Three copies of chromosome 21 give a total of 47 chromosomes."},
+{g:'new',n:'B21',q:"Turner syndrome has the chromosome constitution:",o:["44 + XXY","45, X (only one X)","44 + XYY","44 + XXX"],a:1,s:"Concept: chromosomal disorders",e:"Turner = 45, X, a female with a single X. Klinefelter = 47, XXY (male)."},
+{g:'new',n:'B22',q:"In birds, the sex of the offspring is decided by:",o:["The father's sperm, as in humans","The mother's egg, because females are ZW","Temperature of incubation","The number of X chromosomes only"],a:1,s:"Concept: sex determination",e:"Birds are the reverse of humans: females are ZW (heterogametic), males ZZ. So the egg decides."},
+{g:'new',n:'B23',q:"Mitochondrial DNA in humans is inherited from:",o:["Father only","Mother only","Both equally","Neither"],a:1,s:"Concept: heredity",e:"The egg supplies almost all of the cytoplasm and mitochondria to the zygote, so mtDNA is maternal."},
+{g:'new',n:'B24',q:"The 1989 Nobel Prize for the discovery of catalytic RNA (ribozymes) was in:",o:["Physics","Chemistry","Medicine","Economics"],a:1,s:"Concept: Nobel facts",e:"Thomas Cech and Sidney Altman won the Chemistry prize."},
+{g:'new',n:'B25',q:"The terms gene, genotype and phenotype were coined by:",o:["Mendel","Wilhelm Johannsen","Waldeyer","Morgan"],a:1,s:"Concept: history of genetics",e:"Johannsen introduced them in 1909.",t:"Mendel called them 'factors'."},
+{g:'new',n:'B26',q:"Mendel's laws were rediscovered in 1900 by:",o:["Watson, Crick and Wilkins","De Vries, Correns and Tschermak","Sutton, Boveri and Morgan","Avery, MacLeod and McCarty"],a:1,s:"Concept: history of genetics",e:"Three botanists independently reached the same laws and credited Mendel.",t:"V-C-T: Very Clever Topper."},
+{g:'new',n:'B27',q:"The approximate size of the human haploid genome is:",o:["3 million base pairs","30 million base pairs","3 billion base pairs","300 billion base pairs"],a:2,s:"Concept: genome",e:"About 3 billion base pairs in one haploid set."},
+{g:'new',n:'B28',q:"The term 'chromosome' was coined by:",o:["Sutton","Waldeyer","Boveri","Mendel"],a:1,s:"Concept: history of genetics",e:"Waldeyer named the stained filaments in the nucleus 'chromosomes'. Sutton and Boveri gave the chromosome theory."},
+{g:'new',n:'B29',q:"Spotted (variegated) kernels in maize are explained by:",o:["Jumping genes","Trisomy","Cloning","Reverse transcription"],a:0,s:"Concept: transposons",e:"A transposon inserting into a pigment gene switches it off in some cells, giving spots. This was McClintock's work."}
+];
+
+/* ===== SOLVED BANK ===== */
+(function(){
+  const L='abcde';
+  const list=document.getElementById('bankList');
+  const groups=[['cell','Cell questions (page G-509)'],['her','Heredity question bank (Q1–Q35)']];
+  let html='';
+  groups.forEach(([k,title])=>{
+    html+='<div class="grp">'+title+'</div>';
+    Q.filter(x=>x.g===k).forEach(x=>{
+      const num=x.n.replace('C','');
+      html+='<details class="sol"><summary>Q'+num+'. '+x.q+'<small>'+x.s+'</small></summary><div class="sbody"><ol>'+
+        x.o.map((t,i)=>'<li class="'+(i===x.a?'right':'')+'">('+L[i]+') '+t+(i===x.a?' ✔':'')+'</li>').join('')+
+        '</ol><div class="logic"><strong>Answer ('+L[x.a]+').</strong> '+x.e+'</div>'+
+        (x.t?'<div class="hook"><strong>Trick / trap:</strong> '+x.t+'</div>':'')+'</div></details>';
+    });
+  });
+  list.innerHTML=html;
+  document.getElementById('openAll').onclick=()=>list.querySelectorAll('details').forEach(d=>d.open=true);
+  document.getElementById('closeAll').onclick=()=>list.querySelectorAll('details').forEach(d=>d.open=false);
+})();
+
+/* ===== FLASHCARDS ===== */
+const cards=[
+ ["Father of Genetics","Gregor Johann Mendel. Garden pea (Pisum sativum). Monk at Brünn."],
+ ["Mendel's three laws","Dominance, Segregation, Independent assortment. (Don't Skip Ice-cream)"],
+ ["Monohybrid F2 ratios","Phenotype 3:1, genotype 1:2:1."],
+ ["Dihybrid F2 ratio","9:3:3:1."],
+ ["Who rediscovered Mendel in 1900?","De Vries, Correns, Tschermak (V-C-T)."],
+ ["Unit of heredity","The gene, a segment of DNA."],
+ ["Genotype vs phenotype","Genotype = alleles carried (Tt). Phenotype = observable trait (tall)."],
+ ["Homozygous vs heterozygous","Same alleles (TT, tt) vs different alleles (Tt)."],
+ ["Who discovered / isolated DNA?","Friedrich Miescher, 1869."],
+ ["Who gave the double helix?","Watson and Crick, 1953. Nobel 1962 with Wilkins."],
+ ["Nucleotide parts","5-carbon sugar + phosphate + nitrogenous base."],
+ ["Purines","Adenine, Guanine (PURe As Gold)."],
+ ["Pyrimidines","Cytosine, Thymine, Uracil (CUT the PY)."],
+ ["Sugar in DNA / RNA","Deoxyribose / Ribose."],
+ ["Base only in RNA","Uracil."],
+ ["A pairs with ... G pairs with ...","A–T (2 H-bonds), G–C (3 H-bonds)."],
+ ["Chargaff's rule","A = T and G = C."],
+ ["Feature making DNA good at copying","Complementarity of the two strands."],
+ ["Copying DNA into RNA","Transcription."],
+ ["Copying RNA into DNA","Reverse transcription, enzyme reverse transcriptase."],
+ ["Total codons","64 = 61 sense + 3 stop."],
+ ["Stop codons","UAA, UAG, UGA (U Are Away, U Are Gone, U Go Away)."],
+ ["Start codon","AUG, codes for methionine."],
+ ["Genetic code features","Universal, triplet, non-overlapping, commaless, non-ambiguous, degenerate."],
+ ["Chromosomes in a human cell","46 = 23 pairs = 22 autosome pairs + 1 sex pair."],
+ ["Male / female formula","44 + XY / 44 + XX."],
+ ["Who decides a child's sex?","The father's sperm (X or Y). Mother's egg is always X."],
+ ["Who named chromosomes?","Waldeyer."],
+ ["Chromosomal theory of inheritance","Sutton and Boveri, 1902–03."],
+ ["Who coined gene, genotype, phenotype?","Wilhelm Johannsen, 1909."],
+ ["Jumping genes","Transposons. Barbara McClintock, maize, Nobel Medicine 1983."],
+ ["Khorana","Genetic code (Nobel 1968) and first artificial gene."],
+ ["Ribozyme","RNA that acts as an enzyme. Cech and Altman, Nobel Chemistry 1989."],
+ ["Apoptosis","Programmed cell death. (A for A plan)"],
+ ["Organelle for most ATP","Mitochondria, in the last stage: electron transport chain."],
+ ["Mutation","Change in the base sequence of a gene. Source of all new variation."],
+ ["Down / Turner / Klinefelter","47 (trisomy 21) / 45, X / 47, XXY."]
+];
+(function(){
+  const grid=document.getElementById('cardGrid');
+  cards.forEach(([f,b])=>{
+    const el=document.createElement('button');el.className='fc';el.type='button';
+    el.setAttribute('aria-label',f+'. Tap to reveal answer.');
+    el.innerHTML='<div class="in"><div class="fa">'+f+'<small>tap to flip</small></div><div class="ba">'+b+'</div></div>';
+    el.addEventListener('click',()=>{el.classList.toggle('flip');el.setAttribute('aria-label',el.classList.contains('flip')?b:f+'. Tap to reveal answer.');});
+    grid.appendChild(el);
+  });
+})();
+
+/* ===== QUIZ ===== */
+(function(){
+  const box=document.getElementById('qbox');
+  let pool=[],i=0,score=0,answered=false,missed=[],mode='all';
+  function setPool(){
+    pool=Q.filter(x=>mode==='all'||(mode==='pdf'&&x.g!=='new')||(mode==='new'&&x.g==='new'));
+    i=0;score=0;missed=[];
+  }
+  function render(){
+    if(i>=pool.length){
+      const pct=Math.round(score/pool.length*100);
+      box.innerHTML='<div class="qtext">You scored '+score+' out of '+pool.length+' ('+pct+'%).</div><p>'+(pct>=85?'Strong. Revisit the decoy matrix once before the exam.':'Re-read the sections for the questions you missed, then try again.')+'</p>'+(missed.length?'<div class="miss"><b>Missed:</b> '+missed.join(', ')+'</div>':'')+'<div class="qnav"><button class="btn" id="restart" type="button">Restart</button></div>';
+      document.getElementById('restart').onclick=()=>{setPool();render();};return;
+    }
+    const x=pool[i];answered=false;
+    box.innerHTML='<div class="qmeta"><span>Question '+(i+1)+' of '+pool.length+'</span><span>Score '+score+'</span></div><div class="bar"><i style="width:'+(i/pool.length*100)+'%"></i></div><div class="qmeta" style="margin-top:8px"><span class="qsrc">'+x.s+'</span></div><div class="qtext">'+x.q+'</div><div class="opts">'+x.o.map((t,k)=>'<button class="opt" type="button" data-k="'+k+'">('+'abcde'[k]+') '+t+'</button>').join('')+'</div><div class="expl" id="ex"><b>'+x.e+'</b>'+(x.t?'<br><br>'+x.t:'')+'</div><div class="qnav"><button class="btn" id="next" type="button" disabled>Next question</button></div>';
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(answered)return;answered=true;const k=+b.dataset.k;
+      box.querySelectorAll('.opt').forEach(o=>{o.disabled=true;if(+o.dataset.k===x.a)o.classList.add('right');});
+      if(k===x.a)score++;else{b.classList.add('wrong');missed.push(x.n.charAt(0)==='C'?'Cell Q'+x.n.slice(1):(x.n.charAt(0)==='B'?x.n:'Q'+x.n));}
+      document.getElementById('ex').classList.add('show');document.getElementById('next').disabled=false;
+    });
+    document.getElementById('next').onclick=()=>{i++;render();box.scrollIntoView({block:'start'});};
+  }
+  document.querySelectorAll('#qmodes button').forEach(b=>b.onclick=()=>{
+    mode=b.dataset.m;
+    document.querySelectorAll('#qmodes button').forEach(o=>o.classList.toggle('ghost',o!==b));
+    setPool();render();
+  });
+  setPool();render();
+})();
+</script>
+</body>
+</html>
