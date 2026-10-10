@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Biofertilizers — concept notes, animations and practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F4EE; --paper:#FFFFFF; --ink:#1F2A22; --soft:#56655A; --line:#D5DDD1;
+  --nod:#C2446B; --nod-bg:#F8E3EA; --cy:#1F7F82; --cy-bg:#DDF0F0; --fun:#A2761E; --fun-bg:#F5EBD3;
+  --soil:#7A5A3C; --root:#D9C29A; --leaf:#4F8A3A; --warn:#B3261E; --warn-bg:#FBE6E4; --ok:#2E7D32; --ok-bg:#E3F2E4;
+  --h:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --b:"Literata", Georgia, "Times New Roman", serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131915; --paper:#1B231D; --ink:#E6EDE5; --soft:#A7B5A9; --line:#2F3B32;
+    --nod:#EE7A9C; --nod-bg:#3A1E28; --cy:#5CC3C6; --cy-bg:#16312F; --fun:#E0B45A; --fun-bg:#352A14;
+    --soil:#8C6A48; --root:#9C8763; --leaf:#7DBE63; --warn:#FF8A80; --warn-bg:#3B1D1B; --ok:#81C784; --ok-bg:#1C3320;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131915; --paper:#1B231D; --ink:#E6EDE5; --soft:#A7B5A9; --line:#2F3B32;
+  --nod:#EE7A9C; --nod-bg:#3A1E28; --cy:#5CC3C6; --cy-bg:#16312F; --fun:#E0B45A; --fun-bg:#352A14;
+  --soil:#8C6A48; --root:#9C8763; --leaf:#7DBE63; --warn:#FF8A80; --warn-bg:#3B1D1B; --ok:#81C784; --ok-bg:#1C3320;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--b);font-size:1.06rem;line-height:1.7}
+img,svg{max-width:100%}
+h1,h2,h3{font-family:var(--h);line-height:1.15;margin:0}
+h2{font-size:clamp(1.6rem,4vw,2.3rem);font-weight:800;margin:0 0 .4em}
+h3{font-size:1.2rem;font-weight:700;margin:1.6em 0 .4em}
+p{margin:.6em 0}
+b,strong{font-weight:600}
+a{color:var(--cy)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:10px;padding-bottom:10px;align-items:center}
+nav.top a{font-family:var(--h);font-weight:500;font-size:.92rem;text-decoration:none;color:var(--ink);padding:6px 12px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+nav.top a:hover,nav.top a:focus-visible{border-color:var(--line);background:var(--paper)}
+#themeBtn{margin-left:auto;font:inherit;font-family:var(--h);font-size:.9rem;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+:focus-visible{outline:3px solid var(--cy);outline-offset:2px}
+
+header.hero{padding:42px 0 10px}
+header.hero h1{font-size:clamp(2.6rem,9vw,5.2rem);font-weight:800;letter-spacing:-.02em}
+header.hero .lede{font-size:1.18rem;color:var(--soft);max-width:60ch}
+.stage{background:var(--paper);border:1px solid var(--line);border-radius:18px;margin:22px 0 8px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.cap{font-size:.93rem;color:var(--soft);padding:12px 18px 16px;border-top:1px solid var(--line)}
+.cap b{color:var(--ink)}
+
+section{padding:46px 0 10px;border-top:1px solid var(--line);margin-top:30px}
+.big-idea{font-family:var(--h);font-size:1.3rem;font-weight:500;line-height:1.4;border-left:5px solid var(--leaf);padding:4px 0 4px 16px;margin:14px 0}
+
+.trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.tile{padding:16px 18px;border-radius:14px;border:1px solid var(--line);background:var(--paper)}
+.tile h3{margin:0 0 .3em;font-size:1.1rem}
+.tile.n{border-top:6px solid var(--nod)} .tile.c{border-top:6px solid var(--cy)} .tile.f{border-top:6px solid var(--fun)}
+.tile p{font-size:.97rem;margin:.3em 0}
+
+.scroll{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-family:var(--h);font-weight:700;background:color-mix(in srgb,var(--leaf) 12%,var(--paper))}
+tr:last-child td{border-bottom:none}
+.tag{display:inline-block;font-family:var(--h);font-size:.8rem;font-weight:500;padding:2px 8px;border-radius:6px;margin:1px 2px 1px 0}
+.tag.n{background:var(--nod-bg);color:var(--nod)} .tag.c{background:var(--cy-bg);color:var(--cy)} .tag.f{background:var(--fun-bg);color:var(--fun)} .tag.x{background:var(--warn-bg);color:var(--warn)}
+
+.anim{background:var(--paper);border:1px solid var(--line);border-radius:16px;margin:18px 0;overflow:hidden}
+.anim svg{display:block;width:100%;height:auto}
+
+.trap{background:var(--warn-bg);border-radius:12px;padding:12px 16px;margin:12px 0;font-size:.98rem}
+.trap strong{color:var(--warn);font-family:var(--h)}
+.hook{background:var(--cy-bg);border-radius:12px;padding:12px 16px;margin:12px 0;font-size:.98rem}
+.hook strong{color:var(--cy);font-family:var(--h)}
+
+ul.facts{padding-left:1.1em} ul.facts li{margin:.35em 0}
+
+/* flashcards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:16px 0}
+.fc{perspective:900px;min-height:150px;cursor:pointer;border:none;background:none;padding:0;font:inherit;color:inherit;text-align:left}
+.fc .in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .45s;transform-style:preserve-3d}
+.fc.flip .in{transform:rotateY(180deg)}
+.fc .fa,.fc .ba{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:14px 16px;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.fc .fa{background:var(--paper);font-family:var(--h);font-weight:700;font-size:1.05rem}
+.fc .fa small{font-family:var(--b);font-weight:400;color:var(--soft);font-size:.8rem;margin-top:8px}
+.fc .ba{background:var(--ink);color:var(--bg);transform:rotateY(180deg);font-size:.93rem;line-height:1.5}
+
+/* quiz */
+.qbox{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin:18px 0}
+.qmeta{display:flex;justify-content:space-between;font-family:var(--h);font-size:.9rem;color:var(--soft);gap:10px;flex-wrap:wrap}
+.qsrc{font-style:italic}
+.qtext{font-family:var(--h);font-size:1.2rem;font-weight:700;margin:12px 0 14px;line-height:1.35}
+.opts{display:grid;gap:8px}
+.opt{font:inherit;text-align:left;padding:11px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--cy)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-bg)}
+.opt:disabled{cursor:default}
+.expl{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--bg);display:none;font-size:.97rem}
+.expl.show{display:block}
+.qnav{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{font-family:var(--h);font-weight:700;font-size:.95rem;padding:10px 18px;border-radius:10px;border:none;background:var(--ink);color:var(--bg);cursor:pointer}
+.btn.ghost{background:none;color:var(--ink);border:1.5px solid var(--line)}
+.bar{height:6px;background:var(--line);border-radius:6px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--leaf);width:0;transition:width .3s}
+
+footer{padding:40px 0 60px;color:var(--soft);font-size:.9rem}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .fc .in{transition:none}
+  .spin,.pulse,.flow{animation:none!important}
+}
+.flow{stroke-dasharray:6 8;animation:dash 1.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-28}}
+.pulse{animation:pulse 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{50%{transform:scale(1.08)}}
+</style>
+</head>
+<body>
+
+<nav class="top" aria-label="Sections">
+  <div class="wrap">
+    <a href="#why">Why</a>
+    <a href="#bacteria">Bacteria</a>
+    <a href="#nodule">Nodule &amp; oxygen</a>
+    <a href="#cyano">Cyanobacteria &amp; Azolla</a>
+    <a href="#fungi">Mycorrhiza</a>
+    <a href="#cycle">N-cycle</a>
+    <a href="#beyond">Beyond the PDF</a>
+    <a href="#traps">Traps</a>
+    <a href="#cards">Flashcards</a>
+    <a href="#quiz">Quiz</a>
+    <button id="themeBtn" type="button" aria-label="Toggle light or dark theme">Theme</button>
+  </div>
+</nav>
+
+<div class="wrap">
+<header class="hero">
+  <h1>Biofertilizers</h1>
+  <p class="lede">Living microbes that feed the soil. One page to understand how they work, why the exam asks what it asks, and how to handle questions you haven't seen yet.</p>
+
+  <div class="stage">
+    <!-- HERO: Rhizobium infecting a legume root and fixing N2 -->
+    <svg viewBox="0 0 800 380" role="img" aria-labelledby="heroT">
+      <title id="heroT">Animation: Rhizobium bacteria enter a legume root, form a pink nodule, take in nitrogen gas and release ammonia to the plant</title>
+      <rect width="800" height="120" fill="var(--cy-bg)"/>
+      <rect y="120" width="800" height="260" fill="var(--soil)" opacity=".85"/>
+      <!-- air label -->
+      <text x="24" y="36" font-family="var(--h)" font-size="17" font-weight="700" fill="var(--cy)">Air: 78% N₂ — but plants can't use it</text>
+      <!-- N2 molecules drifting down -->
+      <g font-family="var(--h)" font-size="15" font-weight="700" fill="var(--cy)">
+        <text x="300" y="60">N≡N<animate attributeName="y" values="60;250;250" keyTimes="0;.8;1" dur="4s" repeatCount="indefinite"/><animate attributeName="x" values="300;430;430" keyTimes="0;.8;1" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.8;1" dur="4s" repeatCount="indefinite"/></text>
+        <text x="560" y="80">N≡N<animate attributeName="y" values="80;255;255" keyTimes="0;.8;1" dur="4s" begin="1.3s" repeatCount="indefinite"/><animate attributeName="x" values="560;455;455" keyTimes="0;.8;1" dur="4s" begin="1.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.8;1" dur="4s" begin="1.3s" repeatCount="indefinite"/></text>
+        <text x="420" y="50">N≡N<animate attributeName="y" values="50;245;245" keyTimes="0;.8;1" dur="4s" begin="2.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.8;1" dur="4s" begin="2.6s" repeatCount="indefinite"/></text>
+      </g>
+      <!-- plant -->
+      <path d="M200 120 C200 90 200 60 205 30" stroke="var(--leaf)" stroke-width="6" fill="none"/>
+      <ellipse cx="180" cy="55" rx="26" ry="11" fill="var(--leaf)" transform="rotate(-25 180 55)"/>
+      <ellipse cx="230" cy="45" rx="26" ry="11" fill="var(--leaf)" transform="rotate(25 230 45)"/>
+      <circle cx="205" cy="28" r="7" fill="#E7B93C"/>
+      <text x="238" y="100" font-family="var(--h)" font-size="14" fill="var(--ink)">legume (pea, gram, soybean)</text>
+      <!-- root system -->
+      <path d="M200 120 L200 340" stroke="var(--root)" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M200 190 C260 210 330 230 420 260" stroke="var(--root)" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M200 250 C150 270 110 290 70 320" stroke="var(--root)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <!-- nodule growing -->
+      <circle cx="440" cy="262" r="6" fill="var(--nod)" stroke="#fff" stroke-width="2">
+        <animate attributeName="r" values="6;30;30" keyTimes="0;.35;1" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <text x="480" y="300" font-family="var(--h)" font-size="15" font-weight="700" fill="#fff">root nodule — pink because of leghaemoglobin</text>
+      <!-- rhizobia swimming towards root -->
+      <g fill="#fff">
+        <rect x="620" y="200" width="18" height="7" rx="3.5"><animate attributeName="x" values="620;455" dur="3s" repeatCount="indefinite"/><animate attributeName="y" values="200;255" dur="3s" repeatCount="indefinite"/></rect>
+        <rect x="640" y="330" width="18" height="7" rx="3.5"><animate attributeName="x" values="640;450" dur="3.6s" repeatCount="indefinite"/><animate attributeName="y" values="330;268" dur="3.6s" repeatCount="indefinite"/></rect>
+        <rect x="700" y="260" width="18" height="7" rx="3.5"><animate attributeName="x" values="700;460" dur="4.2s" repeatCount="indefinite"/><animate attributeName="y" values="260;262" dur="4.2s" repeatCount="indefinite"/></rect>
+      </g>
+      <text x="600" y="185" font-family="var(--h)" font-size="14" fill="#fff">Rhizobium bacteria</text>
+      <!-- NH3 going up into plant -->
+      <g font-family="var(--h)" font-size="15" font-weight="800" fill="#FFE08A">
+        <text x="390" y="250">NH₃<animate attributeName="x" values="410;215;205" dur="3s" repeatCount="indefinite"/><animate attributeName="y" values="250;190;110" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/></text>
+        <text x="390" y="250">NH₃<animate attributeName="x" values="410;215;205" dur="3s" begin="1.5s" repeatCount="indefinite"/><animate attributeName="y" values="250;190;110" dur="3s" begin="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.5s" repeatCount="indefinite"/></text>
+      </g>
+      <text x="24" y="365" font-family="var(--h)" font-size="14" fill="#fff">Plant gives sugar → bacteria give ammonia. That trade is symbiosis.</text>
+    </svg>
+    <div class="cap"><b>The whole chapter in one picture.</b> Nitrogen gas is everywhere but locked by a triple bond. Only certain microbes carry the enzyme <b>nitrogenase</b> that can break it. A biofertilizer is simply a packet of those helpful microbes (or phosphate-releasing ones) added to seed or soil.</div>
+  </div>
+</header>
+
+<!-- WHY -->
+<section id="why">
+  <h2>What a biofertilizer actually is</h2>
+  <p class="big-idea">Biofertilizer = a culture of <em>living or dormant</em> microorganisms that increases nutrient availability to plants. It is not the nutrient itself — it is the worker that makes the nutrient available.</p>
+  <p>Chemical fertilisers raised yields, but overuse pollutes water, kills useful soil microbes and adds no organic matter. Biofertilizers restore the soil's own nutrient machinery and cut chemical dependence.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Term</th><th>What it is</th><th>Biofertilizer?</th></tr>
+    <tr><td>Biofertilizer</td><td>Microbial culture (Rhizobium, Azotobacter, BGA, VAM…)</td><td><span class="tag c">Yes</span></td></tr>
+    <tr><td>Organic manure / FYM / compost</td><td>Decomposed organic matter — a nutrient source</td><td><span class="tag x">No</span></td></tr>
+    <tr><td>Green manure</td><td>A crop (dhaincha, sunhemp) ploughed back into soil</td><td><span class="tag x">No</span></td></tr>
+    <tr><td>Biopesticide</td><td>Microbe that kills pests or disease (Bt, Trichoderma)</td><td><span class="tag x">No — different job</span></td></tr>
+    <tr><td>Urea, 2,4-D, Streptocycline</td><td>Chemical fertiliser, herbicide, antibiotic</td><td><span class="tag x">No</span></td></tr>
+  </table></div>
+  <p style="font-size:.93rem;color:var(--soft)">That table alone answers Q1 and Q7 of your PDF.</p>
+
+  <h3>The three families</h3>
+  <div class="trio">
+    <div class="tile n"><h3>Bacteria</h3><p>Rhizobium (in nodules), Azotobacter, Azospirillum (free-living / associative), phosphate solubilisers.</p></div>
+    <div class="tile c"><h3>Cyanobacteria (BGA)</h3><p>Nostoc, Anabaena, Oscillatoria. Fix N₂ in heterocysts. The paddy specialists, often with Azolla.</p></div>
+    <div class="tile f"><h3>Fungi</h3><p>Mycorrhiza (VAM, e.g. Glomus). Do not fix nitrogen — they bring phosphorus and water.</p></div>
+  </div>
+  <div class="hook"><strong>Sort by the nutrient, not the name.</strong> Nearly every question becomes easy once you ask: does this organism give <b>N</b> (fixers) or <b>P</b> (solubilisers/mobilisers)? Mycorrhiza is the lone P-worker in most option lists.</div>
+</section>
+
+<!-- BACTERIA -->
+<section id="bacteria">
+  <h2>Bacteria: three lifestyles</h2>
+  <p>The name tells you where the bacterium lives, and where it lives tells you which crop it's used on.</p>
+
+  <div class="scroll"><table>
+    <tr><th>Lifestyle</th><th>Organism</th><th>Used with</th><th>Key point</th></tr>
+    <tr><td><span class="tag n">Symbiotic (inside nodules)</span></td><td>Rhizobium</td><td>Legumes only: pea, gram, soybean, groundnut, bean, clover, alfalfa</td><td>Forms root nodules; needs leghaemoglobin</td></tr>
+    <tr><td><span class="tag n">Symbiotic, non-legume</span></td><td>Frankia (actinomycete)</td><td>Alnus (alder), Casuarina</td><td>Nodules on non-legume trees</td></tr>
+    <tr><td><span class="tag c">Free-living, aerobic</span></td><td>Azotobacter, Beijerinckia</td><td>Non-legumes: wheat, cotton, mustard, maize, vegetables</td><td>Lives in soil around roots; also makes growth hormones</td></tr>
+    <tr><td><span class="tag c">Free-living, anaerobic</span></td><td>Clostridium</td><td>—</td><td>Asked as an example of free-living fixer</td></tr>
+    <tr><td><span class="tag f">Associative (loosely on/in roots)</span></td><td>Azospirillum</td><td>Sugarcane, maize, sorghum, millets, wheat</td><td>Favours C₄ grasses and cereals</td></tr>
+    <tr><td><span class="tag f">Endophytic</span></td><td>Gluconacetobacter (Acetobacter) diazotrophicus</td><td>Sugarcane</td><td>Lives inside the stem tissue</td></tr>
+    <tr><td><span class="tag x">P-solubilising</span></td><td>Bacillus megaterium var. phosphaticum, Pseudomonas striata/putida, Pantoea, Microbacterium</td><td>All crops</td><td>Release organic acids that dissolve locked rock phosphate</td></tr>
+  </table></div>
+
+  <h3>Match the Rhizobium to its legume</h3>
+  <div class="scroll"><table>
+    <tr><th>Legume</th><th>Species (old exam name)</th><th>Current name</th></tr>
+    <tr><td>Soybean</td><td>Rhizobium japonicum</td><td>Bradyrhizobium japonicum</td></tr>
+    <tr><td>Pea, lentil</td><td>Rhizobium leguminosarum</td><td>same</td></tr>
+    <tr><td>Beans (Phaseolus)</td><td>Rhizobium phaseoli</td><td>R. leguminosarum bv. phaseoli</td></tr>
+    <tr><td>Clover</td><td>Rhizobium trifolii</td><td>R. leguminosarum bv. trifolii</td></tr>
+    <tr><td>Alfalfa</td><td>Rhizobium meliloti</td><td>Sinorhizobium meliloti</td></tr>
+    <tr><td>Chickpea</td><td>Rhizobium ciceri</td><td>Mesorhizobium ciceri</td></tr>
+  </table></div>
+  <div class="hook"><strong>Memory hook:</strong> <b>J</b>apanese eat <b>soy</b> → R. <b>j</b>aponicum. Exams use the old names, so learn those; the new names help if an option looks unfamiliar.</div>
+</section>
+
+<!-- NODULE & OXYGEN -->
+<section id="nodule">
+  <h2>The oxygen paradox</h2>
+  <p class="big-idea">Nitrogenase is poisoned by oxygen. Yet the bacteria need oxygen to make the ATP that nitrogenase burns. Every N-fixer has to solve this.</p>
+  <p>Nitrogenase is a molybdenum–iron enzyme. Its reaction is expensive:</p>
+  <p style="font-family:var(--h);font-size:1.05rem;text-align:center;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto">N₂ + 8H⁺ + 8e⁻ + 16 ATP → 2 NH₃ + H₂ + 16 ADP + 16 Pi</p>
+
+  <div class="anim">
+    <svg viewBox="0 0 800 330" role="img" aria-labelledby="lbT">
+      <title id="lbT">Animation: leghaemoglobin molecules catch free oxygen before it reaches nitrogenase inside the nodule, and deliver it slowly to the bacteria</title>
+      <rect width="800" height="330" fill="var(--paper)"/>
+      <circle cx="400" cy="175" r="140" fill="var(--nod-bg)" stroke="var(--nod)" stroke-width="4"/>
+      <text x="400" y="26" text-anchor="middle" font-family="var(--h)" font-size="17" font-weight="700" fill="var(--ink)">Inside a root nodule</text>
+      <!-- nitrogenase core -->
+      <circle class="pulse" cx="400" cy="175" r="44" fill="var(--nod)"/>
+      <text x="400" y="171" text-anchor="middle" font-family="var(--h)" font-size="14" font-weight="700" fill="#fff">nitrogenase</text>
+      <text x="400" y="189" text-anchor="middle" font-family="var(--h)" font-size="12" fill="#fff">(Mo–Fe)</text>
+      <!-- leghaemoglobin guards -->
+      <g font-family="var(--h)" font-size="12" font-weight="700">
+        <g><circle cx="300" cy="120" r="20" fill="#A52A4A"/><text x="300" y="124" text-anchor="middle" fill="#fff">Lb</text></g>
+        <g><circle cx="500" cy="120" r="20" fill="#A52A4A"/><text x="500" y="124" text-anchor="middle" fill="#fff">Lb</text></g>
+        <g><circle cx="300" cy="235" r="20" fill="#A52A4A"/><text x="300" y="239" text-anchor="middle" fill="#fff">Lb</text></g>
+        <g><circle cx="500" cy="235" r="20" fill="#A52A4A"/><text x="500" y="239" text-anchor="middle" fill="#fff">Lb</text></g>
+      </g>
+      <!-- O2 flying in and getting caught -->
+      <g font-family="var(--h)" font-size="15" font-weight="800" fill="var(--cy)">
+        <text>O₂<animate attributeName="x" values="90;290;290" keyTimes="0;.6;1" dur="3s" repeatCount="indefinite"/><animate attributeName="y" values="70;118;118" keyTimes="0;.6;1" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.7;1" dur="3s" repeatCount="indefinite"/></text>
+        <text>O₂<animate attributeName="x" values="720;510;510" keyTimes="0;.6;1" dur="3s" begin="1s" repeatCount="indefinite"/><animate attributeName="y" values="300;240;240" keyTimes="0;.6;1" dur="3s" begin="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.7;1" dur="3s" begin="1s" repeatCount="indefinite"/></text>
+        <text>O₂<animate attributeName="x" values="720;510;510" keyTimes="0;.6;1" dur="3s" begin="2s" repeatCount="indefinite"/><animate attributeName="y" values="60;118;118" keyTimes="0;.6;1" dur="3s" begin="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.7;1" dur="3s" begin="2s" repeatCount="indefinite"/></text>
+      </g>
+      <text x="30" y="300" font-family="var(--h)" font-size="14" fill="var(--soft)">Lb = leghaemoglobin: grabs free O₂, releases a gentle trickle for bacterial respiration</text>
+    </svg>
+    <div class="cap"><b>Leghaemoglobin</b> works like myoglobin: a haem protein that binds oxygen tightly. It keeps free O₂ low enough to protect nitrogenase, yet supplies enough for the bacteria to breathe. It makes active nodules pink/red. The plant makes it only after bacteria colonise the root (the globin part is plant-coded; the haem is linked to the bacterial partner).</div>
+  </div>
+
+  <h3>How each fixer beats oxygen</h3>
+  <div class="scroll"><table>
+    <tr><th>Organism</th><th>Solution</th></tr>
+    <tr><td>Rhizobium (nodule)</td><td>Leghaemoglobin mops up O₂</td></tr>
+    <tr><td>Cyanobacteria (Anabaena, Nostoc)</td><td>Heterocysts: thick-walled cells with no oxygen-evolving photosystem II</td></tr>
+    <tr><td>Azotobacter</td><td>Extremely high respiration rate burns off O₂ ("respiratory protection")</td></tr>
+    <tr><td>Clostridium</td><td>Simply lives where there is no oxygen (anaerobe)</td></tr>
+  </table></div>
+  <div class="trap"><strong>Trap:</strong> "Leghaemoglobin is found in human / rabbit / chicken blood" — no. It is found only in legume root nodules. Also, leghaemoglobin does not fix nitrogen itself; nitrogenase does.</div>
+</section>
+
+<!-- CYANO & AZOLLA -->
+<section id="cyano">
+  <h2>Cyanobacteria and the Azolla partnership</h2>
+  <p>Cyanobacteria (blue-green algae, BGA) are bacteria, not true algae. They photosynthesise <em>and</em> fix nitrogen, which makes them perfect for flooded rice paddies where water, light and warmth are all available. Examples: <b>Nostoc, Anabaena, Oscillatoria, Tolypothrix, Aulosira</b>.</p>
+
+  <div class="anim">
+    <svg viewBox="0 0 800 220" role="img" aria-labelledby="hetT">
+      <title id="hetT">Animation: a filament of cyanobacteria cells; ordinary cells make oxygen, while the thick-walled heterocyst keeps oxygen out and fixes nitrogen, passing it to neighbours</title>
+      <rect width="800" height="220" fill="var(--paper)"/>
+      <text x="30" y="32" font-family="var(--h)" font-size="17" font-weight="700" fill="var(--ink)">Anabaena filament: division of labour</text>
+      <g>
+        <circle cx="110" cy="115" r="30" fill="var(--cy)" opacity=".75"/>
+        <circle cx="175" cy="115" r="30" fill="var(--cy)" opacity=".75"/>
+        <circle cx="240" cy="115" r="30" fill="var(--cy)" opacity=".75"/>
+        <circle cx="330" cy="115" r="42" fill="var(--paper)" stroke="var(--fun)" stroke-width="9"/>
+        <circle cx="420" cy="115" r="30" fill="var(--cy)" opacity=".75"/>
+        <circle cx="485" cy="115" r="30" fill="var(--cy)" opacity=".75"/>
+        <circle cx="550" cy="115" r="30" fill="var(--cy)" opacity=".75"/>
+      </g>
+      <text x="330" y="112" text-anchor="middle" font-family="var(--h)" font-size="12" font-weight="700" fill="var(--ink)">heterocyst</text>
+      <text x="330" y="128" text-anchor="middle" font-family="var(--h)" font-size="12" fill="var(--ink)">N₂ → NH₃</text>
+      <!-- O2 bouncing off heterocyst -->
+      <text font-family="var(--h)" font-size="14" font-weight="800" fill="var(--cy)">O₂<animate attributeName="x" values="310;318;290" keyTimes="0;.5;1" dur="2s" repeatCount="indefinite"/><animate attributeName="y" values="40;62;30" keyTimes="0;.5;1" dur="2s" repeatCount="indefinite"/></text>
+      <!-- fixed N moving to neighbours -->
+      <path class="flow" d="M372 150 C390 175 410 175 420 150" stroke="var(--fun)" stroke-width="3" fill="none"/>
+      <path class="flow" d="M288 150 C270 175 250 175 240 150" stroke="var(--fun)" stroke-width="3" fill="none"/>
+      <text x="600" y="100" font-family="var(--h)" font-size="13" fill="var(--ink)">ordinary cells:</text>
+      <text x="600" y="118" font-family="var(--h)" font-size="13" fill="var(--soft)">photosynthesis, make O₂</text>
+      <text x="600" y="150" font-family="var(--h)" font-size="13" fill="var(--ink)">heterocyst:</text>
+      <text x="600" y="168" font-family="var(--h)" font-size="13" fill="var(--soft)">thick wall, no PS-II,</text>
+      <text x="600" y="186" font-family="var(--h)" font-size="13" fill="var(--soft)">low O₂ inside</text>
+      <text x="30" y="205" font-family="var(--h)" font-size="13" fill="var(--soft)">Heterocysts form more when fixed nitrogen in the water runs short.</text>
+    </svg>
+  </div>
+
+  <h3>Azolla + Anabaena</h3>
+  <div class="anim">
+    <svg viewBox="0 0 800 270" role="img" aria-labelledby="azT">
+      <title id="azT">Animation: Azolla, a floating fern, houses Anabaena in cavities of its leaves; the fern sends sugar to Anabaena and receives ammonia in return</title>
+      <rect width="800" height="270" fill="var(--cy-bg)"/>
+      <rect y="170" width="800" height="100" fill="var(--cy)" opacity=".35"/>
+      <text x="30" y="32" font-family="var(--h)" font-size="17" font-weight="700" fill="var(--ink)">Floating on a flooded rice field</text>
+      <!-- Azolla fronds -->
+      <g transform="translate(160 150)">
+        <ellipse cx="0" cy="0" rx="110" ry="24" fill="var(--leaf)"/>
+        <ellipse cx="-60" cy="-12" rx="40" ry="16" fill="var(--leaf)" opacity=".85"/>
+        <ellipse cx="55" cy="-14" rx="42" ry="16" fill="var(--leaf)" opacity=".85"/>
+        <path d="M-40 22 v40 M0 24 v48 M40 22 v38" stroke="var(--leaf)" stroke-width="2"/>
+      </g>
+      <text x="80" y="220" font-family="var(--h)" font-size="15" font-weight="700" fill="var(--ink)">Azolla</text>
+      <text x="80" y="238" font-family="var(--h)" font-size="13" fill="var(--soft)">aquatic fern (pteridophyte)</text>
+      <!-- zoom cavity -->
+      <circle cx="560" cy="130" r="95" fill="var(--paper)" stroke="var(--leaf)" stroke-width="5"/>
+      <text x="560" y="52" text-anchor="middle" font-family="var(--h)" font-size="13" fill="var(--soft)">leaf cavity, zoomed</text>
+      <g fill="var(--cy)">
+        <circle cx="505" cy="140" r="12"/><circle cx="530" cy="140" r="12"/><circle cx="557" cy="140" r="16" fill="var(--paper)" stroke="var(--fun)" stroke-width="5"/><circle cx="584" cy="140" r="12"/><circle cx="609" cy="140" r="12"/>
+      </g>
+      <text x="560" y="180" text-anchor="middle" font-family="var(--h)" font-size="13" font-weight="700" fill="var(--cy)">Anabaena azollae</text>
+      <path d="M270 140 L465 130" stroke="var(--leaf)" stroke-width="2" stroke-dasharray="4 5"/>
+      <!-- exchange -->
+      <g font-family="var(--h)" font-weight="800" font-size="14">
+        <text fill="var(--fun)">sugar →<animate attributeName="x" values="300;430" dur="2.4s" repeatCount="indefinite"/><animate attributeName="y" values="110;100" dur="2.4s" repeatCount="indefinite"/></text>
+        <text fill="var(--nod)">← NH₄⁺<animate attributeName="x" values="430;300" dur="2.4s" begin="1.2s" repeatCount="indefinite"/><animate attributeName="y" values="160;155" dur="2.4s" begin="1.2s" repeatCount="indefinite"/></text>
+      </g>
+    </svg>
+    <div class="cap"><b>Azolla is a fern, not an alga or bacterium.</b> It gives food and a home; Anabaena gives fixed nitrogen. Because the fern becomes nitrogen-rich, it is also high in protein — which is why it is grown as <b>supplementary feed for cattle, especially milch animals</b>, and for poultry and fish.</div>
+  </div>
+
+  <ul class="facts">
+    <li><b>Crop:</b> BGA and Azolla are used mainly in <b>paddy</b> (water-logged). Not maize, not wheat, not bajra.</li>
+    <li><b>Best combination:</b> Azolla works best "mixed with" blue-green algae — because that is literally what it already carries.</li>
+    <li>BGA also add organic matter, improve soil structure and help reclaim saline–alkaline soil.</li>
+    <li>Other floating plants in option lists — <b>Salvinia, Marsilea, Lemna, Wolffia, Trapa, Pteridium</b> — are not used as biofertilizers. Salvinia and Marsilea are also ferns, which makes them good distractors.</li>
+  </ul>
+</section>
+
+<!-- FUNGI -->
+<section id="fungi">
+  <h2>Mycorrhiza: the phosphorus pipeline</h2>
+  <p class="big-idea">Mycorrhiza = fungus + root. The fungus's threads (hyphae) reach far beyond the root and haul back phosphorus and water. It does <u>not</u> fix nitrogen.</p>
+
+  <div class="anim">
+    <svg viewBox="0 0 800 280" role="img" aria-labelledby="myT">
+      <title id="myT">Animation: fungal hyphae spread from a root into soil, carrying phosphate and water to the root while sugar moves from the root to the fungus</title>
+      <rect width="800" height="280" fill="var(--soil)" opacity=".85"/>
+      <path d="M400 0 L400 280" stroke="var(--root)" stroke-width="30" stroke-linecap="round"/>
+      <text x="415" y="24" font-family="var(--h)" font-size="14" font-weight="700" fill="#fff">root</text>
+      <g stroke="var(--fun)" stroke-width="3" fill="none">
+        <path d="M385 90 C300 70 220 110 90 80"/><path d="M385 150 C300 170 200 140 70 200"/>
+        <path d="M415 110 C500 80 590 130 730 90"/><path d="M415 190 C500 220 620 180 740 240"/>
+        <path d="M300 75 C280 40 250 30 220 20"/><path d="M560 120 C590 160 620 170 650 200"/>
+      </g>
+      <g font-family="var(--h)" font-weight="800" font-size="14" fill="#FFE08A">
+        <text>P<animate attributeName="x" values="95;380" dur="3s" repeatCount="indefinite"/><animate attributeName="y" values="78;92" dur="3s" repeatCount="indefinite"/></text>
+        <text>P<animate attributeName="x" values="725;420" dur="3.4s" repeatCount="indefinite"/><animate attributeName="y" values="92;112" dur="3.4s" repeatCount="indefinite"/></text>
+        <text fill="#9ED8FF">H₂O<animate attributeName="x" values="75;370" dur="3.8s" repeatCount="indefinite"/><animate attributeName="y" values="198;152" dur="3.8s" repeatCount="indefinite"/></text>
+        <text>Zn<animate attributeName="x" values="735;420" dur="4s" repeatCount="indefinite"/><animate attributeName="y" values="238;192" dur="4s" repeatCount="indefinite"/></text>
+        <text fill="#fff">sugar<animate attributeName="x" values="420;600" dur="3s" begin="1s" repeatCount="indefinite"/><animate attributeName="y" values="195;205" dur="3s" begin="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="3s" begin="1s" repeatCount="indefinite"/></text>
+      </g>
+      <text x="20" y="268" font-family="var(--h)" font-size="13" fill="#fff">Hyphae = extended root system. Phosphate barely moves in soil, so reach matters.</text>
+    </svg>
+  </div>
+
+  <div class="scroll"><table>
+    <tr><th>Type</th><th>Where the fungus sits</th><th>Examples</th></tr>
+    <tr><td>Ectomycorrhiza</td><td>Sheath around root, between cells</td><td>Pine, oak, eucalyptus; fungi like Pisolithus</td></tr>
+    <tr><td>Endomycorrhiza / VAM (arbuscular)</td><td>Enters root cells, forms arbuscules and vesicles</td><td>Most crops; fungus Glomus</td></tr>
+  </table></div>
+  <p><b>Benefits of mycorrhizal plants:</b> tolerance to drought and salinity, resistance to root-borne pathogens, better overall growth. VAM is the standard answer for "phosphatic biofertilizer".</p>
+  <p>Other P-biofertilizers: fungi <b>Aspergillus awamori, Penicillium</b>; bacteria <b>Bacillus megaterium var. phosphaticum, Pseudomonas striata</b>.</p>
+</section>
+
+<!-- CYCLE -->
+<section id="cycle">
+  <h2>Where it fits in the nitrogen cycle</h2>
+  <p>Questions "beyond the PDF" usually come from here. Each step has one bacterium the exam loves.</p>
+
+  <div class="anim">
+    <svg viewBox="0 0 800 360" role="img" aria-labelledby="ncT">
+      <title id="ncT">Diagram of the nitrogen cycle: fixation, ammonification, nitrification by Nitrosomonas and Nitrobacter, uptake, and denitrification</title>
+      <rect width="800" height="360" fill="var(--paper)"/>
+      <g font-family="var(--h)" text-anchor="middle">
+        <rect x="320" y="18" width="160" height="50" rx="12" fill="var(--cy-bg)" stroke="var(--cy)"/><text x="400" y="49" font-size="16" font-weight="800" fill="var(--cy)">N₂ in air</text>
+        <rect x="40" y="150" width="170" height="50" rx="12" fill="var(--nod-bg)" stroke="var(--nod)"/><text x="125" y="181" font-size="16" font-weight="800" fill="var(--nod)">NH₃ / NH₄⁺</text>
+        <rect x="315" y="280" width="170" height="50" rx="12" fill="var(--fun-bg)" stroke="var(--fun)"/><text x="400" y="311" font-size="16" font-weight="800" fill="var(--fun)">NO₂⁻ nitrite</text>
+        <rect x="590" y="150" width="170" height="50" rx="12" fill="var(--ok-bg)" stroke="var(--ok)"/><text x="675" y="181" font-size="16" font-weight="800" fill="var(--ok)">NO₃⁻ nitrate</text>
+      </g>
+      <g fill="none" stroke-width="3">
+        <path class="flow" d="M330 60 C230 80 150 110 130 148" stroke="var(--nod)"/>
+        <path class="flow" d="M130 202 C150 260 250 300 312 305" stroke="var(--fun)"/>
+        <path class="flow" d="M488 305 C560 300 650 260 670 203" stroke="var(--ok)"/>
+        <path class="flow" d="M680 148 C660 100 560 70 482 50" stroke="var(--cy)"/>
+      </g>
+      <g font-family="var(--h)" font-size="13">
+        <text x="150" y="88" fill="var(--ink)" font-weight="700">1. Fixation</text>
+        <text x="150" y="106" fill="var(--soft)">Rhizobium, Azotobacter, BGA,</text>
+        <text x="150" y="122" fill="var(--soft)">lightning, Haber process</text>
+        <text x="90" y="262" fill="var(--ink)" font-weight="700">2. Nitrification (a)</text>
+        <text x="90" y="280" fill="var(--soft)">Nitrosomonas</text>
+        <text x="560" y="262" fill="var(--ink)" font-weight="700">3. Nitrification (b)</text>
+        <text x="560" y="280" fill="var(--soft)">Nitrobacter</text>
+        <text x="560" y="82" fill="var(--ink)" font-weight="700">4. Denitrification</text>
+        <text x="560" y="100" fill="var(--soft)">Pseudomonas, Thiobacillus</text>
+        <text x="560" y="116" fill="var(--soft)">(loses N back to air)</text>
+        <text x="245" y="200" fill="var(--soft)">Ammonification: decomposers turn</text>
+        <text x="245" y="216" fill="var(--soft)">dead matter back into NH₃</text>
+        <text x="595" y="228" fill="var(--soft)">plants absorb mainly NO₃⁻</text>
+      </g>
+    </svg>
+  </div>
+  <div class="hook"><strong>Alphabet hook:</strong> Nitroso<b>m</b>onas comes before Nitro<b>b</b>acter in the cycle — "<b>S</b>o first, then <b>B</b>" (NH₄⁺ → NO₂⁻ → NO₃⁻).</div>
+</section>
+
+<!-- BEYOND -->
+<section id="beyond">
+  <h2>Beyond the PDF: what gets asked next</h2>
+
+  <h3>Nitrogen-use efficiency (PDF Q23)</h3>
+  <ul class="facts">
+    <li><b>Split application:</b> give urea in two or three doses rather than all at sowing, so less is lost.</li>
+    <li><b>Nitrification inhibitors:</b> slow the conversion of NH₄⁺ to easily-leached NO₃⁻. Neem oil does this, which is why India made <b>neem-coated urea</b> mandatory for all domestic urea in 2015. Chemical examples: DCD, nitrapyrin.</li>
+    <li><b>Slow-release fertilisers:</b> sulphur-coated urea, polymer-coated urea.</li>
+  </ul>
+
+  <h3>Legume vs non-legume (PDF Q24–26)</h3>
+  <p><b>Nitrogen-fixing plants</b> are legumes (family Fabaceae): gram/chickpea, pea, beans, soybean, groundnut, alfalfa, clover, pigeon pea, lentil, moong, urad, dhaincha. <b>Not N-fixing:</b> paddy, wheat, maize, bajra, sugarcane, amaranth, spinach, purslane (kulfa), mustard.</p>
+  <p>That's why pulses are grown in rotation with cereals, and why paddy fields rely on BGA, Azolla or urea.</p>
+  <p><b>Rare case:</b> <i>Sesbania rostrata</i> (a dhaincha) has <b>stem nodules</b> made by <i>Azorhizobium caulinodans</i> — a classic "beyond" fact.</p>
+
+  <h3>Compost, vermicompost and earthworms (PDF Q22, Q29)</h3>
+  <ul class="facts">
+    <li>Compost: biodegradable waste decomposed in pits by bacteria and fungi; earthworms <b>speed it up</b>.</li>
+    <li>Vermicompost species: <i>Eisenia fetida</i> (red wiggler), <i>Eudrilus eugeniae</i>.</li>
+    <li>Earthworm nicknames: "ploughers of the soil", "farmer's friend", "intestines of the earth" (Aristotle).</li>
+  </ul>
+
+  <h3>Biochar (PDF Q21)</h3>
+  <p>Charcoal made by <b>pyrolysis</b> — heating crop waste or wood with little oxygen. It is porous, so it holds water and nutrients, gives microbes a habitat (including N-fixers), stores carbon for a long time, and is usable as a growing medium in vertical farming.</p>
+
+  <h3>Other biofertilizer groups</h3>
+  <div class="scroll"><table>
+    <tr><th>Group</th><th>Example</th></tr>
+    <tr><td>Potash-mobilising</td><td>Frateuria aurantia</td></tr>
+    <tr><td>Zinc-solubilising</td><td>Bacillus species</td></tr>
+    <tr><td>Plant growth-promoting rhizobacteria (PGPR)</td><td>Pseudomonas fluorescens</td></tr>
+    <tr><td>Consortium products</td><td>NPK liquid biofertilizers mixing N-fixer + P-solubiliser + K-mobiliser</td></tr>
+  </table></div>
+
+  <h3>Biofertilizer vs biopesticide (PDF Q9)</h3>
+  <div class="scroll"><table>
+    <tr><th>Organism</th><th>Role</th></tr>
+    <tr><td>Azotobacter, Rhizobium, BGA, Azolla, VAM</td><td><span class="tag c">Biofertilizer</span></td></tr>
+    <tr><td>Bacillus thuringiensis (Bt)</td><td><span class="tag x">Bioinsecticide</span></td></tr>
+    <tr><td>Trichoderma</td><td><span class="tag x">Biofungicide</span></td></tr>
+    <tr><td>Beauveria bassiana, Metarhizium</td><td><span class="tag x">Fungal bioinsecticides</span></td></tr>
+    <tr><td>NPV (nucleopolyhedrovirus)</td><td><span class="tag x">Viral bioinsecticide (Helicoverpa)</span></td></tr>
+    <tr><td>Chrysopa (lacewing)</td><td><span class="tag f">Predator — biocontrol of aphids (mustard "mahu")</span></td></tr>
+  </table></div>
+
+  <h3>Policy hooks for UPSC / UPPSC</h3>
+  <ul class="facts">
+    <li>Biofertilizers are regulated under the <b>Fertiliser (Control) Order, 1985</b>, which added quality standards for them in 2006.</li>
+    <li><b>Paramparagat Krishi Vikas Yojana (PKVY)</b>, 2015 — cluster-based organic farming.</li>
+    <li><b>Soil Health Card</b> scheme, 2015 — tells farmers which nutrients to add.</li>
+    <li><b>PM-PRANAM</b>, 2023 — incentivises states to cut chemical fertiliser use.</li>
+    <li><b>Sikkim</b> — declared India's first fully organic state (2016).</li>
+    <li>National Centre for Organic and Natural Farming, Ghaziabad — the nodal body for biofertilizer promotion.</li>
+  </ul>
+</section>
+
+<!-- TRAPS -->
+<section id="traps">
+  <h2>Traps that cost marks</h2>
+  <div class="trap"><strong>"Mycorrhiza fixes nitrogen."</strong> False. It is a fungus–root association that supplies phosphorus and water. In a "which is not a nitrogen-fixer" question, it is almost always the answer.</div>
+  <div class="trap"><strong>"Azolla is an alga / bacterium."</strong> False. Azolla is an aquatic fern. Its partner Anabaena is the cyanobacterium that fixes nitrogen.</div>
+  <div class="trap"><strong>"Blue-green algae are algae."</strong> They are bacteria (prokaryotes) — cyanobacteria. Red, brown and green algae do not fix nitrogen.</div>
+  <div class="trap"><strong>"Alfalfa is a biofertilizer."</strong> Alfalfa is a legume plant that fixes nitrogen with Rhizobium's help (used as fodder and green manure), but the plant itself isn't a biofertilizer culture. In PDF Q2 the answer is Azolla + BGA only.</div>
+  <div class="trap"><strong>"Azolla is used in maize."</strong> No — Azolla needs standing water, so its crop is paddy.</div>
+  <div class="trap"><strong>"Earthworms slow down composting."</strong> They speed it up.</div>
+  <div class="trap"><strong>PDF Q3 (Nitrolin, answer marked *).</strong> The book marks this question disputed. Lock in the firm facts: Azolla ✔, BGA ✔, Alfalfa ✘. Nitrolin was an old trade name for a bacterial culture, which is why some keys include it — if it recurs, choose the option with 1, 2 and 4 and without Alfalfa.</div>
+</section>
+
+<!-- FLASHCARDS -->
+<section id="cards">
+  <h2>Flashcards</h2>
+  <p>Tap a card to flip it. Say the answer aloud before you flip.</p>
+  <div class="cards" id="cardGrid"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <h2>Practice quiz</h2>
+  <p>Your PDF's questions plus new ones built on the same concepts. Each answer explains the logic, so you can reason through unfamiliar options.</p>
+  <div class="qbox" id="qbox" aria-live="polite"></div>
+</section>
+
+<footer>Made for revision from the Biofertilizers chapter (G-516 to G-520). Rhizobium names are given in the older form used in exam papers, with current names where they differ.</footer>
+</div>
+
+<script>
+// theme toggle
+(function(){
+  const r=document.documentElement,b=document.getElementById('themeBtn');
+  try{const t=localStorage.getItem('theme');if(t)r.dataset.theme=t;}catch(e){}
+  b.addEventListener('click',()=>{
+    const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme=dark?'light':'dark';
+    try{localStorage.setItem('theme',r.dataset.theme);}catch(e){}
+  });
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('svg').forEach(s=>{try{s.pauseAnimations();}catch(e){}});
+  }
+})();
+
+// flashcards
+const cards=[
+ ["Biofertilizer — definition","Culture of living or latent microbes that makes nutrients (mainly N and P) available to plants."],
+ ["Enzyme that fixes N₂","Nitrogenase (Mo–Fe protein). Inactivated by O₂. Product: ammonia."],
+ ["Leghaemoglobin","Haem protein in legume root nodules. Binds O₂ to protect nitrogenase; makes nodules pink."],
+ ["Heterocyst","Thick-walled cyanobacterial cell lacking PS-II. Low-O₂ site of N-fixation."],
+ ["Azolla","Aquatic fern. Hosts Anabaena azollae. Biofertilizer for paddy; protein-rich cattle feed."],
+ ["Soybean's Rhizobium","R. japonicum (now Bradyrhizobium japonicum)."],
+ ["Pea's Rhizobium","R. leguminosarum."],
+ ["Azotobacter","Free-living aerobic N-fixer. Wheat, cotton, mustard, maize."],
+ ["Azospirillum","Associative N-fixer. Sugarcane, maize, sorghum, millets."],
+ ["Phosphatic biofertilizer","VAM (e.g. Glomus); also Bacillus megaterium var. phosphaticum, Pseudomonas striata."],
+ ["Frankia","Actinomycete forming nodules on non-legumes: Alnus, Casuarina."],
+ ["Stem nodules","Sesbania rostrata, with Azorhizobium caulinodans."],
+ ["NH₄⁺ → NO₂⁻","Nitrosomonas."],
+ ["NO₂⁻ → NO₃⁻","Nitrobacter."],
+ ["Denitrification","Pseudomonas, Thiobacillus — nitrate back to N₂."],
+ ["Chrysopa","Lacewing predator used against mustard aphid (mahu). Biocontrol, not fertilizer."],
+ ["Biochar","Charcoal from pyrolysis. Holds water, houses microbes, stores carbon."],
+ ["Ploughers of the soil","Earthworms."],
+ ["Neem-coated urea","Nitrification inhibitor coating — raises nitrogen-use efficiency. Mandatory in India since 2015."],
+ ["Sugarcane endophyte","Gluconacetobacter (Acetobacter) diazotrophicus."]
+];
+const grid=document.getElementById('cardGrid');
+cards.forEach(([f,b])=>{
+  const el=document.createElement('button');el.className='fc';el.type='button';
+  el.setAttribute('aria-label',f+'. Tap to reveal answer.');
+  el.innerHTML=`<div class="in"><div class="fa">${f}<small>tap to flip</small></div><div class="ba">${b}</div></div>`;
+  el.addEventListener('click',()=>{el.classList.toggle('flip');el.setAttribute('aria-label',el.classList.contains('flip')?b:f+'. Tap to reveal answer.');});
+  grid.appendChild(el);
+});
+
+// quiz
+const Q=[
+ {q:"Biofertilizers are:",o:["Organic manures","Cultures of micro-organisms","Green manures","None of the above"],a:1,s:"UP RO/ARO 2023",e:"A biofertilizer is the microbe itself. Manures are nutrient sources, not microbial cultures."},
+ {q:"Which is NOT a nitrogen-fixing organism?",o:["Nostoc","Anabaena","Azotobacter","Mycorrhiza"],a:3,s:"UPPCS Mains 2017",e:"Mycorrhiza is a fungus–root association that brings phosphorus and water. The other three all fix N₂."},
+ {q:"Which is a phosphatic biofertilizer?",o:["Rhizobium","Blue-green algae","Azolla","Vesicular Arbuscular Mycorrhiza"],a:3,s:"UP BEO 2019",e:"VAM hyphae extend the root's reach for poorly mobile phosphate. The rest are nitrogen providers."},
+ {q:"Azolla gives a good biofertilizer when mixed with:",o:["Blue-green algae","Bone meal","Cow dung","Urea"],a:0,s:"Uttarakhand PCS 2007",e:"Azolla naturally partners with Anabaena, a blue-green alga, and the two together supply N to rice fields."},
+ {q:"The biofertilizer used as supplementary feed for milch cattle is:",o:["Azospirillum","Azolla","Azotobacter","Rhizobium"],a:1,s:"RAS/RTS 2016",e:"Azolla becomes protein-rich thanks to the nitrogen its Anabaena partner fixes, so it doubles as fodder."},
+ {q:"Nitrogen fixation in soybean is done by:",o:["R. leguminosarum","R. japonicum","R. phaseoli","R. trifolii"],a:1,s:"UPPCS 2006",e:"Soybean → R. japonicum (now Bradyrhizobium japonicum). Pea → leguminosarum, beans → phaseoli, clover → trifolii."},
+ {q:"Leghaemoglobin in a root nodule mainly:",o:["Fixes nitrogen directly","Carries sugar to bacteria","Keeps free O₂ low to protect nitrogenase","Converts nitrate to nitrite"],a:2,s:"Concept (extends UPPCS Mains 2005)",e:"Nitrogenase is O₂-sensitive. Leghaemoglobin binds O₂, supplying just enough for respiration while protecting the enzyme."},
+ {q:"Heterocysts can fix nitrogen in oxygen-rich water because they:",o:["Contain leghaemoglobin","Lack photosystem II and have thick walls","Live inside legume roots","Produce antibiotics"],a:1,s:"Beyond the PDF",e:"No PS-II means no O₂ is produced inside, and the thick wall slows O₂ entry — a low-O₂ pocket for nitrogenase."},
+ {q:"Which pair is NOT correctly matched?",o:["Blue-green algae – Biofertilizer","Chrysopa – Mahu control","Bio 902 – Mustard variety","Azotobacter – Bioinsecticide"],a:3,s:"UP Lower Sub. 2002/03",e:"Azotobacter is a free-living nitrogen fixer (biofertilizer). Chrysopa preys on mustard aphids."},
+ {q:"Which is NOT correctly matched (nitrogen agent – crop)?",o:["Blue-green algae – Paddy","R. leguminosarum – Pea","Azotobacter – Wheat","Azolla – Maize"],a:3,s:"UPPCS 2017",e:"Azolla needs standing water, so it is a paddy biofertilizer, not a maize one."},
+ {q:"Frankia forms root nodules on:",o:["Pea","Alnus and Casuarina","Rice","Wheat"],a:1,s:"Beyond the PDF",e:"Frankia is an actinomycete that nodulates non-legume trees such as alder and Casuarina."},
+ {q:"Stem nodules are found in:",o:["Sesbania rostrata","Pisum sativum","Glycine max","Cicer arietinum"],a:0,s:"Beyond the PDF",e:"Sesbania rostrata carries stem nodules formed by Azorhizobium caulinodans; the others have root nodules."},
+ {q:"Which are nitrogen-fixing plants? 1 Alfalfa 2 Amaranth 3 Chickpea 4 Clover 5 Purslane 6 Spinach",o:["1, 3 and 4 only","1, 3, 5 and 6 only","2, 4, 5 and 6 only","1, 2, 4, 5 and 6"],a:0,s:"IAS Pre 2022",e:"Only the legumes (Fabaceae): alfalfa, chickpea, clover. Amaranth, purslane and spinach aren't legumes."},
+ {q:"The metal(s) at the heart of nitrogenase:",o:["Copper and zinc","Molybdenum and iron","Magnesium only","Cobalt and nickel"],a:1,s:"Beyond the PDF",e:"Nitrogenase is a Mo–Fe protein; that's why molybdenum deficiency hurts legume nodulation."},
+ {q:"Azospirillum inoculation is mainly recommended for:",o:["Pulses","Sugarcane, maize, sorghum, millets","Paddy only","Tea"],a:1,s:"PDF notes",e:"Azospirillum associates with cereal and grass roots — especially C₄ crops."},
+ {q:"Conversion of ammonium to nitrite is done by:",o:["Nitrobacter","Nitrosomonas","Pseudomonas","Rhizobium"],a:1,s:"Beyond the PDF",e:"Nitrosomonas: NH₄⁺ → NO₂⁻. Nitrobacter then does NO₂⁻ → NO₃⁻. Pseudomonas denitrifies."},
+ {q:"Which statement about compost is incorrect?",o:["Biodegradable waste is decomposed in pits","It is rich in organic matter","Earthworms slow down decomposition","Farm waste like excreta is used"],a:2,s:"RAS/RTS 2018",e:"Earthworms speed up decomposition — that's the point of vermicomposting."},
+ {q:"Neem-coated urea improves nitrogen-use efficiency by:",o:["Adding extra nitrogen","Acting as a nitrification inhibitor","Killing Rhizobium","Increasing soil acidity"],a:1,s:"Beyond (links UPPCS 2009)",e:"Neem slows the conversion of NH₄⁺ to leachable NO₃⁻, so more N stays available for the crop."},
+ {q:"Trichoderma is best described as a:",o:["Nitrogen biofertilizer","Phosphate solubiliser","Biofungicide","Cyanobacterium"],a:2,s:"Beyond the PDF",e:"Trichoderma is a fungus used against soil-borne fungal diseases — biocontrol, not a fertilizer."},
+ {q:"Biochar: 1 usable in vertical farming 2 promotes N-fixing microbes 3 helps retain water. Correct?",o:["1 and 2 only","2 only","1 and 3 only","1, 2 and 3"],a:3,s:"IAS Pre 2020",e:"Its porous structure holds water and nutrients and shelters microbes, including nitrogen-fixers. All three are correct."},
+ {q:"The aquatic plant commonly used as biofertilizer in water-logged rice fields:",o:["Wolffia","Azolla","Trapa","Lemna"],a:1,s:"UPPCS Pre 2023",e:"Azolla. Wolffia and Lemna are duckweeds, Trapa is water chestnut — none carry a nitrogen-fixing partner."},
+ {q:"Blue-green algae are:",o:["Eukaryotic algae","Prokaryotic bacteria","Fungi","Aquatic ferns"],a:1,s:"Concept check",e:"Cyanobacteria are prokaryotes — which is why the PDF lists them as a separate type from true algae."}
+];
+let i=0,score=0,answered=false;const box=document.getElementById('qbox');
+function render(){
+  if(i>=Q.length){
+    const pct=Math.round(score/Q.length*100);
+    box.innerHTML=`<div class="qtext">You scored ${score} out of ${Q.length} (${pct}%).</div><p>${pct>=85?'Strong. Revisit the traps section once before the exam.':'Re-read the sections for the questions you missed, then try again.'}</p><div class="qnav"><button class="btn" id="restart">Restart quiz</button></div>`;
+    document.getElementById('restart').onclick=()=>{i=0;score=0;render();};return;
+  }
+  const x=Q[i];answered=false;
+  box.innerHTML=`<div class="qmeta"><span>Question ${i+1} of ${Q.length}</span><span>Score ${score}</span></div><div class="bar"><i style="width:${i/Q.length*100}%"></i></div><div class="qmeta" style="margin-top:8px"><span class="qsrc">${x.s}</span></div><div class="qtext">${x.q}</div><div class="opts">${x.o.map((t,k)=>`<button class="opt" data-k="${k}">(${'abcd'[k]}) ${t}</button>`).join('')}</div><div class="expl" id="ex">${x.e}</div><div class="qnav"><button class="btn" id="next" disabled>Next question</button></div>`;
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(answered)return;answered=true;const k=+b.dataset.k;
+    box.querySelectorAll('.opt').forEach(o=>{o.disabled=true;if(+o.dataset.k===x.a)o.classList.add('right');});
+    if(k===x.a)score++;else b.classList.add('wrong');
+    document.getElementById('ex').classList.add('show');document.getElementById('next').disabled=false;
+  });
+  document.getElementById('next').onclick=()=>{i++;render();box.scrollIntoView({block:'start'});};
+}
+render();
+</script>
+</body>
+</html>
