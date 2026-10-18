@@ -272,6 +272,35 @@
     "indiatimes"
    ],
    "text": "AI was everywhere at {{c1::GFF}} 2026."
+  },
+  "mve9594t712xx9djny": {
+   "createdAt": 1792353750653,
+   "editedAt": 1792353750653,
+   "extra": "",
+   "id": "mve9594t712xx9djny",
+   "source": {
+    "context": "Part VIII",
+    "domain": "superkalam.com",
+    "favicon": "https://superkalam.com/favicon.ico",
+    "link": "https://superkalam.com/upsc-preparation/resources/all-important-articles-of-indian-constitution-for-upsc#:~:text=Part-,VIII",
+    "quote": "VIII",
+    "title": "All Important Articles of Indian Constitution for UPSC",
+    "url": "https://superkalam.com/upsc-preparation/resources/all-important-articles-of-indian-constitution-for-upsc"
+   },
+   "srs": {
+    "1": {
+     "due": 1792353750653,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "superkalam"
+   ],
+   "text": "Part {{c1::VIII}} union territory"
   }
  }
 }
