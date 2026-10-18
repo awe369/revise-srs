@@ -187,6 +187,35 @@
     "wikipedia"
    ],
    "text": "Mount {{c1::Manipur (Mount Harriet)}} being depicted in the Indian 20-rupee note (pre-2019 edition)"
+  },
+  "mve8qy0115xhvbi125l": {
+   "createdAt": 1792353083041,
+   "editedAt": 1792353083041,
+   "extra": "",
+   "id": "mve8qy0115xhvbi125l",
+   "source": {
+    "context": "Manipur breaks into celebration as Centre renames Andaman's 'Mount Harriet' as 'Mount Manipur'",
+    "domain": "economictimes.indiatimes.com",
+    "favicon": "https://economictimes.indiatimes.com/icons/etfavicon.ico",
+    "link": "https://economictimes.indiatimes.com/news/india/manipur-breaks-into-celebration-as-centre-renames-andamans-mount-harriet-as-mount-manipur/articleshow/87086747.cms?from=mdr#:~:text=renames%20Andaman's%20'Mount-,Harriet',-as%20'Mount%20Manipur'",
+    "quote": "Harriet",
+    "title": "Manipur breaks into celebration as Centre renames Andaman's 'Mount Harriet' as 'Mount Manipur' - The Economic Times",
+    "url": "https://economictimes.indiatimes.com/news/india/manipur-breaks-into-celebration-as-centre-renames-andamans-mount-harriet-as-mount-manipur/articleshow/87086747.cms?from=mdr"
+   },
+   "srs": {
+    "1": {
+     "due": 1792353083041,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "indiatimes"
+   ],
+   "text": "Manipur breaks into celebration as Centre renames Andaman's 'Mount {{c1::Harriet}}' as 'Mount Manipur'"
   }
  }
 }
