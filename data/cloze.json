@@ -39,7 +39,7 @@
   },
   "mve81wdj1sotzsq16ja": {
    "createdAt": 1792351914535,
-   "editedAt": 1792351914535,
+   "editedAt": 1792352026385,
    "extra": "",
    "id": "mve81wdj1sotzsq16ja",
    "source": {
@@ -64,7 +64,8 @@
    "tags": [
     "wikipedia"
    ],
-   "text": "Inter-State Council (ISC) -  Article {{c1::263}}"
+   "text": "Inter-State Council (ISC) -  Article {{c1::263}}",
+   "suspended": false
   }
  }
 }
