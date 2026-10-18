@@ -1,0 +1,35 @@
+{
+ "version": 1,
+ "settings": {},
+ "cards": {
+  "mve7yx40pmdajgp6do": {
+   "createdAt": 1792351775520,
+   "editedAt": 1792351775520,
+   "extra": "",
+   "id": "mve7yx40pmdajgp6do",
+   "source": {
+    "context": "Article 263: Empowers the President of India to establish the council if public interests are served. www.constitutionofindia.net +1",
+    "domain": "google.com",
+    "favicon": "https://www.gstatic.com/images/branding/searchlogo/ico/favicon.ico",
+    "link": "https://www.google.com/search?q=inter+state+council&oq=inter+st&gs_lcrp=EgZjaHJvbWUqBwgDEAAYgAQyBggAEEUYOTIHCAEQABiABDIKCAIQABiABBi0BzIHCAMQABiABDIKCAQQABiABBi0BzIHCAUQABiABDIGCAYQRRhBMgYIBxBFGDzSAQkxNjc4NmowajeoAgCwAgA&sourceid=chrome&source=chrome.ob&ie=UTF-8#:~:text=Article-,263,-%3A%20Empowers%20the",
+    "quote": "263",
+    "title": "inter state council - Google Search",
+    "url": "https://www.google.com/search?q=inter+state+council&oq=inter+st&gs_lcrp=EgZjaHJvbWUqBwgDEAAYgAQyBggAEEUYOTIHCAEQABiABDIKCAIQABiABBi0BzIHCAMQABiABDIKCAQQABiABBi0BzIHCAUQABiABDIGCAYQRRhBMgYIBxBFGDzSAQkxNjc4NmowajeoAgCwAgA&sourceid=chrome&source=chrome.ob&ie=UTF-8"
+   },
+   "srs": {
+    "1": {
+     "due": 1792351775520,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "google"
+   ],
+   "text": "Article {{c1::263::which}}: Empowers the President of India to establish the council if public interests are served."
+  }
+ }
+}
