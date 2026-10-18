@@ -16,24 +16,6 @@
   "Ghatna chakra/Science/Biology"
  ],
  "items": {
-  "mv2ijnisykh0": {
-   "id": "mv2ijnisykh0",
-   "name": "biofertilizers",
-   "type": "html",
-   "file": "files/mv2ijnisykh0-biofertilizers.html",
-   "sha": "9ef54a90c16b87b0f69a7fc1973297a99d13c8dd",
-   "folder": "Ghatna chakra/Science/Biology",
-   "size": 53304,
-   "added": "2026-10-10",
-   "reads": 0,
-   "last": null,
-   "due": "2026-10-10",
-   "schedule": null,
-   "done": false,
-   "hist": [],
-   "hl": 0,
-   "note": false
-  },
   "mv2ilcg7yg86": {
    "id": "mv2ilcg7yg86",
    "name": "genetics_heredity",
