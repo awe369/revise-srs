@@ -301,6 +301,35 @@
     "superkalam"
    ],
    "text": "Part {{c1::VIII}} union territory"
+  },
+  "mvea1u77li114011m0": {
+   "createdAt": 1792355270947,
+   "editedAt": 1792355270947,
+   "extra": "",
+   "id": "mvea1u77li114011m0",
+   "source": {
+    "context": "The Budget Session is the longest and most important session of Parliament. It begins with the President’s Address and includes the presentation of the Union Budget in the Lok Sabha. Key features:",
+    "domain": "superkalam.com",
+    "favicon": "https://superkalam.com/favicon.ico",
+    "link": "https://superkalam.com/upsc-mains/notes/sessions-of-parliament-provisions-and-types-upsc-notes#:~:text=The-,Budget,-Session%20is%20the",
+    "quote": "Budget",
+    "title": "Sessions of Parliament: Provisions & Types (UPSC Notes)",
+    "url": "https://superkalam.com/upsc-mains/notes/sessions-of-parliament-provisions-and-types-upsc-notes"
+   },
+   "srs": {
+    "1": {
+     "due": 1792355270947,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "superkalam"
+   ],
+   "text": "The {{c1::Budget}} Session is the longest and most important session of Parliament."
   }
  }
 }
