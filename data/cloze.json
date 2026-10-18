@@ -101,6 +101,35 @@
     "wikipedia"
    ],
    "text": "National parks in India are International Union for Conservation of Nature (IUCN) category {{c1::II}} protected areas."
+  },
+  "mve86pdk1atu3oy1tnl": {
+   "createdAt": 1792352138744,
+   "editedAt": 1792352138744,
+   "extra": "",
+   "id": "mve86pdk1atu3oy1tnl",
+   "source": {
+    "context": "National parks in India are International Union for Conservation of Nature (IUCN) category II protected areas. India's first national park was established in 1936, now known as Jim Corbett National Park, in Uttarakhand. In 1970, India had only five national parks. In 1972, India enacted the Wildlife Protection Act and Project Tiger in 1973 to safeguard the habitats of conservation reliant species. Further legislation strengthening protection for wildlife was introduced in the 1980s.",
+    "domain": "en.wikipedia.org",
+    "favicon": "https://en.wikipedia.org/static/apple-touch/wikipedia.png",
+    "link": "https://en.wikipedia.org/wiki/List_of_national_parks_of_India#:~:text=was%20established%20in-,1936,-%2C%20now%20known",
+    "quote": "1936",
+    "title": "List of national parks of India - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/List_of_national_parks_of_India"
+   },
+   "srs": {
+    "1": {
+     "due": 1792352138744,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "wikipedia"
+   ],
+   "text": "India's first national park was established in {{c1::1936::year}}, now known as {{c1::Jim Corbett National Park}}, in Uttarakhand."
   }
  }
 }
