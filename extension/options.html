@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ClozeForge settings</title>
+<link rel="stylesheet" href="ui.css">
+<style>
+  main { max-width: 640px; margin: 40px auto; padding: 0 16px 60px; }
+  .actions { display: flex; gap: 10px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1><span class="logo">[…]</span> ClozeForge</h1>
+  <p class="muted">Cards you make on any website are saved to <code>data/cloze.json</code> in your <b>revise-srs</b> repo and reviewed in the <b>Cloze</b> tab of your Revise app. Usually you only need to paste the token below.</p>
+
+  <form class="card" id="form">
+    <div class="row">
+      <div><label for="owner">GitHub user / org</label><input type="text" id="owner" placeholder="awe369" required></div>
+      <div><label for="repo">Repository</label><input type="text" id="repo" placeholder="revise-srs" required></div>
+    </div>
+    <div class="row">
+      <div><label for="branch">Branch</label><input type="text" id="branch" placeholder="main"></div>
+      <div><label for="path">File path</label><input type="text" id="path" placeholder="data/cloze.json"></div>
+    </div>
+    <label for="token">Personal access token <span class="muted">— stored only on this device</span></label>
+    <input type="password" id="token" placeholder="github_pat_…" autocomplete="off">
+    <label for="siteUrl">Review site URL <span class="muted">(leave empty for https://awe369.github.io/revise-srs/cloze/)</span></label>
+    <input type="url" id="siteUrl" placeholder="">
+    <label class="check"><input type="checkbox" id="floatingButton"> Show the “Cloze” button when I select text</label>
+
+    <div class="actions">
+      <button class="btn primary" type="submit">Save &amp; test connection</button>
+      <button class="btn" type="button" id="openSite">Open review site ↗</button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+  </form>
+
+  <h2>Create the token (one minute)</h2>
+  <ol>
+    <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Fine-grained token</a>.</li>
+    <li><b>Repository access</b>: Only select repositories → pick your repo.</li>
+    <li><b>Permissions → Contents</b>: Read and write. Nothing else is needed.</li>
+    <li>Generate, copy, paste it above.</li>
+  </ol>
+
+  <h2>How to use</h2>
+  <ol>
+    <li>Select text on any page → click the <b>[…] Cloze</b> button, right-click → <i>Make cloze card</i>, or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>.</li>
+    <li>Click words in the preview to hide them. Each number (<code>c1</code>, <code>c2</code>…) becomes its own review.</li>
+    <li>Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save. Review on your site — click a card's source to jump to the exact sentence.</li>
+  </ol>
+  <p class="muted">Heads-up: if the repository is public, your cards are public too. Use a private repo for private notes (the review site then needs the token to read them).</p>
+</main>
+<script type="module" src="options.js"></script>
+</body>
+</html>

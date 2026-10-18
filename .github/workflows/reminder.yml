@@ -48,6 +48,21 @@ jobs:
             const where = it => it.folder ? it.folder.split('/').join(' › ') : 'Home';
             const late = it => Math.round((Date.parse(today) - Date.parse(it.due)) / 864e5);
 
+            // Cloze cards (data/cloze.json, made with the browser extension): items due by the end of today.
+            let clozeDue = 0, clozeNew = 0;
+            try {
+              const cz = JSON.parse(fs.readFileSync('data/cloze.json', 'utf8'));
+              const endOfToday = Date.parse(addDays(today, 1) + 'T00:00:00+05:30');
+              for (const c of Object.values(cz.cards || {})) {
+                if (c.deleted || c.suspended) continue;
+                for (const it of Object.values(c.srs || {})) { if (!it.reps) clozeNew++; else if (it.due < endOfToday) clozeDue++; }
+              }
+              clozeNew = Math.min(clozeNew, +(cz.settings && cz.settings.newPerDay) || 20);
+            } catch (e) { /* no cloze cards yet */ }
+            const clozeCount = clozeDue + clozeNew;
+            const clozeUrl = app + 'cloze/';
+            const clozeText = clozeCount ? `🧠 Cloze cards: ${clozeDue} due${clozeNew ? ` + ${clozeNew} new` : ''}` : '';
+
             const failures = [];
             let channels = 0;
 
@@ -66,6 +81,7 @@ jobs:
                 } else {
                   text = `✅ <b>Aaj kuch due nahi</b> · ${pretty(today)}\nKal: ${tomorrow} file${tomorrow === 1 ? '' : 's'}.`;
                 }
+                if (clozeText) text += `\n\n${h(clozeText)} → <a href="${h(clozeUrl)}">Review</a>`;
                 try {
                   const r = await fetch(`https://api.telegram.org/bot${process.env.TG_TOKEN}/sendMessage`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -94,6 +110,7 @@ jobs:
                 } else {
                   text = `✅ *Aaj kuch due nahi* · ${pretty(today)}\nKal: ${tomorrow} file${tomorrow === 1 ? '' : 's'}.`;
                 }
+                if (clozeText) text += `\n\n${clozeText}\n${clozeUrl}`;
                 const phone = process.env.WA_PHONE.replace(/[^\d+]/g, '');
                 const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&apikey=${encodeURIComponent(process.env.WA_KEY)}&text=${encodeURIComponent(text)}`;
                 try {
@@ -114,12 +131,13 @@ jobs:
             const label = 'revision-reminder';
             const open = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: 'open', labels: label });
             for (const i of open) await github.rest.issues.update({ owner, repo, issue_number: i.number, state: 'closed', state_reason: 'completed' });
-            if (!shown.length) { core.info('Nothing due today.'); return; }
+            if (!shown.length && !clozeCount) { core.info('Nothing due today.'); return; }
             try { await github.rest.issues.createLabel({ owner, repo, name: label, color: '2f6fde' }); } catch (e) {}
             const clean = s => String(s).replace(/[\[\]]/g, '');
             const lines = shown.map(it => `- [ ] [${clean(it.name)}](${app}#open=${it.id}) — ${clean(where(it))}${late(it) > 0 ? ` · ${late(it)}d late` : ''}`);
             await github.rest.issues.create({
               owner, repo, labels: [label],
-              title: `📚 ${shown.length} revision${shown.length > 1 ? 's' : ''} due — ${today}`,
-              body: `@${owner} aaj ye revise karna hai:\n\n${lines.join('\n')}\n\n👉 [Open Revise](${app})`
+              title: shown.length ? `📚 ${shown.length} revision${shown.length === 1 ? '' : 's'} due — ${today}` : `🧠 ${clozeCount} cloze card${clozeCount === 1 ? '' : 's'} due — ${today}`,
+              body: (shown.length ? `@${owner} aaj ye revise karna hai:\n\n${lines.join('\n')}\n\n👉 [Open Revise](${app})` : `@${owner} aaj sirf cloze cards due hain.`)
+                + (clozeText ? `\n\n${clozeText} → [Review](${clozeUrl})` : '')
             });

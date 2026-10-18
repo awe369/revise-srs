@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
+<title>Cloze — Revise</title>
+<meta name="description" content="Spaced-repetition review of cloze cards captured from any website.">
+<link rel="icon" href="../icon.svg">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <a class="back" href="../" title="Back to Revise">‹ Revise</a>
+    <a class="brand" href="#/review"><span class="logo">[…]</span> Cloze</a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#/review" data-route="review">Review <span class="badge" id="dueBadge" hidden></span></a>
+      <a href="#/cards" data-route="cards">Cards</a>
+      <a href="#/stats" data-route="stats">Stats</a>
+      <a href="#/settings" data-route="settings">Settings</a>
+    </nav>
+    <button class="sync" id="syncBtn" title="Sync with GitHub"><span class="dot"></span><span id="syncText">Offline</span></button>
+  </header>
+  <div class="banner" id="banner" hidden></div>
+  <main id="view" tabindex="-1"></main>
+</div>
+
+<aside class="viewer" id="viewer" hidden aria-label="Source page">
+  <div class="viewer-bar">
+    <span class="viewer-title" id="viewerTitle"></span>
+    <a class="btn sm" id="viewerOpen" target="_blank" rel="noopener noreferrer">Open in tab ↗</a>
+    <button class="btn sm icon" id="viewerClose" aria-label="Close source">✕</button>
+  </div>
+  <iframe id="viewerFrame" title="Source page" referrerpolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
+  <p class="viewer-hint">Blank or “refused to connect”? That site blocks embedding — use <b>Open in tab</b>, which also jumps to the highlighted sentence.</p>
+</aside>
+
+<dialog id="modal"></dialog>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
