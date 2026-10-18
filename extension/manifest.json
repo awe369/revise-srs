@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "ClozeForge — cloze cards from any page",
+  "short_name": "ClozeForge",
+  "version": "1.0.0",
+  "description": "Turn any text on any website into Anki-style cloze cards, saved to your GitHub repo and reviewed with spaced repetition.",
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "action": {
+    "default_title": "ClozeForge",
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/16.png", "32": "icons/32.png" }
+  },
+  "options_page": "options.html",
+  "background": { "service_worker": "background.js", "type": "module" },
+  "permissions": ["storage", "contextMenus", "scripting", "activeTab", "alarms"],
+  "host_permissions": ["https://api.github.com/*", "<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["lib/cloze.js"], "matches": ["<all_urls>"] }
+  ],
+  "commands": {
+    "create-cloze": {
+      "suggested_key": { "default": "Alt+Shift+C", "mac": "Alt+Shift+C" },
+      "description": "Make a cloze card from the selected text"
+    }
+  }
+}

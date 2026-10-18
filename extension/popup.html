@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ClozeForge</title>
+<link rel="stylesheet" href="ui.css">
+<style>
+  body { width: 320px; padding: 16px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  header b { font-size: 15px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; }
+  .stat b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .stat span { font-size: 11.5px; color: var(--muted); }
+  .stat.hot b { color: var(--accent); }
+  .btns { display: grid; gap: 8px; }
+  .foot { margin-top: 12px; font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .foot button { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; }
+  .warn { font-size: 12.5px; color: var(--bad); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+  <header>
+    <b><span class="logo">[…]</span> ClozeForge</b>
+    <a href="options.html" target="_blank" title="Settings">Settings</a>
+  </header>
+  <div class="warn" id="warn" hidden></div>
+  <div class="stats">
+    <div class="stat hot"><b id="due">–</b><span>due now</span></div>
+    <div class="stat"><b id="new">–</b><span>new</span></div>
+    <div class="stat"><b id="total">–</b><span>cards</span></div>
+  </div>
+  <div class="btns">
+    <button class="btn primary" id="review">Start review ↗</button>
+    <button class="btn" id="make" title="Shortcut: Alt+Shift+C">Card from selection <kbd>Alt+Shift+C</kbd></button>
+  </div>
+  <div class="foot"><span id="sync">–</span><button id="syncNow">Sync now</button></div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

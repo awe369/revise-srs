@@ -41,6 +41,22 @@ When you open a file, rate it at the bottom:
   when you're back online.
 - **Stats tab:** revision activity, Hard/Good/Easy mix per subject, and your toughest files.
 
+## Cloze cards from any website 🧠
+
+Make Anki-style fill-in-the-blank cards from **any website** with the Chrome extension in `extension/`,
+and review them in the **Cloze** tab (bottom right) — `https://<your-username>.github.io/<repo-name>/cloze/`.
+
+- Select text on any page → click **[…] Cloze** (or press **Alt+Shift+C**). The selected word is hidden inside its
+  sentence; click more words to hide them too. **Ctrl+Enter** saves to `data/cloze.json`.
+- Schedule: **1 → 3 → 7 → 15 → 30 → 60 → 120 → 240 days**, then doubling. *Again* / *Hard* / *Good* / *Easy*.
+- **Open source** opens the original page scrolled to the exact sentence, highlighted.
+- The Cloze page uses the same token as Revise — no second setup. Due cloze cards are added to the morning
+  Telegram / WhatsApp reminder.
+
+**Install the extension:** Code → *Download ZIP* → unzip → `chrome://extensions` → turn on **Developer mode** →
+**Load unpacked** → choose the `extension` folder → paste your token in the page that opens → *Save & test*.
+Details: [`extension/README.md`](extension/README.md).
+
 ## One-time setup
 
 1. **Turn on GitHub Pages:** repo **Settings → Pages → Build and deployment →
@@ -93,6 +109,8 @@ GitHub issue each morning, so GitHub notifies you instead.
 | `files/` | Your uploaded HTML / PDF files |
 | `data/srs.json` | Folders, schedules and revision history |
 | `data/notes/` | Highlights and notes, one file per note |
+| `data/cloze.json` | Cloze cards and their review history |
+| `cloze/`, `extension/` | Cloze review page and the Chrome extension |
 | `index.html` | The whole app (no build step) |
 
 > ⚠️ On a free GitHub plan, Pages only works on **public** repos, so anyone with the link can see
