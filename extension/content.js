@@ -175,6 +175,182 @@
     }
   });
 
+  // ---------------------------------------------------------------- quiz on the source page
+  //
+  // Opened from the Cloze review page, the source page keeps the answer hidden too: every
+  // occurrence of the answer is wrapped in a masked <span>, and clicking one reveals it.
+
+  const MASK = 'clozeforge-mask';
+  let quiz = null; // { data, masks }
+
+  const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Whitespace-tolerant, word-bounded, case-insensitive pattern for a phrase.
+  function phraseRe(text) {
+    const t = text.trim();
+    if (!t) return null;
+    const body = t.split(/\s+/).map(escRe).join('\\s+');
+    const pre = /^[\p{L}\p{N}]/u.test(t) ? '(?<![\\p{L}\\p{N}])' : '';
+    const post = /[\p{L}\p{N}]$/u.test(t) ? '(?![\\p{L}\\p{N}])' : '';
+    return new RegExp(pre + body + post, 'giu');
+  }
+
+  function textIndex() {
+    const nodes = [];
+    let text = '';
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement?.closest(`script, style, noscript, textarea, clozeforge-ui, .${MASK}`) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    });
+    // A newline between text from different blocks keeps "…Manipur</h1><p>Mount…" from fusing into one word.
+    const blockOf = (el) => { while (el && el !== document.body && !BLOCK.test(el.tagName)) el = el.parentElement; return el; };
+    let lastBlock = null;
+    for (let n; (n = walker.nextNode());) {
+      const b = blockOf(n.parentElement);
+      if (lastBlock && b !== lastBlock) text += '\n';
+      lastBlock = b;
+      nodes.push({ n, s: text.length, e: text.length + n.data.length });
+      text += n.data;
+    }
+    return { text, nodes };
+  }
+
+  function findAll(idx, phrase, limit = 300) {
+    const re = phraseRe(phrase);
+    if (!re) return [];
+    const out = [];
+    for (const m of idx.text.matchAll(re)) { out.push([m.index, m.index + m[0].length]); if (out.length >= limit) break; }
+    return out;
+  }
+
+  // Wrap text [s, e) — which may span several text nodes — in mask spans. Returns the spans.
+  function wrap(idx, s, e, group) {
+    const parts = idx.nodes.filter((x) => x.e > s && x.s < e);
+    const spans = [];
+    for (const x of parts) {
+      const a = Math.max(0, s - x.s), b = Math.min(x.n.data.length, e - x.s);
+      if (b <= a || !x.n.data.slice(a, b).trim()) continue;
+      const r = document.createRange();
+      r.setStart(x.n, a);
+      r.setEnd(x.n, b);
+      const span = document.createElement('span');
+      span.className = MASK;
+      span.dataset.group = group;
+      span.title = 'Cloze — click to peek';
+      try { r.surroundContents(span); spans.push(span); } catch { /* skip odd nodes */ }
+    }
+    return spans;
+  }
+
+  function unmask(span) {
+    span.classList.add('peek');
+  }
+
+  async function startQuiz(data) {
+    if (!data?.text || quiz) return;
+    const { parseCloze, stripCloze } = await loadLib();
+    const answers = [...new Set(parseCloze(data.text)
+      .filter((x) => x.type === 'cloze' && x.n === data.n).map((x) => x.answer.trim()).filter(Boolean))];
+    if (!answers.length) return;
+    // Key words of a multi-word answer give it away on their own too ("Mount Manipur" in the page title
+    // for the answer "Manipur (Mount Harriet)") — unless the card already shows that word.
+    const shown = new Set(stripCloze(parseCloze(data.text).filter((x) => x.type === 'text' || x.n !== data.n)
+      .map((x) => x.value ?? x.answer).join(' ')).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []);
+    const keywords = [...new Set(answers.filter((a) => /\s/.test(a.trim()))
+      .flatMap((a) => a.match(/[\p{L}\p{N}]{3,}/gu) || []))]
+      .filter((w) => !shown.has(w.toLowerCase()) && !answers.some((a) => a.toLowerCase() === w.toLowerCase()));
+
+    const apply = () => {
+      if (quiz) return true;
+      const plain = stripCloze(data.text);
+      let idx = textIndex();
+      const ctx = findAll(idx, plain, 1)[0] || findAll(idx, plain.split(/\s+/).slice(0, 8).join(' '), 1)[0] || null;
+      // Collect every occurrence first (offsets shift after wrapping), then wrap from the end.
+      const hits = [];
+      for (const a of answers) for (const h of findAll(idx, a)) hits.push(h);
+      const overlaps = (h) => hits.some((x) => h[0] < x[1] && x[0] < h[1]);
+      for (const w of keywords) for (const h of findAll(idx, w)) if (!overlaps(h)) hits.push(Object.assign(h, { word: true }));
+      if (!hits.length) return false;
+      const full = hits.filter((h) => !h.word);
+      const near = ctx && full.length ? full.reduce((b, h) => (Math.abs(h[0] - ctx[0]) < Math.abs(b[0] - ctx[0]) ? h : b)) : (full[0] || hits[0]);
+      hits.sort((x, y) => y[0] - x[0]);
+      const masks = [];
+      let focus = null;
+      hits.forEach((h, i) => { h.group = i; });
+      for (const h of hits) {
+        const spans = wrap(idx, h[0], h[1], h.group);
+        masks.push(...spans);
+        if (h === near) focus = spans;
+        idx = textIndex(); // nodes were split; rebuild so earlier offsets stay valid
+      }
+      if (!masks.length) return false;
+      quiz = { data, masks };
+      focus?.forEach((f) => f.classList.add('focus'));
+      focus?.[0]?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      showQuizPanel();
+      return true;
+    };
+    // Pages that render late (SPAs) get a few more tries.
+    if (!apply()) for (const t of [700, 2000, 5000]) setTimeout(apply, t);
+  }
+
+  // One answer can be split over several spans (e.g. across <i> tags): count and reveal by group.
+  const hiddenCount = () => quiz ? new Set(quiz.masks.filter((m) => m.isConnected && !m.classList.contains('peek')).map((m) => m.dataset.group)).size : 0;
+
+  async function showQuizPanel() {
+    if (!quiz) return;
+    const { renderCloze } = await loadLib();
+    ensureHost();
+    let panel = root.querySelector('.quiz');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.className = 'quiz';
+      root.appendChild(panel);
+    }
+    const left = hiddenCount();
+    panel.innerHTML = `
+      <div class="qhead"><span class="logo">[…]</span> Cloze <span class="dim">· ${left ? `${left} hidden on this page — click one to peek` : 'answer shown'}</span>
+        <button class="icon qx" title="Close" aria-label="Close">✕</button></div>
+      <div class="qtext">${renderCloze(quiz.data.text, quiz.data.n, !left)}</div>
+      <div class="qbtns">${left
+        ? '<button class="btn sm primary" data-q="reveal">Show answer</button>'
+        : '<button class="btn sm" data-q="hide">Hide again</button>'}</div>`;
+    panel.querySelector('.qx').onclick = () => { panel.remove(); quiz.masks.forEach(unmask); };
+    panel.querySelector('[data-q="reveal"]')?.addEventListener('click', () => { quiz.masks.forEach(unmask); showQuizPanel(); });
+    panel.querySelector('[data-q="hide"]')?.addEventListener('click', () => { quiz.masks.forEach((m) => m.classList.remove('peek')); showQuizPanel(); });
+  }
+
+  // Click a hidden word → peek at just that one (and don't follow a link on that click).
+  document.addEventListener('click', (ev) => {
+    const m = ev.target.closest?.(`.${MASK}:not(.peek)`);
+    if (!m) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    quiz?.masks.filter((x) => x.dataset.group === m.dataset.group).forEach(unmask);
+    showQuizPanel();
+  }, true);
+
+  // Opened in a new tab from the review page: the background script holds the card for this tab.
+  if (window === top) {
+    chrome.runtime.sendMessage({ type: 'quiz-pending' }).then((d) => d && startQuiz(d)).catch(() => {});
+  }
+
+  // Opened inside the review page's side viewer (an iframe): the parent page sends the card.
+  if (window !== top) {
+    addEventListener('message', (ev) => {
+      if (ev.source === parent && ev.data?.type === 'clozeforge:quiz') startQuiz(ev.data);
+    });
+    try { parent.postMessage({ type: 'clozeforge:ready' }, '*'); } catch {}
+  }
+
+  // On the review page itself: announce the extension, and forward "open source" requests.
+  if (/\.github\.io$/i.test(location.hostname) || location.hostname === 'localhost') {
+    document.documentElement.dataset.clozeforge = '1';
+    addEventListener('message', (ev) => {
+      if (ev.source !== window || ev.data?.type !== 'clozeforge:open') return;
+      const { link, text, n } = ev.data;
+      chrome.runtime.sendMessage({ type: 'open-quiz', link, text, n }).catch(() => window.open(link, '_blank', 'noopener'));
+    });
+  }
+
   // ---------------------------------------------------------------- editor
 
   async function openEditor(cap) {
@@ -366,14 +542,14 @@
   * { box-sizing: border-box; }
   :host {
     --bg: #fbfaf7; --surface: #ffffff; --line: #e4e0d8; --text: #1d1b18; --muted: #6b665d;
-    --accent: #d4572a; --accent-ink: #fff; --mark: #fbe3d6; --mark-ink: #9a3412; --hover: #f2efe9;
+    --accent: #2f6fde; --accent-ink: #fff; --mark: #e2ebfb; --mark-ink: #1d4ea8; --hover: #f2efe9;
     --shadow: 0 24px 64px rgba(20, 16, 10, .28), 0 2px 8px rgba(20, 16, 10, .12);
     font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text);
   }
   @media (prefers-color-scheme: dark) {
     :host {
       --bg: #1b1a18; --surface: #232220; --line: #3a3733; --text: #f0ede6; --muted: #a39d92;
-      --accent: #f07a4a; --accent-ink: #1b1a18; --mark: #4a2a1c; --mark-ink: #ffb894; --hover: #2c2a27;
+      --accent: #6b9cff; --accent-ink: #0d1220; --mark: #1f2a44; --mark-ink: #a9c4ff; --hover: #2c2a27;
       --shadow: 0 24px 64px rgba(0, 0, 0, .6);
     }
   }
@@ -451,6 +627,17 @@
   .status { font-size: 12.5px; color: var(--muted); }
   .status.err { color: #c2410c; }
 
+  .quiz {
+    position: fixed; right: 16px; bottom: 16px; width: min(380px, calc(100vw - 32px)); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 12px 14px 12px; animation: rise .2s ease-out;
+  }
+  .qhead { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; }
+  .qhead .dim { font-weight: 500; }
+  .qhead .qx { margin-left: auto; width: 26px; height: 26px; }
+  .qtext { font: 16px/1.55 Charter, "Iowan Old Style", Georgia, serif; margin: 8px 0 10px; max-height: 160px; overflow: auto; }
+  .qtext .cz-blank { background: var(--mark); color: var(--mark-ink); border-radius: 5px; padding: 0 5px; font: 700 13px ui-sans-serif, system-ui; }
+  .qtext .cz-answer { color: var(--accent); font-weight: 700; }
+  .qbtns { display: flex; justify-content: flex-end; }
   .toast {
     position: fixed; right: 20px; bottom: 20px; padding: 10px 16px; border-radius: 10px; background: #1d1b18; color: #fff;
     font-weight: 600; box-shadow: var(--shadow); animation: rise .2s ease-out; transition: opacity .3s, transform .3s;

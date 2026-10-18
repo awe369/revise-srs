@@ -49,7 +49,7 @@ and review them in the **Cloze** tab (bottom right) — `https://<your-username>
 - Select text on any page → click **[…] Cloze** (or press **Alt+Shift+C**). The selected word is hidden inside its
   sentence; click more words to hide them too. **Ctrl+Enter** saves to `data/cloze.json`.
 - Schedule: **1 → 3 → 7 → 15 → 30 → 60 → 120 → 240 days**, then doubling. *Again* / *Hard* / *Good* / *Easy*.
-- **Open source** opens the original page scrolled to the exact sentence, highlighted.
+- **Open source** opens the original page at the exact sentence — with the answer **still hidden there** (blue boxes; click one to peek).
 - The Cloze page uses the same token as Revise — no second setup. Due cloze cards are added to the morning
   Telegram / WhatsApp reminder.
 

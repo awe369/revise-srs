@@ -1,0 +1,17 @@
+/* Injected into every page: how ClozeForge masks a card's answer on its source page. */
+.clozeforge-mask {
+  color: transparent !important;
+  background: #9fb6e6 !important;
+  border-radius: 4px;
+  text-shadow: none !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.clozeforge-mask * { color: transparent !important; text-shadow: none !important; text-decoration: none !important; }
+.clozeforge-mask.focus { background: #4d7fe0 !important; outline: 3px solid rgba(77, 127, 224, .3); }
+.clozeforge-mask.peek, .clozeforge-mask.peek * { color: inherit !important; }
+.clozeforge-mask.peek { background: rgba(255, 214, 102, .55) !important; outline: none; cursor: auto; }
+/* A link's underline is drawn by the link itself; an inline-block child is the only way to keep it off the mask. */
+a .clozeforge-mask, u .clozeforge-mask { display: inline-block; }

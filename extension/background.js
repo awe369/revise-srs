@@ -109,11 +109,13 @@ async function updateBadge(deck) {
   const now = Date.now();
   let due = 0;
   for (const { item } of items(deck || emptyDeck())) if (item.reps > 0 && item.due <= now) due++;
-  await chrome.action.setBadgeBackgroundColor({ color: '#d4572a' });
+  await chrome.action.setBadgeBackgroundColor({ color: '#2f6fde' });
   await chrome.action.setBadgeText({ text: due ? String(due > 999 ? '999+' : due) : '' });
 }
 
 // ---------- messages from content script / popup ----------
+
+let quizOpening = Promise.resolve();
 
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   (async () => {
@@ -138,6 +140,27 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
       case 'open-editor-active':
         await openEditor(await activeTab());
         return { ok: true };
+      case 'open-quiz': {
+        // Only the review site may ask for this.
+        const cfg = await getConfig();
+        const site = siteUrlFor(cfg);
+        const from = sender.url || '';
+        if (!(site && from.startsWith(site)) && !/^https:\/\/[^/]+\.github\.io\//.test(from) && !/^http:\/\/localhost[:/]/.test(from)) return { ok: false };
+        // A fast page can ask for its card before tabs.create() has even resolved, so it waits on this.
+        quizOpening = (async () => {
+          const tab = await chrome.tabs.create({ url: msg.link, index: sender.tab ? sender.tab.index + 1 : undefined });
+          await chrome.storage.session.set({ [`quiz:${tab.id}`]: { text: msg.text, n: msg.n } });
+        })();
+        await quizOpening;
+        return { ok: true };
+      }
+      case 'quiz-pending': {
+        await quizOpening.catch(() => {});
+        const key = `quiz:${sender.tab?.id}`;
+        const got = await chrome.storage.session.get(key);
+        if (got[key]) await chrome.storage.session.remove(key); // one-shot: a reload shows the page normally
+        return got[key] || null;
+      }
       case 'config':
         return getConfig().then(({ token, ...rest }) => rest);
       default:
