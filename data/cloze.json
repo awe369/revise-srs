@@ -225,7 +225,7 @@
   },
   "mve8xgyj190fdawbrs0": {
    "createdAt": 1792353387547,
-   "editedAt": 1792353497970,
+   "editedAt": 1792356460648,
    "extra": "",
    "id": "mve8xgyj190fdawbrs0",
    "source": {
@@ -271,7 +271,8 @@
    "tags": [
     "indiatimes"
    ],
-   "text": "AI was everywhere at {{c1::GFF}} 2026."
+   "text": "AI was everywhere at {{c1::GFF}} 2026.",
+   "deleted": true
   },
   "mve9594t712xx9djny": {
    "createdAt": 1792353750653,
