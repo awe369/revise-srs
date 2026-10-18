@@ -16,27 +16,6 @@
   "Ghatna chakra/Science/Biology"
  ],
  "items": {
-  "mv2ilcg7yg86": {
-   "id": "mv2ilcg7yg86",
-   "name": "genetics_heredity",
-   "type": "html",
-   "file": "files/mv2ilcg7yg86-genetics-heredity.html",
-   "sha": "dd489807db2886f0a063b62ff095bfe24f5938cc",
-   "folder": "Ghatna chakra/Science/Biology",
-   "size": 83852,
-   "added": "2026-10-10",
-   "reads": 1,
-   "last": "2026-10-10",
-   "due": "2026-10-13",
-   "schedule": null,
-   "done": false,
-   "hist": [
-    [
-     "2026-10-10",
-     "r"
-    ]
-   ]
-  },
   "mv2io7d51afp": {
    "id": "mv2io7d51afp",
    "name": "Miscellaneous_Smart_Short_Notes",
