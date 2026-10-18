@@ -130,6 +130,35 @@
     "wikipedia"
    ],
    "text": "India's first national park was established in {{c1::1936::year}}, now known as {{c1::Jim Corbett National Park}}, in Uttarakhand."
+  },
+  "mve89aghfdkoajbol6": {
+   "createdAt": 1792352259377,
+   "editedAt": 1792352259377,
+   "extra": "",
+   "id": "mve89aghfdkoajbol6",
+   "source": {
+    "context": "Mount Manipur (Mount Harriet) being depicted in the Indian 20-rupee note (pre-2019 edition)",
+    "domain": "en.wikipedia.org",
+    "favicon": "https://en.wikipedia.org/static/apple-touch/wikipedia.png",
+    "link": "https://en.wikipedia.org/wiki/Mount_Manipur#:~:text=Mount-,Manipur%20(Mount%20Harriet),-being%20depicted%20in",
+    "quote": "Manipur (Mount Harriet)",
+    "title": "Mount Manipur - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Mount_Manipur"
+   },
+   "srs": {
+    "1": {
+     "due": 1792352259377,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "wikipedia"
+   ],
+   "text": "Mount {{c1::Manipur (Mount Harriet)}} being depicted in the Indian 20-rupee note (pre-2019 edition)"
   }
  }
 }
