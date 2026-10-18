@@ -292,7 +292,7 @@ function renderReview(keepCurrent = false) {
         ${card.source?.context ? `<div class="context-label">From the page</div><div class="context">${contextHtml(card.source)}</div>` : ''}
         <div class="card-actions">
           ${safeUrl(card.source?.link || card.source?.url) ? `
-            <a class="btn sm" href="${escapeHtml(safeUrl(card.source.link) || safeUrl(card.source.url))}" target="_blank" rel="noopener noreferrer">Open source ↗ <kbd>O</kbd></a>
+            <a class="btn sm" href="${escapeHtml(safeUrl(card.source.link) || safeUrl(card.source.url))}" target="_blank" rel="noopener noreferrer" data-src>Open source ↗ <kbd>O</kbd></a>
             <button class="btn sm" data-act="inline">View here <kbd>V</kbd></button>` : ''}
           <button class="btn sm ghost" data-act="edit">Edit <kbd>E</kbd></button>
           <button class="btn sm ghost" data-act="suspend">Suspend</button>
@@ -312,6 +312,7 @@ function renderReview(keepCurrent = false) {
 
   view.querySelectorAll('[data-grade]').forEach((b) => b.addEventListener('click', () => grade(+b.dataset.grade)));
   view.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); act(b.dataset.act); }));
+  view.querySelectorAll('[data-src]').forEach((a) => a.addEventListener('click', (e) => { if (openSource(cur)) e.preventDefault(); }));
   if ($('#viewer').hidden === false) openViewer(card.source); // keep the side panel in sync with the card
 }
 
@@ -321,7 +322,7 @@ function act(a) {
     case 'reveal': session.revealed = true; renderReview(true); break;
     case 'undo': undo(); break;
     case 'inline': if (cur) openViewer(cur.card.source, true); break;
-    case 'open': { const u = cur && (safeUrl(cur.card.source?.link) || safeUrl(cur.card.source?.url)); if (u) window.open(u, '_blank', 'noopener'); break; }
+    case 'open': { const u = cur && (safeUrl(cur.card.source?.link) || safeUrl(cur.card.source?.url)); if (u && !openSource(cur)) window.open(u, '_blank', 'noopener'); break; }
     case 'edit': if (cur) openEditor(cur.card); break;
     case 'suspend':
       if (!cur) break;
@@ -331,6 +332,23 @@ function act(a) {
       break;
   }
 }
+
+// ---------------------------------------------------------------- source page quiz
+// With the extension installed, the source page opens with this card's answer hidden there too.
+// Returns false when the extension isn't there (the caller then opens a plain link).
+
+function openSource(cur) {
+  const link = cur && (safeUrl(cur.card.source?.link) || safeUrl(cur.card.source?.url));
+  if (!link || document.documentElement.dataset.clozeforge !== '1') return false;
+  window.postMessage({ type: 'clozeforge:open', link, text: cur.card.text, n: cur.n }, location.origin);
+  return true;
+}
+
+// The extension inside the side viewer says it's ready → send it the card to hide.
+addEventListener('message', (ev) => {
+  if (ev.data?.type !== 'clozeforge:ready' || ev.source !== $('#viewerFrame').contentWindow || !session.current) return;
+  ev.source.postMessage({ type: 'clozeforge:quiz', text: session.current.card.text, n: session.current.n }, '*');
+});
 
 // ---------------------------------------------------------------- inline source viewer
 

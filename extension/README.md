@@ -35,6 +35,15 @@ Every card stores the page URL plus a [text-fragment link](https://developer.moz
 (`#:~:text=…`), so **Open source** jumps straight to — and highlights — the exact sentence.
 **View here** loads the page beside the card (some sites forbid embedding; then use *Open source*).
 
+## Quiz on the source page
+
+With the extension installed, **Open source** (or clicking the source chip, or **O**) on the review page opens the
+original page with **this card's answer hidden there too**: every place the answer appears is covered by a blue box,
+the one in your sentence is darker and scrolled into view. Key words of a multi-word answer are hidden as well (so
+the page title can't give "Manipur (Mount Harriet)" away). Click a box to peek at it, or use **Show answer** in the
+small panel. **View here** (the side panel) does the same. Reloading the page shows it normally. Without the
+extension (e.g. on a phone) the link just opens the page.
+
 ## Scheduling
 
 Each cloze number is reviewed on its own.
