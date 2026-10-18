@@ -36,6 +36,35 @@
     "google"
    ],
    "text": "Article {{c1::263::which}}: Empowers the President of India to establish the council if public interests are served."
+  },
+  "mve81wdj1sotzsq16ja": {
+   "createdAt": 1792351914535,
+   "editedAt": 1792351914535,
+   "extra": "",
+   "id": "mve81wdj1sotzsq16ja",
+   "source": {
+    "context": "The Constitution of India, under Article 263,[1] provides that an Inter-State Council (ISC) may be established \"at any time it appears to the President that the public interests would be served\" by such establishment.",
+    "domain": "en.wikipedia.org",
+    "favicon": "https://en.wikipedia.org/static/apple-touch/wikipedia.png",
+    "link": "https://en.wikipedia.org/wiki/Inter-State_Council#:~:text=India%2C%20under%20Article-,263,-%2C%5B1%5D%20provides%20that",
+    "quote": "263",
+    "title": "Inter-State Council - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Inter-State_Council"
+   },
+   "srs": {
+    "1": {
+     "due": 1792351914535,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "wikipedia"
+   ],
+   "text": "Inter-State Council (ISC) -  Article {{c1::263}}"
   }
  }
 }
