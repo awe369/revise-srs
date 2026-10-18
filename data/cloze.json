@@ -216,6 +216,35 @@
     "indiatimes"
    ],
    "text": "Manipur breaks into celebration as Centre renames Andaman's 'Mount {{c1::Harriet}}' as 'Mount Manipur'"
+  },
+  "mve8xgyj190fdawbrs0": {
+   "createdAt": 1792353387547,
+   "editedAt": 1792353387547,
+   "extra": "",
+   "id": "mve8xgyj190fdawbrs0",
+   "source": {
+    "context": "AI was everywhere at GFF 2026. Full automation was not",
+    "domain": "economictimes.indiatimes.com",
+    "favicon": "https://economictimes.indiatimes.com/icons/etfavicon.ico",
+    "link": "https://economictimes.indiatimes.com/ai/ai-insights/what-gff-2026-revealed-about-the-promises-and-limits-of-ai-in-financial-services/articleshow/134278768.cms#:~:text=was%20everywhere%20at-,GFF,-2026.%20Full%20automation",
+    "quote": "GFF",
+    "title": "AI was everywhere at GFF 2026. Full automation was not",
+    "url": "https://economictimes.indiatimes.com/ai/ai-insights/what-gff-2026-revealed-about-the-promises-and-limits-of-ai-in-financial-services/articleshow/134278768.cms"
+   },
+   "srs": {
+    "1": {
+     "due": 1792353387547,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "indiatimes"
+   ],
+   "text": "AI was everywhere at {{c1::GFF}} 2026."
   }
  }
 }
