@@ -348,6 +348,35 @@
     "superkalam"
    ],
    "text": "The {{c1::Budget}} Session is the longest and most important session of Parliament."
+  },
+  "mvftplg5cauv0d1tve": {
+   "createdAt": 1792448758229,
+   "editedAt": 1792448758229,
+   "extra": "",
+   "id": "mvftplg5cauv0d1tve",
+   "source": {
+    "context": "Ganweriwala was the 5th largest city[9] within the Indus Valley Civilisation and is believed to have been a major centre from 2600 to 1900 BC.[9][12] The Indus Valley Civilisation was a Bronze Age Civilisation[13][14] which at its zenith had an estimated population of 5 million.[13] Together with Mesopotamia and Ancient Egypt, it was one of the earliest complex civilisations,[13][14] and of the three, was the most extensive.[13][14] Ganweriwala was one of the largest cities within the Indus Valley Civilisation but is the least explored.[8][9] Ganweriwala is believed to have followed the typical Indus Civilisation town planning.[15][9] It had an Upper town and a Lower town as is seen in the presence of the two different mounds.[8][9]",
+    "domain": "en.wikipedia.org",
+    "favicon": "https://en.wikipedia.org/static/apple-touch/wikipedia.png",
+    "link": "https://en.wikipedia.org/wiki/Ganweriwal#:~:text=Ganweriwala%20was%20the-,5th,-largest%20city%5B9%5D%20within",
+    "quote": "5th",
+    "title": "Ganweriwal - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Ganweriwal"
+   },
+   "srs": {
+    "1": {
+     "due": 1792448758229,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "wikipedia"
+   ],
+   "text": "Ganweriwala was the {{c1::5th}} largest city[9] within the Indus Valley Civilisation and is believed to have been a major centre from 2600 to 1900 BC."
   }
  }
 }
