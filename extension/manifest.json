@@ -2,33 +2,72 @@
   "manifest_version": 3,
   "name": "ClozeForge — cloze cards from any page",
   "short_name": "ClozeForge",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Turn any text on any website into Anki-style cloze cards, saved to your GitHub repo and reviewed with spaced repetition.",
-  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzwEwvHLafZyfprhD7L6LmpD82iKCPKplZgjvNMScmR5OllGSTo9FwADN5M+wXzYlkim2UGj0Ox+sx0acAUf8XzvxxfQ2o3fYGkkKZL3C2+DFLRisT403fuy73BHRX5UAi1LuDYYkQ0oQ6kJUkcXXv2/pLFM5/e1qOU3ld7lATTEPvCwYe0b9BdbJ1/Owlx37VLd6gN37deHpuZ+2Ip2o3JvYZwKJGkYXOD7ekS/0a9UXWprRwswqVyZWye25yMSvzjquj8Ij0+So1qEt3nurWqPq8kwNSglW7tjED2GHiNNOkAs+fBu1SCHJfa1eCoucG+PRa667QNrAxK6r0I0SeQIDAQAB",
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
   "action": {
     "default_title": "ClozeForge",
     "default_popup": "popup.html",
-    "default_icon": { "16": "icons/16.png", "32": "icons/32.png" }
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png"
+    }
   },
   "options_page": "options.html",
-  "background": { "service_worker": "background.js", "type": "module" },
-  "permissions": ["storage", "contextMenus", "scripting", "activeTab", "alarms"],
-  "host_permissions": ["https://api.github.com/*", "<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "scripting",
+    "activeTab",
+    "alarms",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://api.github.com/*",
+    "https://www.googleapis.com/*",
+    "<all_urls>"
+  ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["page.css"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "page.css"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }
   ],
   "web_accessible_resources": [
-    { "resources": ["lib/cloze.js"], "matches": ["<all_urls>"] }
+    {
+      "resources": [
+        "lib/cloze.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ],
   "commands": {
     "create-cloze": {
-      "suggested_key": { "default": "Alt+Shift+C", "mac": "Alt+Shift+C" },
+      "suggested_key": {
+        "default": "Alt+Shift+C",
+        "mac": "Alt+Shift+C"
+      },
       "description": "Make a cloze card from the selected text"
     }
   }

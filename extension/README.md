@@ -19,6 +19,34 @@ tests/       node --test tests/*.test.mjs
    *Save & test connection*.
 3. Open the **Cloze** tab in Revise (or `https://<user>.github.io/<repo>/cloze/`).
 
+## Google Drive setup (one time, by the site owner — ~10 minutes)
+
+With this done, **anyone** can use the extension and the review site: each person signs in with Google and their
+cards go to **their own** Google Drive (`ClozeForge/cloze-cards.json`). The app only asks for the `drive.file`
+permission, so it can see only the file it created — nobody else's data ever passes through you.
+
+1. Open <https://console.cloud.google.com/> → project picker (top left) → **New project** → name `ClozeForge` → **Create**,
+   and make sure it's selected.
+2. Turn on the Drive API: <https://console.cloud.google.com/apis/library/drive.googleapis.com> → **Enable**.
+3. Sign-in screen: <https://console.cloud.google.com/auth/overview> → **Get started**
+   - App name `ClozeForge`, your email → **Next** → Audience **External** → **Next** → your email → agree → **Create**.
+   - **Data access** → **Add or remove scopes** → search `drive.file` → tick `…/auth/drive.file` → **Update** → **Save**.
+   - **Audience** → **Publish app** → **Confirm**, so anyone can sign in. (`drive.file` is a non-sensitive scope, so
+     Google doesn't require a review. If you'd rather keep it in *Testing*, add each user's Gmail under *Test users*.)
+4. **Clients** → **Create client** → type **Web application** → name `ClozeForge`
+   - **Authorized JavaScript origins**: `https://awe369.github.io`
+   - **Authorized redirect URIs**: `https://lmagcfmilnehgfjbcepfnigdhhoiieae.chromiumapp.org/`
+     (the extension's fixed ID, set by `"key"` in `manifest.json`)
+   - **Create** and copy the **Client ID** (`….apps.googleusercontent.com`). It is not a secret; no client secret is needed.
+5. Paste it into `extension/lib/google-config.js` (`GOOGLE_CLIENT_ID = '…'`) and push. Privacy page for the
+   consent screen, if asked: `https://awe369.github.io/revise-srs/cloze/privacy.html`.
+
+Until a client ID is set, everything keeps using GitHub as before.
+
+**For other people:** download this repo's ZIP → `chrome://extensions` → Developer mode → *Load unpacked* →
+`extension` folder → **Sign in with Google** in the page that opens. Review at
+`https://awe369.github.io/revise-srs/cloze/` and sign in there with the same Google account.
+
 ## Making cards
 
 Select text on any page, then either click the floating **[…] Cloze** button, right-click → *Make cloze card*,
@@ -65,7 +93,11 @@ Keyboard on the review page: **Space** reveal · **1–4** grade · **O** open s
 
 ## Storage & sync
 
-All cards live in one JSON file, `data/cloze.json` on `main` (next to Revise's `data/srs.json`; branch and path
+**Google Drive** (default once set up): one JSON file per person, `ClozeForge/cloze-cards.json` in their own Drive.
+Writes re-check the file's version right before uploading and retry on a change. Switching from GitHub to Drive
+copies your existing cards across on the first sign-in (Settings also has *Copy them from GitHub*).
+
+**GitHub**: all cards live in one JSON file, `data/cloze.json` on `main` (next to Revise's `data/srs.json`; branch and path
 can be changed in the extension options and the Cloze settings). Every write is read → merge → write with the file's
 SHA, retried on conflict. The merge is per card (newest edit wins) and per cloze (newest review wins, review logs
 are unioned), so the extension, the site and several devices can all work offline and sync safely.

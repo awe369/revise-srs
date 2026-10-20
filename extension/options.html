@@ -6,51 +6,66 @@
 <link rel="stylesheet" href="ui.css">
 <style>
   main { max-width: 640px; margin: 40px auto; padding: 0 16px 60px; }
-  .actions { display: flex; gap: 10px; margin-top: 18px; }
+  .actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0 14px; }
+  .opt { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; margin: 0; font-weight: 400; font-size: 13px; color: var(--muted); }
+  .opt b { display: block; color: var(--text); font-size: 14px; margin-bottom: 2px; }
+  .opt input { position: absolute; opacity: 0; }
+  .opt:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .opt:has(input:disabled) { opacity: .55; cursor: not-allowed; }
+  .signed { display: flex; align-items: center; gap: 10px; font-size: 14px; }
 </style>
 </head>
 <body>
 <main>
   <h1><span class="logo">[…]</span> ClozeForge</h1>
-  <p class="muted">Cards you make on any website are saved to <code>data/cloze.json</code> in your <b>revise-srs</b> repo and reviewed in the <b>Cloze</b> tab of your Revise app. Usually you only need to paste the token below.</p>
+  <p class="muted">Make cloze cards on any website. Choose where your cards are saved — each person's cards go to their own storage.</p>
 
-  <form class="card" id="form">
-    <div class="row">
-      <div><label for="owner">GitHub user / org</label><input type="text" id="owner" placeholder="awe369" required></div>
-      <div><label for="repo">Repository</label><input type="text" id="repo" placeholder="revise-srs" required></div>
+  <div class="card">
+    <div class="choice" role="radiogroup" aria-label="Where to save cards">
+      <label class="opt"><input type="radio" name="backend" value="drive"><b>Google Drive</b>Your own Drive · just sign in</label>
+      <label class="opt"><input type="radio" name="backend" value="github"><b>GitHub</b>A repo you own · needs a token</label>
     </div>
-    <div class="row">
-      <div><label for="branch">Branch</label><input type="text" id="branch" placeholder="main"></div>
-      <div><label for="path">File path</label><input type="text" id="path" placeholder="data/cloze.json"></div>
-    </div>
-    <label for="token">Personal access token <span class="muted">— stored only on this device</span></label>
-    <input type="password" id="token" placeholder="github_pat_…" autocomplete="off">
-    <label for="siteUrl">Review site URL <span class="muted">(leave empty for https://awe369.github.io/revise-srs/cloze/)</span></label>
+
+    <section id="driveBox">
+      <p class="muted" id="driveNotReady" hidden>Google sign-in isn't set up in this copy of the extension yet (no client ID in <code>lib/google-config.js</code>). Use GitHub for now.</p>
+      <div id="driveReady">
+        <p class="muted" style="margin-top:0">Cards are saved to <code>ClozeForge/cloze-cards.json</code> in your Google Drive. The extension can only see files it created — never the rest of your Drive.</p>
+        <div class="signed" id="signedIn" hidden><span>✅ Signed in as <b id="gemail"></b></span><button class="btn" type="button" id="gout">Sign out</button></div>
+        <button class="btn primary" type="button" id="gin"><span class="g">G</span> Sign in with Google</button>
+      </div>
+    </section>
+
+    <form id="form" hidden>
+      <div class="row">
+        <div><label for="owner">GitHub user / org</label><input type="text" id="owner" placeholder="awe369"></div>
+        <div><label for="repo">Repository</label><input type="text" id="repo" placeholder="revise-srs"></div>
+      </div>
+      <div class="row">
+        <div><label for="branch">Branch</label><input type="text" id="branch" placeholder="main"></div>
+        <div><label for="path">File path</label><input type="text" id="path" placeholder="data/cloze.json"></div>
+      </div>
+      <label for="token">Personal access token <span class="muted">— stored only on this device</span></label>
+      <input type="password" id="token" placeholder="github_pat_…" autocomplete="off">
+      <div class="actions"><button class="btn primary" type="submit">Save &amp; test connection</button></div>
+      <p class="muted" style="font-size:13px">Token: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a> → only this repo → Contents: Read and write.</p>
+    </form>
+    <div class="msg" id="msg" role="status"></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <label for="siteUrl" style="margin-top:0">Review site <span class="muted">(leave empty for https://awe369.github.io/revise-srs/cloze/)</span></label>
     <input type="url" id="siteUrl" placeholder="">
     <label class="check"><input type="checkbox" id="floatingButton"> Show the “Cloze” button when I select text</label>
-
-    <div class="actions">
-      <button class="btn primary" type="submit">Save &amp; test connection</button>
-      <button class="btn" type="button" id="openSite">Open review site ↗</button>
-    </div>
-    <div class="msg" id="msg" role="status"></div>
-  </form>
-
-  <h2>Create the token (one minute)</h2>
-  <ol>
-    <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Fine-grained token</a>.</li>
-    <li><b>Repository access</b>: Only select repositories → pick your repo.</li>
-    <li><b>Permissions → Contents</b>: Read and write. Nothing else is needed.</li>
-    <li>Generate, copy, paste it above.</li>
-  </ol>
+    <div class="actions"><button class="btn" type="button" id="openSite">Open review site ↗</button></div>
+  </div>
 
   <h2>How to use</h2>
   <ol>
     <li>Select text on any page → click the <b>[…] Cloze</b> button, right-click → <i>Make cloze card</i>, or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>.</li>
     <li>Click words in the preview to hide them. Each number (<code>c1</code>, <code>c2</code>…) becomes its own review.</li>
-    <li>Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save. Review on your site — click a card's source to jump to the exact sentence.</li>
+    <li>Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save. Review on the site (sign in there with the same Google account) — open a card's source to quiz yourself on the original page.</li>
   </ol>
-  <p class="muted">Heads-up: if the repository is public, your cards are public too. Use a private repo for private notes (the review site then needs the token to read them).</p>
 </main>
 <script type="module" src="options.js"></script>
 </body>

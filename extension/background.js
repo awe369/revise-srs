@@ -1,7 +1,9 @@
-// Service worker: context menu, keyboard command, offline outbox and GitHub sync.
+// Service worker: context menu, keyboard command, offline outbox and sync (Google Drive or GitHub).
 
 import { getConfig, siteUrlFor } from './config.js';
 import { GitHubStore } from './lib/github.js';
+import { DriveStore } from './lib/drive.js';
+import { getGoogleToken, dropGoogleToken, signInGoogle, signOutGoogle } from './google-auth.js';
 import { createCard, emptyDeck, items, mergeDecks } from './lib/deck.js';
 
 // ---------- menus & commands ----------
@@ -70,9 +72,15 @@ function sync() {
   return syncing;
 }
 
+export function storeFor(cfg) {
+  return cfg.backend === 'drive'
+    ? new DriveStore({ getToken: () => getGoogleToken(false), onAuthError: dropGoogleToken })
+    : new GitHubStore(cfg);
+}
+
 async function doSync() {
   const cfg = await getConfig();
-  const store = new GitHubStore(cfg);
+  const store = storeFor(cfg);
   const { outbox, deckCache } = await getLocal();
   if (!store.ready) {
     await chrome.storage.local.set({ lastError: 'Not connected — open the extension options to add your GitHub repo and token.' });
@@ -81,9 +89,11 @@ async function doSync() {
   try {
     const local = emptyDeck();
     for (const card of outbox) local.cards[card.id] = card;
-    const merged = outbox.length
-      ? await store.sync(local, outbox.length === 1 ? `Add card: ${outbox[0].source?.title || outbox[0].id}`.slice(0, 120) : `Add ${outbox.length} cards`)
+    // Pushing the cached deck too means switching storage (GitHub → Drive) carries every card across.
+    const merged = outbox.length || (deckCache && cfg.backend !== deckCache.backend)
+      ? await store.sync(mergeDecks(deckCache, local), outbox.length === 1 ? `Add card: ${outbox[0].source?.title || outbox[0].id}`.slice(0, 120) : `Add ${outbox.length || 'cached'} cards`)
       : mergeDecks(deckCache, (await store.load()).deck);
+    merged.backend = cfg.backend;
     // Only drop what was actually written (more may have been queued meanwhile).
     const sent = new Set(outbox.map((c) => c.id));
     const { outbox: now = [] } = await chrome.storage.local.get('outbox');
@@ -130,7 +140,9 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
       case 'status': {
         const cfg = await getConfig();
         const local = await getLocal();
-        return { configured: !!(cfg.owner && cfg.repo && cfg.token), siteUrl: siteUrlFor(cfg), ...local };
+        const { gsignedIn = false, gemail = '' } = await chrome.storage.local.get(['gsignedIn', 'gemail']);
+        const configured = cfg.backend === 'drive' ? gsignedIn : !!(cfg.owner && cfg.repo && cfg.token);
+        return { configured, backend: cfg.backend, gemail, siteUrl: siteUrlFor(cfg), ...local };
       }
       case 'sync':
         return sync();
@@ -161,6 +173,17 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
         if (got[key]) await chrome.storage.session.remove(key); // one-shot: a reload shows the page normally
         return got[key] || null;
       }
+      case 'google-signin': {
+        await signInGoogle();
+        await chrome.storage.sync.set({ backend: 'drive' });
+        const user = await storeFor({ backend: 'drive' }).test().catch(() => ({}));
+        if (user.emailAddress) await chrome.storage.local.set({ gemail: user.emailAddress });
+        const res = await sync();
+        return { ...res, user };
+      }
+      case 'google-signout':
+        await signOutGoogle();
+        return { ok: true };
       case 'config':
         return getConfig().then(({ token, ...rest }) => rest);
       default:
