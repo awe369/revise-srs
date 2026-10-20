@@ -25,13 +25,19 @@ async function render() {
   $('new').textContent = fresh;
   $('total').textContent = total;
   $('sync').textContent = st.outbox.length ? `${st.outbox.length} waiting to sync` : ago(st.lastSync);
-  const warn = !st.configured ? 'Not connected yet — open Settings to link your GitHub repo.' : st.lastError;
+  const needGoogle = st.backend === 'drive' && (!st.configured || /sign in/i.test(st.lastError));
+  const warn = needGoogle ? 'Sign in with Google to save your cards in your own Google Drive.'
+    : !st.configured ? 'Not connected yet — open Settings to choose where to save cards.' : st.lastError;
   $('warn').hidden = !warn;
   $('warn').textContent = warn || '';
+  $('google').hidden = !needGoogle;
+  $('where').textContent = st.backend === 'drive' ? (st.gemail ? `Google Drive · ${st.gemail}` : 'Google Drive') : 'GitHub';
 }
 
 $('review').addEventListener('click', async () => { await chrome.runtime.sendMessage({ type: 'open-review' }); window.close(); });
 $('make').addEventListener('click', async () => { await chrome.runtime.sendMessage({ type: 'open-editor-active' }); window.close(); });
+// The popup closes when Google's sign-in window opens; the background page finishes the sign-in.
+$('google').addEventListener('click', () => { chrome.runtime.sendMessage({ type: 'google-signin' }); });
 $('syncNow').addEventListener('click', async () => {
   $('sync').textContent = 'syncing…';
   await chrome.runtime.sendMessage({ type: 'sync' });

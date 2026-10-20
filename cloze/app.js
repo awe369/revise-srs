@@ -3,13 +3,15 @@ import { renderCloze, renderAll, escapeHtml, stripCloze, clozeNumbers } from '..
 import { schedule, preview, withDefaults, intervalForStep, formatDays, startOfDay, DAY, GRADES, DEFAULT_SETTINGS } from '../extension/lib/srs.js';
 import { emptyDeck, createCard, editCard, items, mergeDecks, safeUrl, syncItems } from '../extension/lib/deck.js';
 import { GitHubStore, loadPublic } from '../extension/lib/github.js';
+import { DriveStore, DriveError } from '../extension/lib/drive.js';
+import { GOOGLE_CLIENT_ID, DRIVE_SCOPE, googleReady } from '../extension/lib/google-config.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const view = $('#view');
 
 // =============================================================== config & local cache
 
-const LS = { cfg: 'cf.cfg', token: 'cf.token', deck: 'cf.deck', dirty: 'cf.dirty' };
+const LS = { cfg: 'cf.cfg', token: 'cf.token', deck: 'cf.deck', dirty: 'cf.dirty', gtoken: 'cf.gtoken', gemail: 'cf.gemail', gsigned: 'cf.gsigned' };
 const ls = {
   get(k, fb = null) { try { const v = localStorage.getItem(k) ?? sessionStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch { return fb; } },
   set(k, v, session = false) {
@@ -38,6 +40,7 @@ function loadCfg() {
     ...detectRepo(), ...(reviseCfg().owner ? { owner: reviseCfg().owner, repo: reviseCfg().repo } : {}),
     branch: 'main', path: 'data/cloze.json', ...ls.get(LS.cfg, {}),
     token: ls.get(LS.token, '') || reviseCfg().token || '',
+    backend: ls.get(LS.cfg, {})?.backend || (googleReady() ? 'drive' : 'github'),
   };
 }
 
@@ -45,7 +48,16 @@ let cfg = loadCfg();
 let deck = ls.get(LS.deck) || emptyDeck();
 let dirty = !!ls.get(LS.dirty, false);
 let edits = 0; // bumps on every local change, so a push can tell if more happened meanwhile
-const store = () => new GitHubStore(cfg);
+const isDrive = () => cfg.backend === 'drive';
+const googleToken = () => { const t = ls.get(LS.gtoken); return t && t.exp > Date.now() + 60_000 ? t.token : null; };
+/** Can this page save to its storage right now? (else changes wait in this browser) */
+const canWrite = () => (isDrive() ? !!googleToken() : !!cfg.token);
+const store = () => (isDrive()
+  ? new DriveStore({
+    getToken: async () => googleToken() || Promise.reject(new DriveError(401, 'Sign in with Google to sync.')),
+    onAuthError: () => ls.del(LS.gtoken),
+  })
+  : new GitHubStore(cfg));
 const settings = () => withDefaults(deck.settings);
 
 // =============================================================== sync
@@ -72,7 +84,7 @@ function changed() {
   refreshBadge();
   clearTimeout(syncTimer);
   syncTimer = setTimeout(sync, 2500);
-  if (!cfg.token) setSync('', 'Saved on this device');
+  if (!canWrite()) setSync('', 'Saved on this device');
 }
 
 async function sync() {
@@ -80,8 +92,13 @@ async function sync() {
   syncing = (async () => {
     clearTimeout(syncTimer);
     try {
+      if (isDrive() && !googleToken()) {
+        setSync('err', 'Sign in to sync');
+        signInBanner();
+        return;
+      }
       setSync('busy', 'Syncing…');
-      if (!cfg.token) {
+      if (!isDrive() && !cfg.token) {
         if (!cfg.owner || !cfg.repo) { setSync('err', 'Not connected'); return; }
         const remote = await loadPublic(cfg);
         deck = mergeDecks(remote, deck);
@@ -99,7 +116,8 @@ async function sync() {
     } catch (e) {
       setSync('err', navigator.onLine ? 'Sync failed' : 'Offline');
       syncBtn.title = e.message;
-      if (e.status === 401 || e.status === 403 || e.status === 404) showBanner(`GitHub said: ${escapeHtml(e.message)} — check <a href="#/settings">Settings</a>.`);
+      if (isDrive() && e.status === 401) { ls.del(LS.gtoken); signInBanner(true); }
+      else if (e.status === 401 || e.status === 403 || e.status === 404) showBanner(`${isDrive() ? 'Google Drive' : 'GitHub'} said: ${escapeHtml(e.message)} — check <a href="#/settings">Settings</a>.`);
     } finally {
       refreshBadge();
       // Re-render with fresh data, but never swap the card under the user's eyes or wipe a form being typed in.
@@ -113,7 +131,7 @@ async function sync() {
 syncBtn.addEventListener('click', sync);
 addEventListener('online', sync);
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden' && dirty && cfg.token) sync();
+  if (document.visibilityState === 'hidden' && dirty && canWrite()) sync();
   if (document.visibilityState === 'visible') sync();
 });
 
@@ -122,6 +140,58 @@ function showBanner(html) {
   b.innerHTML = html;
   b.hidden = !html;
 }
+
+// =============================================================== Google sign-in (website)
+// Google Identity Services token flow: a popup the first time, then it closes by itself.
+// Tokens last an hour; after that one click on "Continue" renews it.
+
+let gisLoading = null;
+function loadGis() {
+  gisLoading ??= new Promise((resolve, reject) => {
+    const sc = Object.assign(document.createElement('script'), { src: 'https://accounts.google.com/gsi/client', async: true });
+    sc.onload = resolve;
+    sc.onerror = () => { gisLoading = null; reject(new Error('Could not load Google sign-in')); };
+    document.head.appendChild(sc);
+  });
+  return gisLoading;
+}
+
+async function googleSignIn() {
+  await loadGis();
+  return new Promise((resolve) => {
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: DRIVE_SCOPE,
+      login_hint: ls.get(LS.gemail, '') || undefined,
+      callback: async (r) => {
+        if (r.error || !r.access_token) { toast(`Google sign-in failed: ${r.error || 'no token'}`); return resolve(false); }
+        ls.set(LS.gtoken, { token: r.access_token, exp: Date.now() + (Number(r.expires_in) || 3600) * 1000 });
+        ls.set(LS.gsigned, true);
+        try { const u = await store().test(); if (u.emailAddress) ls.set(LS.gemail, u.emailAddress); } catch {}
+        showBanner('');
+        await sync();
+        resolve(true);
+      },
+      error_callback: (e) => { toast(e?.type === 'popup_closed' ? 'Sign-in window was closed' : 'Google sign-in did not finish'); resolve(false); },
+    });
+    client.requestAccessToken({ prompt: ls.get(LS.gsigned) ? '' : 'select_account' });
+  });
+}
+
+function googleSignOut() {
+  const t = ls.get(LS.gtoken);
+  if (t?.token) window.google?.accounts.oauth2.revoke(t.token, () => {});
+  ls.del(LS.gtoken); ls.del(LS.gsigned); ls.del(LS.gemail);
+}
+
+function signInBanner(expired = false) {
+  if (!googleReady()) return showBanner('Google Drive sign-in is not set up on this site yet. Use GitHub in <a href="#/settings">Settings</a>.');
+  showBanner(expired || ls.get(LS.gsigned)
+    ? `Your Google session ended — reviews are kept on this device until you <button class="linkbtn" data-gsignin>continue with Google</button>.`
+    : `<b>Save your cards in your own Google Drive.</b> <button class="linkbtn" data-gsignin>Sign in with Google</button> — the site only sees the file it creates, never the rest of your Drive.`);
+}
+
+$('#banner').addEventListener('click', (e) => { if (e.target.closest('[data-gsignin]')) googleSignIn(); });
 
 // =============================================================== review queue
 
@@ -620,6 +690,24 @@ function renderSettings() {
     <div class="settings">
       <h1>Settings</h1>
       <div class="panel">
+        <h2>Where your cards are saved</h2>
+        <div class="choice" role="radiogroup" aria-label="Storage">
+          <label class="opt"><input type="radio" name="sBackend" value="drive" ${isDrive() ? 'checked' : ''} ${googleReady() ? '' : 'disabled'}><b>Google Drive</b><span>Your own Drive · sign in with Google</span></label>
+          <label class="opt"><input type="radio" name="sBackend" value="github" ${isDrive() ? '' : 'checked'}><b>GitHub</b><span>A repo you own · needs a token</span></label>
+        </div>
+        ${isDrive() ? `
+          <p class="muted">Cards live in <code>ClozeForge/cloze-cards.json</code> in your Google Drive. This site can only see files it created — never the rest of your Drive. Use the same Google account in the extension.</p>
+          <div class="actions">
+            ${ls.get(LS.gsigned)
+              ? `<span>✅ Signed in${ls.get(LS.gemail) ? ` as <b>${escapeHtml(ls.get(LS.gemail))}</b>` : ''}</span>
+                 ${googleToken() ? '' : '<button class="btn primary" id="sGin">Continue with Google</button>'}
+                 <button class="btn ghost" id="sGout">Sign out</button>`
+              : '<button class="btn primary" id="sGin"><span class="g">G</span> Sign in with Google</button>'}
+          </div>
+          ${cfg.owner && cfg.repo ? `<p class="muted" style="font-size:13px;margin-top:14px">Had cards on GitHub before? <button class="linkbtn" id="sImportGh">Copy them from ${escapeHtml(cfg.owner)}/${escapeHtml(cfg.repo)}</button> into Drive.</p>` : ''}` : ''}
+        ${!googleReady() ? '<p class="muted" style="font-size:13px">Google Drive needs a Google client ID in <code>extension/lib/google-config.js</code> (see the README).</p>' : ''}
+      </div>
+      <div class="panel" ${isDrive() ? 'hidden' : ''}>
         <h2>GitHub storage</h2>
         <p class="muted" style="margin-top:-6px">Cards live in <code>${escapeHtml(cfg.path || 'data/cloze.json')}</code> on the <code>${escapeHtml(cfg.branch || 'main')}</code> branch. ${reviseCfg().token && cfg.token === reviseCfg().token ? 'Using the token from your Revise app.' : 'Use the same values as in the extension.'}</p>
         <div class="grid2">
@@ -653,7 +741,7 @@ function renderSettings() {
         <ol class="steps">
           <li>Download this repository (${extUrl ? `<a href="${escapeHtml(extUrl)}" target="_blank" rel="noopener">extension folder</a>` : 'the <code>extension</code> folder'}) — Code → Download ZIP, then unzip.</li>
           <li>Open <code>chrome://extensions</code>, turn on <b>Developer mode</b>, click <b>Load unpacked</b> and choose the <code>extension</code> folder.</li>
-          <li>In the extension's options, enter the same repo and a token. Then select text anywhere and press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>.</li>
+          <li>In the extension's settings, ${isDrive() ? 'choose <b>Google Drive</b> and sign in with the same Google account' : 'enter the same repo and a token'}. Then select text anywhere and press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>.</li>
         </ol>
       </div>
 
@@ -677,6 +765,25 @@ function renderSettings() {
   $('#sLadder').addEventListener('input', ladderPreview);
   $('#sGrowth').addEventListener('input', ladderPreview);
   ladderPreview();
+
+  view.querySelectorAll('input[name="sBackend"]').forEach((r) => r.addEventListener('change', () => {
+    ls.set(LS.cfg, { ...ls.get(LS.cfg, {}), backend: r.value });
+    cfg = loadCfg();
+    showBanner('');
+    renderSettings();
+    sync();
+  }));
+  $('#sGin')?.addEventListener('click', async () => { if (await googleSignIn()) renderSettings(); });
+  $('#sGout')?.addEventListener('click', () => { googleSignOut(); setSync('', 'Signed out'); renderSettings(); signInBanner(); });
+  $('#sImportGh')?.addEventListener('click', async () => {
+    try {
+      const gh = cfg.token && !isDrive() ? (await new GitHubStore(cfg).load()).deck : await loadPublic({ owner: cfg.owner, repo: cfg.repo, branch: 'main', path: 'data/cloze.json' });
+      const before = Object.values(deck.cards).filter((c) => !c.deleted).length;
+      deck = mergeDecks(deck, gh);
+      changed();
+      toast(`Copied ${Object.values(deck.cards).filter((c) => !c.deleted).length - before} cards from GitHub`);
+    } catch (e) { toast(`Could not read GitHub: ${e.message}`); }
+  });
 
   $('#sConnect').addEventListener('click', async () => {
     const msg = $('#sMsg');
@@ -801,7 +908,9 @@ addEventListener('hashchange', () => { render(); view.focus({ preventScroll: tru
 applyTheme();
 render();
 refreshBadge();
-if (!cfg.owner || !cfg.repo) showBanner('Welcome! Open <a href="#/settings">Settings</a> to connect your GitHub repository.');
+if (!reviseCfg().token) $('.back')?.setAttribute('hidden', ''); // the "‹ Revise" link is only for the Revise owner
+if (isDrive()) { if (!googleToken()) signInBanner(); if (googleReady()) loadGis().catch(() => {}); }
+else if (!cfg.owner || !cfg.repo) showBanner('Welcome! Open <a href="#/settings">Settings</a> to connect your GitHub repository.');
 else if (!cfg.token) showBanner('Read-only mode: reviews are kept on this device. Add a token in <a href="#/settings">Settings</a> to sync them to GitHub.');
 sync();
 setInterval(() => { refreshBadge(); if (document.visibilityState === 'visible') sync(); }, 5 * 60_000);

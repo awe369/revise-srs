@@ -1,6 +1,9 @@
-// Extension settings. Repo details sync across your Chrome profiles; the token stays on this device.
+// Extension settings. Repo details sync across your Chrome profiles; tokens stay on this device.
+
+import { googleReady } from './lib/google-config.js';
 
 export const DEFAULT_CONFIG = {
+  backend: '',          // 'drive' | 'github'; empty = Drive when Google sign-in is set up
   owner: 'awe369',
   repo: 'revise-srs',
   branch: 'main',
@@ -14,7 +17,8 @@ export async function getConfig() {
     chrome.storage.sync.get(DEFAULT_CONFIG),
     chrome.storage.local.get({ token: '' }),
   ]);
-  return { ...DEFAULT_CONFIG, ...sync, token: local.token };
+  const backend = sync.backend || (googleReady() ? 'drive' : 'github');
+  return { ...DEFAULT_CONFIG, ...sync, backend, token: local.token };
 }
 
 export async function setConfig({ token, ...rest }) {

@@ -135,3 +135,59 @@ test('GitHubStore.sync creates branch, writes, and retries on conflict', async (
   assert.equal(onDisk.cards[c1.id].text, 'Ünïcode {{c1::ok}} ✓');
   assert.ok(onDisk.cards[c2.id]);
 });
+
+test('DriveStore creates folder + file, merges, and re-reads when the file changed meanwhile', async () => {
+  const { DriveStore } = await import('../extension/lib/drive.js');
+  const files = {}; // id → { name, mimeType, parents, version, content }
+  let nextId = 1, sneakyWrite = false, tokenCalls = 0;
+  globalThis.fetch = async (url, opts = {}) => {
+    const u = new URL(url), method = opts.method || 'GET';
+    const json = (status, body) => new Response(JSON.stringify(body), { status });
+    assert.equal(opts.headers.Authorization, 'Bearer tok');
+    if (u.pathname === '/drive/v3/files' && method === 'GET') {
+      const q = u.searchParams.get('q');
+      const name = q.match(/name = '([^']+)'/)[1], folder = q.includes('folder');
+      return json(200, { files: Object.entries(files).filter(([, f]) => f.name === name && (f.mimeType === 'application/vnd.google-apps.folder') === folder).map(([id, f]) => ({ id, version: String(f.version) })) });
+    }
+    if (u.pathname === '/drive/v3/files' && method === 'POST') { const id = 'f' + nextId++; files[id] = { ...JSON.parse(opts.body), version: 1 }; return json(200, { id }); }
+    if (u.pathname === '/upload/drive/v3/files' && method === 'POST') {
+      const parts = opts.body.split(/--cf\w+/);
+      const meta = JSON.parse(parts[1].split('\r\n\r\n')[1]);
+      const content = parts[2].split('\r\n\r\n')[1].replace(/\r\n$/, '');
+      const id = 'f' + nextId++; files[id] = { ...meta, version: 1, content }; return json(200, { id });
+    }
+    const m = u.pathname.match(/\/files\/(\w+)$/);
+    if (m && method === 'PATCH') { files[m[1]].content = opts.body; files[m[1]].version++; return json(200, { id: m[1] }); }
+    if (m && u.searchParams.get('alt') === 'media') {
+      const body = files[m[1]].content;
+      if (sneakyWrite) { // another device writes right after we read
+        sneakyWrite = false;
+        const d = JSON.parse(body); const c = createCard({ text: '{{c1::other device}}' }); d.cards[c.id] = c;
+        files[m[1]].content = JSON.stringify(d); files[m[1]].version++;
+      }
+      return new Response(body, { status: 200 });
+    }
+    if (m) return json(200, { id: m[1], version: String(files[m[1]].version) });
+    if (u.pathname === '/drive/v3/about') return json(200, { user: { emailAddress: 'me@example.com' } });
+    return json(500, { error: { message: `unexpected ${method} ${url}` } });
+  };
+  const store = new DriveStore({ getToken: async () => { tokenCalls++; return 'tok'; } });
+  assert.equal((await store.test()).emailAddress, 'me@example.com');
+  // empty deck → no file created
+  await store.sync(emptyDeck());
+  assert.equal(Object.keys(files).length, 0);
+  const c1 = createCard({ text: 'हिंदी {{c1::ठीक}} ✓' });
+  await store.sync({ ...emptyDeck(), cards: { [c1.id]: c1 } });
+  const folder = Object.values(files).find((f) => f.mimeType === 'application/vnd.google-apps.folder');
+  const file = Object.values(files).find((f) => f.name === 'cloze-cards.json');
+  assert.equal(folder.name, 'ClozeForge');
+  assert.deepEqual(file.parents, [Object.keys(files).find((id) => files[id] === folder)]);
+  sneakyWrite = true;
+  const c2 = createCard({ text: '{{c1::second}}' });
+  const merged = await store.sync({ ...emptyDeck(), cards: { [c2.id]: c2 } });
+  const onDisk = JSON.parse(file.content);
+  assert.equal(Object.keys(onDisk.cards).length, 3, 'own two cards + the other device\'s card');
+  assert.equal(Object.keys(merged.cards).length, 3);
+  assert.equal(onDisk.cards[c1.id].text, 'हिंदी {{c1::ठीक}} ✓');
+  assert.ok(tokenCalls > 0);
+});

@@ -224,3 +224,13 @@ dialog .foot .sp { flex: 1; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 #view:focus { outline: none; }
+
+/* storage choice */
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.opt { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; font-size: 13px; color: var(--muted); position: relative; }
+.opt b { display: block; color: var(--text); font-size: 15px; margin-bottom: 2px; }
+.opt input { position: absolute; opacity: 0; }
+.opt:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.opt:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+.linkbtn { background: none; border: 0; padding: 0; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.g { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #fff; color: #4285f4; font: 700 13px Arial, sans-serif; }

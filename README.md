@@ -50,8 +50,10 @@ and review them in the **Cloze** tab (bottom right) — `https://<your-username>
   sentence; click more words to hide them too. **Ctrl+Enter** saves to `data/cloze.json`.
 - Schedule: **1 → 3 → 7 → 15 → 30 → 60 → 120 → 240 days**, then doubling. *Again* / *Hard* / *Good* / *Easy*.
 - **Open source** opens the original page at the exact sentence — with the answer **still hidden there** (blue boxes; click one to peek).
-- The Cloze page uses the same token as Revise — no second setup. Due cloze cards are added to the morning
-  Telegram / WhatsApp reminder.
+- **Storage:** your own **Google Drive** (sign in with Google — anyone can use it, each person's cards go to their
+  own Drive) or this GitHub repo (uses the same token as Revise; due cloze cards then also appear in the morning
+  Telegram / WhatsApp reminder). Google Drive needs a one-time setup — see
+  [`extension/README.md`](extension/README.md#google-drive-setup-one-time-by-the-site-owner--10-minutes).
 
 **Install the extension:** Code → *Download ZIP* → unzip → `chrome://extensions` → turn on **Developer mode** →
 **Load unpacked** → choose the `extension` folder → paste your token in the page that opens → *Save & test*.

@@ -505,8 +505,12 @@
       };
       try {
         const res = await chrome.runtime.sendMessage({ type: 'save-card', card });
-        if (res?.ok) { toast('Card saved to GitHub ✓'); close(); }
-        else if (res?.id) { toast('Saved offline — will sync when connected', true); close(); }
+        if (res?.ok) { toast('Card saved ✓'); close(); }
+        else if (res?.id) {
+          toast(/sign in/i.test(res.error || '') || !res.error ? 'Saved on this computer — click the extension icon and sign in with Google to sync'
+            : 'Saved offline — will sync when connected', true);
+          close();
+        }
         else throw new Error(res?.error || 'Unknown error');
       } catch (e) {
         status.className = 'status err';
