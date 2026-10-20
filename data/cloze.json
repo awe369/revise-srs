@@ -426,7 +426,7 @@
   },
   "mvgw9td3yhvpxjkang": {
    "createdAt": 1792513527015,
-   "editedAt": 1792513527015,
+   "editedAt": 1792513553829,
    "extra": "",
    "id": "mvgw9td3yhvpxjkang",
    "source": {
@@ -451,7 +451,8 @@
    "tags": [
     "indiankanoon"
    ],
-   "text": "(1)Unless the context otherwise {{c1::requires}}, any reference in any law, to a Magistrate without any qualifying words, Magistrate of the first class or a Magistrate of the second class shall, in relation to any area, be construed as a reference to a Judicial Magistrate of the first class or Judicial Magistrate of the second class, as the case may be, exercising jurisdiction in such area."
+   "text": "(1)Unless the context otherwise {{c1::requires}}, any reference in any law, to a Magistrate without any qualifying words, Magistrate of the first class or a Magistrate of the second class shall, in relation to any area, be construed as a reference to a Judicial Magistrate of the first class or Judicial Magistrate of the second class, as the case may be, exercising jurisdiction in such area.",
+   "deleted": true
   }
  }
 }
