@@ -423,6 +423,35 @@
     "wikipedia"
    ],
    "text": "Ganweriwala was the {{c1::5th}} largest city[9] within the Indus Valley Civilisation and is believed to have been a major centre from 2600 to 1900 BC."
+  },
+  "mvgw9td3yhvpxjkang": {
+   "createdAt": 1792513527015,
+   "editedAt": 1792513527015,
+   "extra": "",
+   "id": "mvgw9td3yhvpxjkang",
+   "source": {
+    "context": "(1)Unless the context otherwise requires, any reference in any law, to a Magistrate without any qualifying words, Magistrate of the first class or a Magistrate of the second class shall, in relation to any area, be construed as a reference to a Judicial Magistrate of the first class or Judicial Magistrate of the second class, as the case may be, exercising jurisdiction in such area.",
+    "domain": "indiankanoon.org",
+    "favicon": "https://indiankanoon.org/favicon.ico",
+    "link": "https://indiankanoon.org/doc/91117739/#:~:text=the%20context%20otherwise-,requires,-%2C%20any%20reference",
+    "quote": "requires",
+    "title": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+    "url": "https://indiankanoon.org/doc/91117739/"
+   },
+   "srs": {
+    "1": {
+     "due": 1792513527015,
+     "lapses": 0,
+     "last": null,
+     "log": [],
+     "reps": 0,
+     "step": -1
+    }
+   },
+   "tags": [
+    "indiankanoon"
+   ],
+   "text": "(1)Unless the context otherwise {{c1::requires}}, any reference in any law, to a Magistrate without any qualifying words, Magistrate of the first class or a Magistrate of the second class shall, in relation to any area, be construed as a reference to a Judicial Magistrate of the first class or Judicial Magistrate of the second class, as the case may be, exercising jurisdiction in such area."
   }
  }
 }
