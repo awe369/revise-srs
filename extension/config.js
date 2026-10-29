@@ -10,6 +10,8 @@ export const DEFAULT_CONFIG = {
   path: 'data/cloze.json',
   siteUrl: '',          // review website; derived from owner/repo when empty
   floatingButton: true, // show the "Cloze" pill when text is selected
+  ankiEnabled: false,   // also mirror cards into Anki (AnkiConnect add-on)
+  ankiDeck: 'ClozeForge',
 };
 
 export async function getConfig() {

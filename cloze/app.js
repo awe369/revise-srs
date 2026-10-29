@@ -300,6 +300,7 @@ function route() { return (location.hash.match(/^#\/(\w+)/) || [, 'review'])[1];
 
 function render() {
   const r = route();
+  if (r === 'open') return handleOpen();
   document.querySelectorAll('.tabs a').forEach((a) => a.classList.toggle('on', a.dataset.route === r));
   ({ review: renderReview, cards: renderCards, stats: renderStats, settings: renderSettings }[r] || renderReview)();
 }
@@ -406,6 +407,25 @@ function act(a) {
 // ---------------------------------------------------------------- source page quiz
 // With the extension installed, the source page opens with this card's answer hidden there too.
 // Returns false when the extension isn't there (the caller then opens a plain link).
+
+// Links from Anki's "Quiz on the page" button: #/open/<cardId>?u=<source link>&n=<cloze number>.
+// With the extension, the source opens with the answer hidden; without it, the plain link opens.
+async function handleOpen() {
+  const m = location.hash.match(/^#\/open\/([^?]+)\??(.*)$/);
+  history.replaceState(null, '', '#/review');
+  if (!m) return render();
+  const id = decodeURIComponent(m[1]);
+  const q = new URLSearchParams(m[2]);
+  if (!deck.cards[id] && canWrite()) await sync(); // a card made on another computer
+  const card = deck.cards[id];
+  const n = parseInt(q.get('n'), 10) || (card ? clozeNumbers(card.text)[0] : 1);
+  const link = (card && (safeUrl(card.source?.link) || safeUrl(card.source?.url))) || safeUrl(q.get('u'));
+  // The extension announces itself on this page a moment after load.
+  for (let i = 0; i < 20 && document.documentElement.dataset.clozeforge !== '1'; i++) await new Promise((r) => setTimeout(r, 100));
+  if (card && link && openSource({ card, n })) { render(); toast('Opened the source page with the answer hidden'); return; }
+  if (link) location.replace(link);
+  else render();
+}
 
 function openSource(cur) {
   const link = cur && (safeUrl(cur.card.source?.link) || safeUrl(cur.card.source?.url));

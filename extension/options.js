@@ -90,6 +90,50 @@ $('form').addEventListener('submit', async (ev) => {
   }
 });
 
+// ---------- Anki
+
+const ankiSay = (text, cls = '') => { $('ankiMsg').className = `msg ${cls}`; $('ankiMsg').textContent = text; };
+const when = (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+function ankiReport(st) {
+  if (!st) return ankiSay('');
+  if (st.ok) {
+    const c = st.counts || {};
+    const changed = [c.added && `${c.added} added`, c.updated && `${c.updated} updated`, c.deleted && `${c.deleted} deleted`].filter(Boolean).join(', ');
+    ankiSay(`✅ Anki in sync — ${st.total} notes in “${$('ankiDeck').value || 'ClozeForge'}”${changed ? ` (${changed})` : ''} · ${when(st.at)}`, 'ok');
+  } else ankiSay(st.code === 'offline' ? `Anki isn't reachable — open Anki (with AnkiConnect installed). Cards will be added when it's open. (${when(st.at)})` : st.error, 'err');
+}
+
+async function renderAnki() {
+  const c = await getConfig();
+  $('ankiDeck').value = c.ankiDeck || 'ClozeForge';
+  $('ankiOn').hidden = c.ankiEnabled;
+  $('ankiSyncNow').hidden = $('ankiLadder').hidden = $('ankiOff').hidden = !c.ankiEnabled;
+  if (c.ankiEnabled) ankiReport((await chrome.storage.local.get('ankiStatus')).ankiStatus);
+}
+renderAnki();
+
+$('ankiOn').addEventListener('click', async () => {
+  ankiSay('Connecting to Anki… (look for the “Allow?” pop-up in Anki)');
+  ankiReport(await chrome.runtime.sendMessage({ type: 'anki-enable', deck: $('ankiDeck').value.trim() || 'ClozeForge' }));
+  renderAnki();
+});
+$('ankiSyncNow').addEventListener('click', async () => {
+  ankiSay('Syncing…');
+  await chrome.storage.sync.set({ ankiDeck: $('ankiDeck').value.trim() || 'ClozeForge' });
+  ankiReport(await chrome.runtime.sendMessage({ type: 'anki-enable' }));
+});
+$('ankiLadder').addEventListener('click', async () => {
+  const r = await chrome.runtime.sendMessage({ type: 'anki-ladder' });
+  if (r?.ok) ankiSay(`✅ Deck “${$('ankiDeck').value || 'ClozeForge'}” now uses the options preset “ClozeForge ladder”: ${r.steps.join(' → ')} days, then ${r.graduate} days. Again = 10 minutes.`, 'ok');
+  else ankiSay(r?.error || 'Could not change the Anki deck options.', 'err');
+});
+$('ankiOff').addEventListener('click', async () => {
+  await chrome.runtime.sendMessage({ type: 'anki-disable' });
+  ankiSay('Anki sync is off. Notes already in Anki stay there.');
+  renderAnki();
+});
+
 // ---------- general
 
 $('floatingButton').addEventListener('change', () => chrome.storage.sync.set({ floatingButton: $('floatingButton').checked }));

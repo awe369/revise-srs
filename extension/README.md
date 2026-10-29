@@ -47,6 +47,31 @@ Until a client ID is set, everything keeps using GitHub as before.
 `extension` folder → **Sign in with Google** in the page that opens. Review at
 `https://awe369.github.io/revise-srs/cloze/` and sign in there with the same Google account.
 
+## Anki
+
+Every card can also live in **Anki**, kept up to date automatically, with a note type that looks like the
+review site (serif text, the blue `[…]` pill, source chip, "From the page" quote, dark mode).
+
+1. Desktop Anki → **Tools → Add-ons → Get Add-ons…** → code **`2055492159`** (AnkiConnect) → restart Anki.
+2. Extension settings → **Anki** → **Connect Anki** (Anki must be open) → click **Yes** in Anki's "Allow?" pop-up.
+3. Optional: **Use my 1 → 3 → 7 → 15 → 30 ladder in Anki** puts the deck on an options preset
+   *ClozeForge ladder* (learning steps 1d 3d 7d 15d 30d 60d 120d 240d, then 480 days; *Again* = 10 minutes).
+
+What happens then (whenever Anki is open; otherwise it catches up the next time it is):
+
+| You do | In Anki |
+|---|---|
+| make a card (extension) | a **ClozeForge** note is added to the deck (default `ClozeForge`), one Anki card per `c1`, `c2`… |
+| edit a card (site or extension) | the note's fields/tags are updated — its Anki review history is kept |
+| delete a card | the note is deleted |
+
+The note type **ClozeForge** has fields `Text, Extra, Context, SourceTitle, SourceLink, OpenUrl, CFId`
+(`CFId` links the note to its card — don't edit it). The back side has **Quiz on the page**: it opens the source
+through the review site, so (with the extension) the answer is hidden on the page too; **Open source** opens it
+directly. Sync is one-way: edit cards in ClozeForge, not in Anki (Anki-side edits are overwritten on the next
+change). Reviews done in Anki stay in Anki — the two apps keep separate schedules. On a phone, the notes reach
+AnkiDroid / AnkiMobile through normal AnkiWeb sync.
+
 ## Making cards
 
 Select text on any page, then either click the floating **[…] Cloze** button, right-click → *Make cloze card*,

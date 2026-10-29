@@ -4,6 +4,7 @@ import { getConfig, siteUrlFor } from './config.js';
 import { GitHubStore } from './lib/github.js';
 import { DriveStore } from './lib/drive.js';
 import { getGoogleToken, dropGoogleToken, signInGoogle, signOutGoogle } from './google-auth.js';
+import { syncToAnki, applyLadder } from './lib/anki.js';
 import { createCard, emptyDeck, items, mergeDecks } from './lib/deck.js';
 
 // ---------- menus & commands ----------
@@ -13,7 +14,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
     chrome.contextMenus.create({ id: 'cloze', title: 'Make cloze card from “%s”', contexts: ['selection'] });
     chrome.contextMenus.create({ id: 'review', title: 'Open ClozeForge review', contexts: ['action'] });
   });
-  chrome.alarms.create('sync', { periodInMinutes: 15 });
+  chrome.alarms.create('sync', { periodInMinutes: 5 });
   if (reason === 'install') chrome.runtime.openOptionsPage();
   refresh();
 });
@@ -68,8 +69,39 @@ async function getLocal() {
 
 let syncing = null;
 function sync() {
-  syncing ??= doSync().finally(() => { syncing = null; });
+  // Anki is mirrored after every sync (also when the cloud sync failed: queued cards still reach Anki).
+  syncing ??= doSync().then(async (r) => ({ ...r, anki: await ankiSync() })).finally(() => { syncing = null; });
   return syncing;
+}
+
+// ---------- Anki mirror (AnkiConnect)
+
+let ankiRunning = null;
+function ankiSync({ force = false } = {}) {
+  ankiRunning ??= doAnkiSync(force).finally(() => { ankiRunning = null; });
+  return ankiRunning;
+}
+
+async function doAnkiSync(force) {
+  const cfg = await getConfig();
+  if (!cfg.ankiEnabled && !force) return null;
+  const { outbox = [], deckCache = null, ankiState = {} } = await chrome.storage.local.get(['outbox', 'deckCache', 'ankiState']);
+  const local = emptyDeck();
+  for (const card of outbox) local.cards[card.id] = card;
+  try {
+    const { state, counts } = await syncToAnki(mergeDecks(deckCache, local), {
+      deckName: cfg.ankiDeck || 'ClozeForge',
+      siteUrl: siteUrlFor(cfg) || 'https://awe369.github.io/revise-srs/cloze/',
+      state: force ? { ...ankiState, modelVersion: 0 } : ankiState,
+    });
+    const ankiStatus = { ok: true, at: Date.now(), counts, total: Object.keys(state.notes).length };
+    await chrome.storage.local.set({ ankiState: state, ankiStatus });
+    return ankiStatus;
+  } catch (e) {
+    const ankiStatus = { ok: false, at: Date.now(), error: e.message, code: e.code };
+    await chrome.storage.local.set({ ankiStatus });
+    return ankiStatus;
+  }
 }
 
 export function storeFor(cfg) {
@@ -142,7 +174,21 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
         const local = await getLocal();
         const { gsignedIn = false, gemail = '' } = await chrome.storage.local.get(['gsignedIn', 'gemail']);
         const configured = cfg.backend === 'drive' ? gsignedIn : !!(cfg.owner && cfg.repo && cfg.token);
-        return { configured, backend: cfg.backend, gemail, siteUrl: siteUrlFor(cfg), ...local };
+        const { ankiStatus = null } = await chrome.storage.local.get('ankiStatus');
+        return { configured, backend: cfg.backend, gemail, siteUrl: siteUrlFor(cfg), ankiEnabled: cfg.ankiEnabled, ankiStatus, ...local };
+      }
+      case 'anki-enable': {
+        await chrome.storage.sync.set({ ankiEnabled: true, ...(msg.deck ? { ankiDeck: msg.deck } : {}) });
+        return ankiSync({ force: true });
+      }
+      case 'anki-disable':
+        await chrome.storage.sync.set({ ankiEnabled: false });
+        return { ok: true };
+      case 'anki-ladder': {
+        const cfg = await getConfig();
+        const { deckCache } = await chrome.storage.local.get('deckCache');
+        await ankiSync({ force: true }); // makes sure the deck exists first
+        return { ok: true, ...(await applyLadder(cfg.ankiDeck || 'ClozeForge', deckCache?.settings)) };
       }
       case 'sync':
         return sync();

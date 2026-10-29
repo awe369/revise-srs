@@ -191,3 +191,80 @@ test('DriveStore creates folder + file, merges, and re-reads when the file chang
   assert.equal(onDisk.cards[c1.id].text, 'हिंदी {{c1::ठीक}} ✓');
   assert.ok(tokenCalls > 0);
 });
+
+test('syncToAnki adds, skips unchanged, updates edits, deletes, and recovers lost state', async () => {
+  const { syncToAnki, applyLadder, MODEL } = await import('../extension/lib/anki.js');
+  const notes = {}; let nid = 100; const calls = [];
+  const conf = { id: 1, name: 'Default', new: { delays: [1, 10], ints: [1, 4, 0], perDay: 20 }, lapse: { delays: [10] } };
+  let models = [], permission = 'granted';
+  globalThis.fetch = async (url, opts) => {
+    assert.equal(url, 'http://127.0.0.1:8765');
+    const { action, params, version } = JSON.parse(opts.body);
+    assert.equal(version, 6);
+    calls.push(action);
+    const ok = (result) => new Response(JSON.stringify({ result, error: null }));
+    switch (action) {
+      case 'requestPermission': return ok({ permission });
+      case 'modelNames': return ok(models);
+      case 'createModel': assert.equal(params.isCloze, true); models.push(params.modelName); return ok({});
+      case 'createDeck': return ok(1);
+      case 'modelFieldNames': return ok(['Text', 'Extra']);
+      case 'modelFieldAdd': calls.push(`field:${params.fieldName}`); return ok(null);
+      case 'updateModelTemplates': case 'updateModelStyling': return ok(null);
+      case 'notesInfo': return ok(params.notes.map((id) => (notes[id] ? { noteId: id } : {})));
+      case 'findNotes': {
+        const id = params.query.match(/CFId:([^"]+)/)[1];
+        return ok(Object.entries(notes).filter(([, n]) => n.fields.CFId === id).map(([k]) => +k));
+      }
+      case 'addNote': assert.equal(params.note.modelName, MODEL); notes[++nid] = { ...params.note }; return ok(nid);
+      case 'updateNote': notes[params.note.id] = { ...notes[params.note.id], fields: params.note.fields, tags: params.note.tags }; return ok(null);
+      case 'deleteNotes': for (const id of params.notes) delete notes[id]; return ok(null);
+      case 'getDeckConfig': return ok(structuredClone(conf));
+      case 'cloneDeckConfigId': return ok(2);
+      case 'setDeckConfigId': conf.name = 'ClozeForge ladder'; conf.id = 2; return ok(true);
+      case 'saveDeckConfig': Object.assign(conf, params.config); return ok(true);
+      default: return new Response(JSON.stringify({ result: null, error: `unsupported action ${action}` }));
+    }
+  };
+  const a = createCard({ text: 'The {{c1::mitochondria}} <makes> ATP', tags: ['bio logy'],
+    source: { url: 'https://x.org/a', link: 'https://x.org/a#:~:text=mito', title: 'Cell', quote: 'mitochondria', context: 'The mitochondria makes ATP.' } });
+  const b = createCard({ text: '{{c1::Paris}} is the capital of {{c2::France}}' });
+  const deck = { ...emptyDeck(), cards: { [a.id]: a, [b.id]: b } };
+  const site = 'https://me.github.io/r/cloze/';
+
+  let r = await syncToAnki(deck, { siteUrl: site });
+  assert.deepEqual(r.counts, { added: 2, updated: 0, deleted: 0 });
+  const na = Object.values(notes).find((n) => n.fields.CFId === a.id);
+  assert.equal(na.fields.Text, 'The {{c1::mitochondria}} &lt;makes&gt; ATP');
+  assert.equal(na.fields.Context, 'The <mark>mitochondria</mark> makes ATP.');
+  assert.ok(na.fields.OpenUrl.startsWith(`${site}#/open/${a.id}?u=https%3A%2F%2Fx.org`) && na.fields.OpenUrl.endsWith('&amp;n='));
+  assert.deepEqual(na.tags, ['clozeforge', 'bio_logy']);
+  assert.equal(na.deckName, 'ClozeForge');
+
+  r = await syncToAnki(deck, { siteUrl: site, state: r.state });
+  assert.deepEqual(r.counts, { added: 0, updated: 0, deleted: 0 }, 'nothing changed → no writes');
+
+  deck.cards[a.id] = editCard(a, { extra: 'ATP = energy' });
+  deck.cards[b.id] = { ...b, deleted: true, editedAt: Date.now() };
+  r = await syncToAnki(deck, { siteUrl: site, state: r.state });
+  assert.deepEqual(r.counts, { added: 0, updated: 1, deleted: 1 });
+  assert.equal(Object.keys(notes).length, 1);
+  assert.equal(Object.values(notes)[0].fields.Extra, 'ATP = energy');
+
+  // Extension reinstalled → no state: finds the existing note by CFId instead of duplicating it.
+  deck.cards[a.id] = editCard(deck.cards[a.id], { extra: 'changed again' });
+  r = await syncToAnki(deck, { siteUrl: site, state: {} });
+  assert.deepEqual(r.counts, { added: 0, updated: 1, deleted: 0 });
+  assert.equal(Object.keys(notes).length, 1);
+  assert.ok(calls.includes('field:CFId') && calls.includes('updateModelStyling'), 'note type refreshed');
+
+  const lad = await applyLadder('ClozeForge', {});
+  assert.deepEqual(conf.new.delays, [1, 3, 7, 15, 30, 60, 120, 240].map((d) => d * 1440));
+  assert.equal(lad.graduate, 480);
+  assert.equal(conf.name, 'ClozeForge ladder');
+
+  permission = 'denied';
+  await assert.rejects(syncToAnki(deck, { state: r.state }), /refused/);
+  globalThis.fetch = async () => { throw new TypeError('Failed to fetch'); };
+  await assert.rejects(syncToAnki(deck, { state: r.state }), (e) => e.code === 'offline');
+});
