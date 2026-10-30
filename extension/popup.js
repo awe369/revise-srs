@@ -31,6 +31,9 @@ async function render() {
   $('warn').hidden = !warn;
   $('warn').textContent = warn || '';
   $('google').hidden = !needGoogle;
+  const a = st.ankiStatus;
+  $('anki').hidden = !st.ankiEnabled;
+  $('anki').textContent = !a ? 'Anki: waiting…' : a.ok ? `Anki ✓ ${a.total} notes` : a.code === 'offline' ? 'Anki: open Anki to sync' : 'Anki: error — see Settings';
   $('where').textContent = st.backend === 'drive' ? (st.gemail ? `Google Drive · ${st.gemail}` : 'Google Drive') : 'GitHub';
 }
 

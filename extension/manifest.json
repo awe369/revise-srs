@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ClozeForge — cloze cards from any page",
   "short_name": "ClozeForge",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Turn any text on any website into Anki-style cloze cards, saved to your GitHub repo and reviewed with spaced repetition.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzwEwvHLafZyfprhD7L6LmpD82iKCPKplZgjvNMScmR5OllGSTo9FwADN5M+wXzYlkim2UGj0Ox+sx0acAUf8XzvxxfQ2o3fYGkkKZL3C2+DFLRisT403fuy73BHRX5UAi1LuDYYkQ0oQ6kJUkcXXv2/pLFM5/e1qOU3ld7lATTEPvCwYe0b9BdbJ1/Owlx37VLd6gN37deHpuZ+2Ip2o3JvYZwKJGkYXOD7ekS/0a9UXWprRwswqVyZWye25yMSvzjquj8Ij0+So1qEt3nurWqPq8kwNSglW7tjED2GHiNNOkAs+fBu1SCHJfa1eCoucG+PRa667QNrAxK6r0I0SeQIDAQAB",
   "icons": {
