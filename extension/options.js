@@ -12,7 +12,11 @@ for (const f of fields) $(f).value = cfg[f] ?? '';
 $('siteUrl').value = cfg.siteUrl || '';
 $('floatingButton').checked = cfg.floatingButton;
 $('pdfViewer').checked = cfg.pdfViewer;
-chrome.extension.isAllowedFileSchemeAccess().then((ok) => { $('fileAccess').textContent = ok ? '✅ Allowed.' : '(Not allowed yet.)'; });
+chrome.extension.isAllowedFileSchemeAccess().then((ok) => {
+  $('fileAccess').textContent = ok ? '✅ Allowed.' : '⚠️ Not allowed yet — PDFs on this computer will open in Chrome\'s viewer.';
+  $('fileFix').hidden = ok;
+});
+$('fileFix').addEventListener('click', () => chrome.tabs.create({ url: `chrome://extensions/?id=${chrome.runtime.id}` }));
 
 // ---------- storage choice
 

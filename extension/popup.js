@@ -48,3 +48,9 @@ $('syncNow').addEventListener('click', async () => {
 });
 
 render();
+
+// Chrome hides file:///… tabs from extensions until "Allow access to file URLs" is on — so PDFs on the
+// laptop open in Chrome's own viewer and ClozeForge never sees them. Say so, and link straight to the switch.
+chrome.extension.isAllowedFileSchemeAccess().then((ok) => { $('fileNote').hidden = ok; });
+$('fileFix').addEventListener('click', () => { chrome.tabs.create({ url: `chrome://extensions/?id=${chrome.runtime.id}` }); window.close(); });
+$('openPdf').addEventListener('click', () => { chrome.tabs.create({ url: chrome.runtime.getURL('pdf/viewer.html') }); window.close(); });
