@@ -271,10 +271,14 @@ function favicon(src) {
 
 function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } }
 
+// A card's source: a web page, or a PDF on this computer (file:///…, opened through the extension).
+const localFile = (u) => (/^file:\/\/\//i.test(u || '') ? u : null);
+const sourceLink = (src) => safeUrl(src?.link) || safeUrl(src?.url) || localFile(src?.link) || localFile(src?.url);
+
 function srcChip(src) {
-  const link = safeUrl(src?.link) || safeUrl(src?.url);
+  const link = sourceLink(src);
   if (!link) return '';
-  const title = src.title || hostOf(link);
+  const title = src.title || hostOf(link) || 'PDF';
   return `<a class="src-chip" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(link)}" data-src>${favicon(src)}<span>${escapeHtml(title)}</span></a>`;
 }
 
@@ -362,8 +366,8 @@ function renderReview(keepCurrent = false) {
         ${card.extra ? `<div class="card-extra">${escapeHtml(card.extra)}</div>` : ''}
         ${card.source?.context ? `<div class="context-label">From the page</div><div class="context">${contextHtml(card.source)}</div>` : ''}
         <div class="card-actions">
-          ${safeUrl(card.source?.link || card.source?.url) ? `
-            <a class="btn sm" href="${escapeHtml(safeUrl(card.source.link) || safeUrl(card.source.url))}" target="_blank" rel="noopener noreferrer" data-src>Open source ↗ <kbd>O</kbd></a>
+          ${sourceLink(card.source) ? `
+            <a class="btn sm" href="${escapeHtml(sourceLink(card.source))}" target="_blank" rel="noopener noreferrer" data-src>Open source ↗ <kbd>O</kbd></a>
             <button class="btn sm" data-act="inline">View here <kbd>V</kbd></button>` : ''}
           <button class="btn sm ghost" data-act="edit">Edit <kbd>E</kbd></button>
           <button class="btn sm ghost" data-act="suspend">Suspend</button>
@@ -393,7 +397,7 @@ function act(a) {
     case 'reveal': session.revealed = true; renderReview(true); break;
     case 'undo': undo(); break;
     case 'inline': if (cur) openViewer(cur.card.source, true); break;
-    case 'open': { const u = cur && (safeUrl(cur.card.source?.link) || safeUrl(cur.card.source?.url)); if (u && !openSource(cur)) window.open(u, '_blank', 'noopener'); break; }
+    case 'open': { const u = cur && sourceLink(cur.card.source); if (u && !openSource(cur) && !localFile(u)) window.open(u, '_blank', 'noopener'); break; }
     case 'edit': if (cur) openEditor(cur.card); break;
     case 'suspend':
       if (!cur) break;
@@ -419,16 +423,16 @@ async function handleOpen() {
   if (!deck.cards[id] && canWrite()) await sync(); // a card made on another computer
   const card = deck.cards[id];
   const n = parseInt(q.get('n'), 10) || (card ? clozeNumbers(card.text)[0] : 1);
-  const link = (card && (safeUrl(card.source?.link) || safeUrl(card.source?.url))) || safeUrl(q.get('u'));
+  const link = (card && sourceLink(card.source)) || safeUrl(q.get('u'));
   // The extension announces itself on this page a moment after load.
   for (let i = 0; i < 20 && document.documentElement.dataset.clozeforge !== '1'; i++) await new Promise((r) => setTimeout(r, 100));
   if (card && link && openSource({ card, n })) { render(); toast('Opened the source page with the answer hidden'); return; }
-  if (link) location.replace(link);
+  if (link && !localFile(link)) location.replace(link);
   else render();
 }
 
 function openSource(cur) {
-  const link = cur && (safeUrl(cur.card.source?.link) || safeUrl(cur.card.source?.url));
+  const link = cur && sourceLink(cur.card.source);
   if (!link || document.documentElement.dataset.clozeforge !== '1') return false;
   window.postMessage({ type: 'clozeforge:open', link, text: cur.card.text, n: cur.n }, location.origin);
   return true;

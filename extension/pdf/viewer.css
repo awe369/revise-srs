@@ -1,0 +1,53 @@
+:root {
+  --bar: #1f2329; --bar-2: #2b3038; --bar-line: #383e48; --bar-text: #e9ecf1; --bar-muted: #a3aab6;
+  --accent: #6b9cff; --bg: #e8eaee;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) { :root { --bg: #15171b; } }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); font: 14px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+[hidden] { display: none !important; }
+
+.bar {
+  position: fixed; inset: 0 0 auto 0; height: 48px; z-index: 10; display: flex; align-items: center; gap: 14px;
+  padding: 0 12px; background: var(--bar); color: var(--bar-text); border-bottom: 1px solid var(--bar-line);
+}
+.logo { font: 700 15px ui-monospace, Menlo, monospace; color: var(--accent); }
+.title { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.group { display: flex; align-items: center; gap: 4px; }
+.group.right { gap: 6px; }
+.ib, .tb, select, #pageNum {
+  font: inherit; color: var(--bar-text); background: var(--bar-2); border: 1px solid var(--bar-line); border-radius: 7px;
+  height: 30px; cursor: pointer;
+}
+.ib { width: 30px; font-size: 17px; line-height: 1; }
+.tb { padding: 0 10px; display: inline-flex; align-items: center; font-size: 13px; }
+.ib:hover, .tb:hover { border-color: var(--bar-muted); }
+select { padding: 0 6px; }
+#pageNum { width: 52px; text-align: center; cursor: text; -moz-appearance: textfield; }
+#pageNum::-webkit-inner-spin-button { -webkit-appearance: none; }
+.of { color: var(--bar-muted); margin: 0 4px 0 2px; font-variant-numeric: tabular-nums; }
+
+.hint {
+  position: fixed; top: 56px; left: 50%; transform: translateX(-50%); z-index: 9; background: var(--bar); color: var(--bar-text);
+  padding: 8px 12px 8px 14px; border-radius: 10px; font-size: 13px; box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+  display: flex; align-items: center; gap: 10px; white-space: nowrap;
+}
+.hint kbd { font: 11px ui-monospace, Menlo, monospace; padding: 1px 5px; border: 1px solid var(--bar-line); border-radius: 4px; }
+.hint .x { background: none; border: 0; color: var(--bar-muted); cursor: pointer; font-size: 13px; }
+
+#viewerContainer { position: absolute; inset: 48px 0 0 0; overflow: auto; }
+.pdfViewer .page { box-shadow: 0 1px 3px rgba(0, 0, 0, .18), 0 6px 24px rgba(0, 0, 0, .08); border: 0 !important; margin: 12px auto !important; }
+
+/* Answer masks sit inside PDF.js's absolutely positioned text spans: keep them in the text flow. */
+.textLayer .clozeforge-mask { position: static !important; display: inline !important; border-radius: 2px; }
+
+.error {
+  position: absolute; top: 120px; left: 50%; transform: translateX(-50%); width: min(560px, calc(100vw - 32px));
+  background: #fff; color: #1d1b18; border-radius: 14px; padding: 20px 22px; box-shadow: 0 10px 40px rgba(0, 0, 0, .2); line-height: 1.55;
+}
+.error h2 { margin: 0 0 8px; font-size: 17px; }
+.error ol { padding-left: 20px; margin: 8px 0; }
+.error code { background: #f0f0f0; padding: 1px 5px; border-radius: 4px; }
+
+@media (max-width: 720px) { .title { display: none; } .group.right .tb:first-child { display: none; } }

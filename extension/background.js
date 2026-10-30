@@ -44,6 +44,8 @@ async function openEditor(tab, frameId) {
   try {
     await send();
   } catch {
+    // Our PDF viewer is an extension page: no content script to message, it listens for a broadcast instead.
+    chrome.runtime.sendMessage({ type: 'open-editor-page', tabId: tab.id }).catch(() => {});
     // Tab was open before the extension was installed/updated: inject, then retry.
     try {
       await chrome.scripting.executeScript({ target, files: ['content.js'] });
@@ -53,6 +55,39 @@ async function openEditor(tab, frameId) {
     }
   }
 }
+
+// ---------- PDFs → ClozeForge PDF viewer
+// Chrome's own PDF viewer doesn't let extensions in, so PDFs are opened in ours (pdf/viewer.html).
+
+const VIEWER = chrome.runtime.getURL('pdf/viewer.html');
+const viewerUrl = (u) => `${VIEWER}?file=${encodeURIComponent(u)}`;
+const pdfBypass = new Map(); // url → until when "open in Chrome's viewer" was asked for
+const noHash = (u) => u.split('#')[0];
+
+async function openPdfInViewer(tabId, url) {
+  if (!(await getConfig()).pdfViewer) return;
+  if ((pdfBypass.get(noHash(url)) || 0) > Date.now()) return;
+  // webRequest URLs have no #fragment; the tab's own URL keeps #page=N.
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
+  const full = [tab?.pendingUrl, tab?.url].find((u) => u && noHash(u) === noHash(url)) || url;
+  chrome.tabs.update(tabId, { url: viewerUrl(full) });
+}
+
+const isPdfPath = (u) => /\.pdf$/i.test(u.split(/[?#]/)[0]);
+
+// Web PDFs: recognised by their Content-Type (works for links that don't end in .pdf too).
+// onResponseStarted also fires when the PDF comes from Chrome's cache (onHeadersReceived doesn't).
+chrome.webRequest.onResponseStarted.addListener((d) => {
+  if (d.tabId < 0 || d.method !== 'GET') return;
+  const h = (n) => d.responseHeaders?.find((x) => x.name.toLowerCase() === n)?.value || '';
+  const pdf = /application\/(x-)?pdf/i.test(h('content-type')) || (/octet-stream/i.test(h('content-type')) && isPdfPath(d.url));
+  if (pdf && !/^\s*attachment/i.test(h('content-disposition')) && (d.statusCode < 300 || d.statusCode === 304)) openPdfInViewer(d.tabId, d.url);
+}, { urls: ['http://*/*', 'https://*/*'], types: ['main_frame'] }, ['responseHeaders']);
+
+// PDFs on this computer (file:///…/notes.pdf): no network request, so watch the tab's address instead.
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.url?.startsWith('file:') && isPdfPath(info.url)) openPdfInViewer(tabId, info.url);
+});
 
 async function openReview(hash = '') {
   const url = siteUrlFor(await getConfig());
@@ -229,6 +264,9 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
       }
       case 'google-signout':
         await signOutGoogle();
+        return { ok: true };
+      case 'pdf-bypass':
+        pdfBypass.set(noHash(msg.url), Date.now() + 60_000);
         return { ok: true };
       case 'config':
         return getConfig().then(({ token, ...rest }) => rest);

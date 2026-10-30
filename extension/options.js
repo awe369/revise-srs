@@ -11,6 +11,8 @@ const cfg = await getConfig();
 for (const f of fields) $(f).value = cfg[f] ?? '';
 $('siteUrl').value = cfg.siteUrl || '';
 $('floatingButton').checked = cfg.floatingButton;
+$('pdfViewer').checked = cfg.pdfViewer;
+chrome.extension.isAllowedFileSchemeAccess().then((ok) => { $('fileAccess').textContent = ok ? '✅ Allowed.' : '(Not allowed yet.)'; });
 
 // ---------- storage choice
 
@@ -137,6 +139,7 @@ $('ankiOff').addEventListener('click', async () => {
 // ---------- general
 
 $('floatingButton').addEventListener('change', () => chrome.storage.sync.set({ floatingButton: $('floatingButton').checked }));
+$('pdfViewer').addEventListener('change', () => chrome.storage.sync.set({ pdfViewer: $('pdfViewer').checked }));
 $('siteUrl').addEventListener('change', () => chrome.storage.sync.set({ siteUrl: $('siteUrl').value.trim() }));
 
 $('openSite').addEventListener('click', async () => {

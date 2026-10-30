@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PDF — ClozeForge</title>
+<link rel="icon" href="../icons/32.png">
+<link rel="stylesheet" href="../vendor/pdfjs/pdf_viewer.css">
+<link rel="stylesheet" href="../page.css">
+<link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+<header class="bar">
+  <span class="logo" title="ClozeForge PDF viewer">[…]</span>
+  <span class="title" id="title">Loading…</span>
+  <div class="group">
+    <button class="ib" id="prev" title="Previous page" aria-label="Previous page">‹</button>
+    <input id="pageNum" type="number" min="1" value="1" aria-label="Page number"><span class="of" id="pageCount">/ –</span>
+    <button class="ib" id="next" title="Next page" aria-label="Next page">›</button>
+  </div>
+  <div class="group">
+    <button class="ib" id="zoomOut" title="Zoom out (Ctrl −)" aria-label="Zoom out">−</button>
+    <select id="zoom" aria-label="Zoom">
+      <option value="page-width">Fit width</option><option value="page-fit">Fit page</option>
+      <option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option>
+      <option value="1.5">150%</option><option value="2">200%</option><option value="custom" hidden></option>
+    </select>
+    <button class="ib" id="zoomIn" title="Zoom in (Ctrl +)" aria-label="Zoom in">+</button>
+  </div>
+  <div class="group right">
+    <label class="tb" title="Open a PDF from this computer">Open file<input type="file" id="pick" accept="application/pdf,.pdf" hidden></label>
+    <button class="tb" id="native" title="Open this PDF in Chrome's own viewer">Chrome viewer</button>
+  </div>
+</header>
+<div id="hint" class="hint">Select text, then click <b>[…] Cloze</b> or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> to make a card.<button class="x" id="hintX" aria-label="Dismiss">✕</button></div>
+<div id="viewerContainer"><div id="viewer" class="pdfViewer"></div></div>
+<div id="error" class="error" hidden></div>
+
+<!-- The card editor (same script the extension injects into web pages). -->
+<script src="../content.js"></script>
+<script type="module" src="viewer.js"></script>
+</body>
+</html>
