@@ -78,6 +78,28 @@
     try { return new URL(link ? link.getAttribute('href') : '/favicon.ico', location.href).href; } catch { return ''; }
   }
 
+  // Where the card points back to. In ClozeForge's PDF viewer that's the PDF itself, at the page.
+  function sourceInfo(range, full, s, e) {
+    const pdf = window.__clozeForgePdf;
+    if (pdf) {
+      const el = range?.startContainer?.nodeType === 1 ? range.startContainer : range?.startContainer?.parentElement;
+      const page = Number(el?.closest?.('.page')?.dataset.pageNumber) || 0;
+      let domain = 'pdf';
+      try { domain = new URL(pdf.url).hostname.replace(/^www\./, '') || 'pdf'; } catch {}
+      return {
+        url: pdf.url, link: pdf.url ? `${pdf.url}${page ? `#page=${page}` : ''}` : '',
+        title: pdf.title || 'PDF', favicon: '', domain, page,
+      };
+    }
+    return {
+      link: range ? linkWithFragment(textFragment(full, s, e)) : location.href,
+      url: location.href.replace(/#:~:.*$/, ''),
+      title: document.title || location.hostname,
+      favicon: faviconUrl(),
+      domain: location.hostname.replace(/^www\./, ''),
+    };
+  }
+
   function capture() {
     const sel = getSelection();
     if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
@@ -106,10 +128,7 @@
       // offsets of the quote inside sentence / paragraph, for pre-clozing
       inSentence: [s - ss, e - ss],
       inParagraph: [s - (full.length - full.trimStart().length), e - (full.length - full.trimStart().length)],
-      link: linkWithFragment(textFragment(full, s, e)),
-      url: location.href.replace(/#:~:.*$/, ''),
-      title: document.title || location.hostname,
-      favicon: faviconUrl(),
+      ...sourceInfo(range, full, s, e),
       rect: { x: rect.right, y: rect.bottom, top: rect.top, left: rect.left },
     };
   }
@@ -165,6 +184,10 @@
   addEventListener('scroll', hidePill, { passive: true, capture: true });
 
   chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
+    if (msg.type === 'open-editor-page') { // sent to extension pages (the PDF viewer) by tab id
+      chrome.tabs?.getCurrent?.((t) => { if (t?.id === msg.tabId) { hidePill(); openEditor(capture() || lastCapture); } });
+      return;
+    }
     if (msg.type === 'open-editor') {
       const cap = capture() || lastCapture;
       // Every frame gets the message: the one holding the selection opens the editor,
@@ -244,8 +267,11 @@
     span.classList.add('peek');
   }
 
+  let quizWanted = null; // the card to quiz on, kept so pages that render later get masked too
+
   async function startQuiz(data) {
     if (!data?.text || quiz) return;
+    quizWanted = data;
     const { parseCloze, stripCloze } = await loadLib();
     const answers = [...new Set(parseCloze(data.text)
       .filter((x) => x.type === 'cloze' && x.n === data.n).map((x) => x.answer.trim()).filter(Boolean))];
@@ -258,8 +284,8 @@
       .flatMap((a) => a.match(/[\p{L}\p{N}]{3,}/gu) || []))]
       .filter((w) => !shown.has(w.toLowerCase()) && !answers.some((a) => a.toLowerCase() === w.toLowerCase()));
 
-    const apply = () => {
-      if (quiz) return true;
+    const apply = (more = false) => {
+      if (quiz && !more) return true;
       const plain = stripCloze(data.text);
       let idx = textIndex();
       const ctx = findAll(idx, plain, 1)[0] || findAll(idx, plain.split(/\s+/).slice(0, 8).join(' '), 1)[0] || null;
@@ -274,7 +300,8 @@
       hits.sort((x, y) => y[0] - x[0]);
       const masks = [];
       let focus = null;
-      hits.forEach((h, i) => { h.group = i; });
+      const g0 = quiz?.groups || 0;
+      hits.forEach((h, i) => { h.group = g0 + i; });
       for (const h of hits) {
         const spans = wrap(idx, h[0], h[1], h.group);
         masks.push(...spans);
@@ -282,7 +309,8 @@
         idx = textIndex(); // nodes were split; rebuild so earlier offsets stay valid
       }
       if (!masks.length) return false;
-      quiz = { data, masks };
+      if (more) { quiz.masks.push(...masks); quiz.groups = g0 + hits.length; showQuizPanel(); return true; }
+      quiz = { data, masks, groups: hits.length, more: () => apply(true) };
       focus?.forEach((f) => f.classList.add('focus'));
       focus?.[0]?.scrollIntoView({ block: 'center', behavior: 'smooth' });
       showQuizPanel();
@@ -318,6 +346,12 @@
     panel.querySelector('[data-q="hide"]')?.addEventListener('click', () => { quiz.masks.forEach((m) => m.classList.remove('peek')); showQuizPanel(); });
   }
 
+  // ClozeForge's PDF viewer renders pages lazily: mask the answer on each page as it appears.
+  document.addEventListener('clozeforge:textlayer', () => {
+    if (quiz) quiz.more();
+    else if (quizWanted) { const d = quizWanted; quizWanted = null; startQuiz(d); }
+  });
+
   // Click a hidden word → peek at just that one (and don't follow a link on that click).
   document.addEventListener('click', (ev) => {
     const m = ev.target.closest?.(`.${MASK}:not(.peek)`);
@@ -329,7 +363,8 @@
   }, true);
 
   // Opened in a new tab from the review page: the background script holds the card for this tab.
-  if (window === top) {
+  // (Not in Chrome's own PDF page: that tab is about to switch to our viewer, which needs the card.)
+  if (window === top && document.contentType !== 'application/pdf') {
     chrome.runtime.sendMessage({ type: 'quiz-pending' }).then((d) => d && startQuiz(d)).catch(() => {});
   }
 
@@ -357,11 +392,8 @@
     const { escapeHtml, parseCloze, wrapCloze, unwrapClozeAt, nextClozeNumber, clozeNumbers } = await loadLib();
     ensureHost();
     closeEditor();
-    cap ||= {
-      quote: '', paragraph: '', sentence: '', inSentence: [0, 0], inParagraph: [0, 0],
-      link: location.href, url: location.href, title: document.title, favicon: faviconUrl(),
-    };
-    const domain = location.hostname.replace(/^www\./, '');
+    cap ||= { quote: '', paragraph: '', sentence: '', inSentence: [0, 0], inParagraph: [0, 0], ...sourceInfo(null) };
+    const domain = cap.domain || location.hostname.replace(/^www\./, '');
     const shortQuote = cap.quote && cap.quote.split(/\s+/).length <= 8 && cap.sentence.length <= 500;
     let scope = shortQuote ? 'sentence' : 'selection';
 
@@ -414,7 +446,7 @@
     const ta = $('.text'), prev = $('.preview'), saveBtn = $('.save'), status = $('.status');
     $('.src').href = cap.link;
     $('.src img')?.addEventListener('error', (e) => e.target.remove());
-    $('.tags').value = domain.split('.').slice(-2, -1)[0] || '';
+    $('.tags').value = window.__clozeForgePdf ? 'pdf' : domain.split('.').slice(-2, -1)[0] || '';
 
     const setScope = (sc) => {
       scope = sc;
@@ -501,6 +533,7 @@
         source: {
           url: cap.url, link: cap.link, title: cap.title, favicon: cap.favicon,
           quote: cap.quote, context: cap.paragraph, domain,
+          ...(cap.page ? { page: cap.page } : {}),
         },
       };
       try {

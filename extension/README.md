@@ -47,6 +47,22 @@ Until a client ID is set, everything keeps using GitHub as before.
 `extension` folder → **Sign in with Google** in the page that opens. Review at
 `https://awe369.github.io/revise-srs/cloze/` and sign in there with the same Google account.
 
+## PDFs
+
+Chrome's built-in PDF viewer doesn't let extensions in, so ClozeForge opens PDFs in its **own viewer**
+(PDF.js 6.3, bundled in `extension/vendor/pdfjs`): open any PDF link, or a PDF on your computer, and it shows up
+there automatically. Select text → **[…] Cloze** / **Alt+Shift+C**, exactly like on a web page.
+
+- The card links to the PDF **and the page** (`…/notes.pdf#page=12`). *Open source* on the review site (or
+  *Quiz on the page* in Anki) reopens it at that page with the answer hidden — on every page it appears.
+- **PDFs on your laptop** (`file:///…`): once, `chrome://extensions` → ClozeForge → **Details** → turn on
+  **Allow access to file URLs**. Or use **Open file** in the viewer's toolbar (cards from a picked file can't be
+  reopened later, because Chrome doesn't tell the extension where the file lives).
+- PDFs behind a login (college portal, Drive previews that download a real PDF) open with your cookies.
+- **Chrome viewer** in the toolbar switches back to Chrome's own viewer for that PDF; the setting
+  *Open PDFs in the ClozeForge viewer* turns the whole thing off.
+- Scanned PDFs (pages that are only images) have no text to select.
+
 ## Anki
 
 Every card can also live in **Anki**, kept up to date automatically, with a note type that looks like the
