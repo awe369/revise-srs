@@ -18,9 +18,9 @@
    },
    "srs": {
     "1": {
-     "due": 1792521000000,
+     "due": 1793817000000,
      "lapses": 0,
-     "last": 1792512477367,
+     "last": 1793254056542,
      "log": [
       [
        1792351794,
@@ -31,10 +31,20 @@
        1792512477,
        2,
        1
+      ],
+      [
+       1792674505,
+       3,
+       3
+      ],
+      [
+       1793254057,
+       3,
+       7
       ]
      ],
-     "reps": 2,
-     "step": 0
+     "reps": 4,
+     "step": 2
     }
    },
    "tags": [
@@ -58,9 +68,9 @@
    },
    "srs": {
     "1": {
-     "due": 1792693800000,
+     "due": 1794508200000,
      "lapses": 0,
-     "last": 1792512483016,
+     "last": 1793253975164,
      "log": [
       [
        1792352032,
@@ -71,10 +81,15 @@
        1792512483,
        3,
        3
+      ],
+      [
+       1793253975,
+       3,
+       15
       ]
      ],
-     "reps": 2,
-     "step": 1
+     "reps": 3,
+     "step": 3
     }
    },
    "tags": [
@@ -99,9 +114,9 @@
    },
    "srs": {
     "1": {
-     "due": 1792693800000,
+     "due": 1794508200000,
      "lapses": 0,
-     "last": 1792512496562,
+     "last": 1793253990702,
      "log": [
       [
        1792352300,
@@ -112,10 +127,15 @@
        1792512497,
        3,
        3
+      ],
+      [
+       1793253991,
+       3,
+       15
       ]
      ],
-     "reps": 2,
-     "step": 1
+     "reps": 3,
+     "step": 3
     }
    },
    "tags": [
@@ -139,11 +159,11 @@
    },
    "srs": {
     "1": {
-     "step": 1,
-     "due": 1792693800000,
-     "reps": 2,
-     "lapses": 0,
-     "last": 1792512520388,
+     "step": 0,
+     "due": 1793385000000,
+     "reps": 5,
+     "lapses": 1,
+     "last": 1793339790645,
      "log": [
       [
        1792352312,
@@ -164,6 +184,21 @@
        1792512520,
        3,
        3
+      ],
+      [
+       1793254016,
+       1,
+       0
+      ],
+      [
+       1793254067,
+       3,
+       1
+      ],
+      [
+       1793339791,
+       2,
+       1
       ]
      ]
     }
@@ -189,9 +224,9 @@
    },
    "srs": {
     "1": {
-     "due": 1792521000000,
+     "due": 1793817000000,
      "lapses": 0,
-     "last": 1792512524140,
+     "last": 1793254061716,
      "log": [
       [
        1792352766,
@@ -202,10 +237,20 @@
        1792512524,
        2,
        1
+      ],
+      [
+       1792674510,
+       3,
+       3
+      ],
+      [
+       1793254062,
+       3,
+       7
       ]
      ],
-     "reps": 2,
-     "step": 0
+     "reps": 4,
+     "step": 2
     }
    },
    "tags": [
@@ -229,9 +274,9 @@
    },
    "srs": {
     "1": {
-     "due": 1792521000000,
+     "due": 1793557800000,
      "lapses": 0,
-     "last": 1792512527346,
+     "last": 1793339797378,
      "log": [
       [
        1792353407,
@@ -242,10 +287,25 @@
        1792512527,
        2,
        1
+      ],
+      [
+       1792674514,
+       2,
+       1
+      ],
+      [
+       1793254020,
+       2,
+       1
+      ],
+      [
+       1793339797,
+       3,
+       3
       ]
      ],
-     "reps": 2,
-     "step": 0
+     "reps": 5,
+     "step": 1
     }
    },
    "tags": [
@@ -320,9 +380,9 @@
    },
    "srs": {
     "1": {
-     "due": 1792693800000,
+     "due": 1793471400000,
      "lapses": 0,
-     "last": 1792512545000,
+     "last": 1793254023883,
      "log": [
       [
        1792355548,
@@ -338,9 +398,14 @@
        1792512545,
        3,
        3
+      ],
+      [
+       1793254024,
+       2,
+       3
       ]
      ],
-     "reps": 3,
+     "reps": 4,
      "step": 1
     }
    },
@@ -365,9 +430,9 @@
    },
    "srs": {
     "1": {
-     "due": 1792693800000,
+     "due": 1793471400000,
      "lapses": 0,
-     "last": 1792512552384,
+     "last": 1793254028587,
      "log": [
       [
        1792355580,
@@ -378,9 +443,14 @@
        1792512552,
        3,
        3
+      ],
+      [
+       1793254029,
+       2,
+       3
       ]
      ],
-     "reps": 2,
+     "reps": 3,
      "step": 1
     }
    },
@@ -405,18 +475,28 @@
    },
    "srs": {
     "1": {
-     "due": 1792521000000,
+     "due": 1793817000000,
      "lapses": 0,
-     "last": 1792512576404,
+     "last": 1793254037390,
      "log": [
       [
        1792512576,
        3,
        1
+      ],
+      [
+       1792674522,
+       2,
+       1
+      ],
+      [
+       1793254037,
+       3,
+       7
       ]
      ],
-     "reps": 1,
-     "step": 0
+     "reps": 3,
+     "step": 2
     }
    },
    "tags": [
@@ -453,6 +533,81 @@
    ],
    "text": "(1)Unless the context otherwise {{c1::requires}}, any reference in any law, to a Magistrate without any qualifying words, Magistrate of the first class or a Magistrate of the second class shall, in relation to any area, be construed as a reference to a Judicial Magistrate of the first class or Judicial Magistrate of the second class, as the case may be, exercising jurisdiction in such area.",
    "deleted": true
+  },
+  "mvt5386h1p2vvxs19pn": {
+   "createdAt": 1793253930281,
+   "editedAt": 1793254438589,
+   "extra": "",
+   "id": "mvt5386h1p2vvxs19pn",
+   "source": {
+    "context": "Biogas is a renewable energy source produced when organic matter breaks down without oxygen, a process called anaerobic digestion. Britannica +1CompositionMethane (CH₄): 50% to 80% (the main energy-rich component)Carbon Dioxide (CO₂): 15% to 50%Trace Gases: Hydrogen sulfide, nitrogen, hydrogen, water vapor, and siloxanes Wikipedia +2How It Is ProducedFeedstock: Organic materials like animal manure, food scraps, crop waste, and sewage sludge are placed in an airtight tank or digestor.Decomposition Stages: Microorganisms break the material down through four stages: hydrolysis, acidogenesis, acetogenesis, and methanogenesis.Capture & Upgrading: The resulting gas is collected. It can be burned raw or purified into biomethane (renewable natural gas) by removing CO₂ and hydrogen sulfide. U.S. Energy Information Administration (EIA) (.gov) +7Common ApplicationsElectricity and Heat: Burned in engines or combined heat and power (CHP) systems to generate power.Cooking and Lighting: Used directly in household or community biogas stoves.Vehicle Fuel: Compressed into compressed biogas (CBG) or biomethane for transport.Gas Grid Injection: Upgraded and piped into natural gas distribution networks.Organic Fertilizer: The leftover solid and liquid byproduct (digestate) is nutrient-rich and used in farming. ScienceDirect.com +5Learn more about global frameworks and policies via the Ministry of New and Renewable Energy Biogas Programme or explore overviews on Wikipedia. If you'd like, let me know what you want to do with biogas:Are you looking to build a small-scale farm or home digester?Do you need details on feedstock requirements or purification methods?",
+    "domain": "google.com",
+    "favicon": "https://www.gstatic.com/images/branding/searchlogo/ico/favicon.ico",
+    "link": "https://www.google.com/search?q=biogas&oq=biogas&gs_lcrp=EgZjaHJvbWUqDwgAEAAYQxixAxiABBiKBTIPCAAQABhDGLEDGIAEGIoFMgwIARAAGEMYgAQYigUyCggCEAAYsQMYgAQyDAgDEAAYQxiABBiKBTIMCAQQABhDGIAEGIoFMg0IBRAAGIMBGLEDGIAEMgcIBhAAGIAEMgwIBxAAGEMYgAQYigUyCggIEAAYgAQYtAcyBwgJEAAYgATSAQgxODMyajBqOagCBrACAfEF7aOoJEoSx2k&sourceid=chrome&source=chrome.ob&ie=UTF-8#:~:text=Biogas%20is%20a%20renewable,water%20vapor%2C%20and%20siloxanes,-Wikipedia%20%2B2How%20It",
+    "quote": "Biogas is a renewable energy source produced when organic matter breaks down without oxygen, a process called anaerobic digestion. Britannica +1 Composition Methane (CH₄): 50% to 80% (the main energy-rich component) Carbon Dioxide (CO₂): 15% to 50% Trace Gases: Hydrogen sulfide, nitrogen, hydrogen, water vapor, and siloxanes",
+    "title": "biogas - Google Search",
+    "url": "https://www.google.com/search?q=biogas&oq=biogas&gs_lcrp=EgZjaHJvbWUqDwgAEAAYQxixAxiABBiKBTIPCAAQABhDGLEDGIAEGIoFMgwIARAAGEMYgAQYigUyCggCEAAYsQMYgAQyDAgDEAAYQxiABBiKBTIMCAQQABhDGIAEGIoFMg0IBRAAGIMBGLEDGIAEMgcIBhAAGIAEMgwIBxAAGEMYgAQYigUyCggIEAAYgAQYtAcyBwgJEAAYgATSAQgxODMyajBqOagCBrACAfEF7aOoJEoSx2k&sourceid=chrome&source=chrome.ob&ie=UTF-8"
+   },
+   "srs": {
+    "2": {
+     "due": 1793557800000,
+     "lapses": 0,
+     "last": 1793340039668,
+     "log": [
+      [
+       1793254261,
+       3,
+       1
+      ],
+      [
+       1793340040,
+       3,
+       3
+      ]
+     ],
+     "reps": 2,
+     "step": 1
+    }
+   },
+   "tags": [
+    "google"
+   ],
+   "text": "Biogas {{c2::is a renewable energy source produced when organic matter breaks down without oxygen, a process called anaerobic digestion::what is this?}}. \n\nComposition \n\n{{c2::Methane}} : 50% to 80% (the main energy-rich component) \n\n{{c2::Carbon Dioxide (CO₂)}}: 15% to 50% Trace Gases: Hydrogen sulfide, nitrogen, hydrogen, water vapor, and siloxanes"
+  },
+  "mvuqmlzg1b5l59y16ft": {
+   "createdAt": 1793350572748,
+   "editedAt": 1793350572748,
+   "extra": "",
+   "id": "mvuqmlzg1b5l59y16ft",
+   "source": {
+    "context": "Parkinson's disease is a progressive movement disorder of the central nervous system that worsens over time. Mayo Clinic +1",
+    "domain": "google.com",
+    "favicon": "https://www.gstatic.com/images/branding/searchlogo/ico/favicon.ico",
+    "link": "https://www.google.com/search?q=parkinson%27s+disease&sca_esv=baa7ad82cb9e0b87&biw=1512&bih=759&sxsrf=AKL5yDgtOnIksKkMNsVtVkW3jtRCxp0sOw%3A1793350418879&ei=ElvkapKNNcuSseMPx8qoAQ&uact=5&oq=parkinson%27s+disease&gs_lp=Egxnd3Mtd2l6LXNlcnAiE3BhcmtpbnNvbidzIGRpc2Vhc2UyBBAjGCcyDRAAGIAEGBQYhwIYsQMyBRAAGIAEMggQABiABBixAzIIEAAYgAQYsQMyBRAAGIAEMgUQABiABDIFEAAYgAQyBRAAGIAEMgoQABiABBiKBRhDSNjXBVDU1QVY1NUFcAd4AZABAJgBjQGgAY0BqgEDMC4xsAEAuAEDyAEA-AEBmAIBoAKjAZgDAOIDBBgAIF3iAwQYACBe4gMEGAAgX-IDBBgAIGDiAwQYACBh4gMEGAAgYogGAZIHAzAuMaAH7QiyBwMwLjG4B6MBwgcDMi0xyAcHgAgB&sclient=gws-wiz-serp#:~:text=Parkinson's%20disease%20is%20a,that%20worsens%20over%20time,-.%20Mayo%20Clinic",
+    "quote": "Parkinson's disease is a progressive movement disorder of the central nervous system that worsens over time",
+    "title": "parkinson's disease - Google Search",
+    "url": "https://www.google.com/search?q=parkinson%27s+disease&sca_esv=baa7ad82cb9e0b87&biw=1512&bih=759&sxsrf=AKL5yDgtOnIksKkMNsVtVkW3jtRCxp0sOw%3A1793350418879&ei=ElvkapKNNcuSseMPx8qoAQ&uact=5&oq=parkinson%27s+disease&gs_lp=Egxnd3Mtd2l6LXNlcnAiE3BhcmtpbnNvbidzIGRpc2Vhc2UyBBAjGCcyDRAAGIAEGBQYhwIYsQMyBRAAGIAEMggQABiABBixAzIIEAAYgAQYsQMyBRAAGIAEMgUQABiABDIFEAAYgAQyBRAAGIAEMgoQABiABBiKBRhDSNjXBVDU1QVY1NUFcAd4AZABAJgBjQGgAY0BqgEDMC4xsAEAuAEDyAEA-AEBmAIBoAKjAZgDAOIDBBgAIF3iAwQYACBe4gMEGAAgX-IDBBgAIGDiAwQYACBh4gMEGAAgYogGAZIHAzAuMaAH7QiyBwMwLjG4B6MBwgcDMi0xyAcHgAgB&sclient=gws-wiz-serp"
+   },
+   "srs": {
+    "1": {
+     "due": 1793385000000,
+     "lapses": 0,
+     "last": 1793350921159,
+     "log": [
+      [
+       1793350921,
+       3,
+       1
+      ]
+     ],
+     "reps": 1,
+     "step": 0
+    }
+   },
+   "tags": [
+    "google"
+   ],
+   "text": "Parkinson's disease is a {{c1::progressive movement disorder of the central nervous system that worsens over time::what is ?}}"
   }
  }
 }
